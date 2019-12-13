@@ -40,15 +40,28 @@ class ArrayComponent {
 class Color {
   float r_, g_, b_;
  public:
+  Color() : Color(0, 0, 0) {}
   Color(float r, float g, float b): r_(r), g_(g), b_(b) {}
   float r() {
     return r_;
   }
+  void r(float _r) {
+    r_ = _r;
+  }
   float g() {
     return g_;
   }
+  void g(float _g) {
+    g_ = _g;
+  }
   float b() {
     return b_;
+  }
+  void b(float _b) {
+    b_ = _b;
+  }
+  void print() const {
+    std::cout << "Color(" << r_ << ", " << g_ << ", " << b_ << ")" << std::endl;
   }
 };
 
@@ -120,9 +133,9 @@ class Grid {
     ofs << "P6\n" << cols << " " << rows << "\n255\n";
     for (unsigned i = 0; i < rows; ++i)
       for (unsigned j = 0; j < cols; ++j) {
-        ofs << (unsigned char)(std::min(float(1), getter.r(data[i][j])) * 255) <<
-               (unsigned char)(std::min(float(1), getter.g(data[i][j])) * 255) <<
-               (unsigned char)(std::min(float(1), getter.b(data[i][j])) * 255);
+        ofs << (unsigned char)(std::max(float(0), std::min(float(1), getter.r(data[i][j]))) * 255) <<
+               (unsigned char)(std::max(float(0), std::min(float(1), getter.g(data[i][j]))) * 255) <<
+               (unsigned char)(std::max(float(0), std::min(float(1), getter.b(data[i][j]))) * 255);
       }
     ofs.close();
   }
@@ -286,20 +299,57 @@ void strech(Grid<float, rows, cols, components>& grid) {
 }
 
 template<size_t rows, size_t cols, typename components>
-std::unique_ptr<Grid<float, rows, cols, components>> weightedSum(
-  std::vector<std::pair<Grid<float, rows, cols, components>, float>>& grids
+void transfer(
+  Grid<float, rows, cols, components>& a,
+  Grid<float, rows, cols, components>& b
 ) {
-  std::unique_ptr<Grid<float, rows, cols, components>> g(new Grid<float, rows, cols, components>());
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      g->set(i, j, 0.0);
+      b.set(i, j, a.get(i, j));
     }
-  for(auto gw : grids)
+}
+
+template<size_t rows, size_t cols, typename components>
+void weightedSum(
+  Grid<float, rows, cols, components>& g,
+  std::vector<Grid<float, rows, cols, components>>& grids,
+  std::vector<float>& weights
+) {
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      g.set(i, j, 0.0);
+    }
+  for(int k = 0; k < grids.size(); k++)
     for(int i = 0; i < rows; i++)
       for(int j = 0; j < cols; j++) {
-        g->set(i, j, g->get(i, j) + gw.first.get(i, j) * gw.second);
+        g.set(i, j, g.get(i, j) + grids[k].get(i, j) * weights[k]);
       }
-  return g;
+}
+
+template<size_t rows, size_t cols, typename components>
+void weightedSum(
+  Grid<float, rows, cols, components>& a,
+  float wa,
+  Grid<float, rows, cols, components>& b,
+  float wb,
+  Grid<float, rows, cols, components>& c
+) {
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      c.set(i, j, a.get(i, j) * wa + b.get(i, j) * wb);
+    }
+}
+
+template<size_t rows, size_t cols, typename components>
+void add(
+  Grid<float, rows, cols, components>& a,
+  Grid<float, rows, cols, components>& b,
+  float w = 1.0
+) {
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      a.set(i, j, a.get(i, j) + b.get(i, j) * w);
+    }
 }
 
 class NormalComponent {
@@ -353,8 +403,42 @@ void diff(Grid<float, rows, cols, components>& z,
     }
 }
 
-void fractal_perlin() {
-  std::vector<std::pair<Grid<float, 256, 256, GrayscaleComponent>, float>> grids;
+struct GridPath {
+  size_t i;
+  size_t j;
+  float t;
+  float x_start;
+  float y_start;
+  float x;
+  float y;
+  float vx_start;
+  float vy_start;
+  float vx;
+  float vy;
+  float ax;
+  float ay;
+  /*
+  void print(const std::ostream& os) const {
+    os << "i, j: " << i << ", " << j << std::endl;
+  }
+  //*/
+  void print() const {
+    std::cout << "i, j: " << i << ", " << j << std::endl;
+  }
+};
+
+template<size_t rows, size_t cols, typename cg, typename cc>
+void grayToColor(Grid<float, rows, cols, cg>& gray, Grid<Color, rows, cols, cc>& col) {
+  for(size_t i = 0; i < rows; i++)
+    for(size_t j = 0; j < cols; j++) {
+      float g = gray.get(i, j);
+      col.set(i, j, Color(g, g, g));
+    }
+}
+
+void fractal_perlin(Grid<float, 512, 512, GrayscaleComponent>& fpg) {
+  Grid<float, 512, 512, GrayscaleComponent> perlin;
+  std::vector<float> weights;
   /*
   for(int s = 256, i = 0; s > 0; s /= 2) {
     srand(time(NULL));
@@ -367,58 +451,192 @@ void fractal_perlin() {
   //*/
   //*
   srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 1.0);
-  perlinGradientGrid<1, 1, 256>(grids[0].first);
-  strech(grids[0].first);
-  map(grids[0].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<1, 1, 512>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  transfer(perlin, fpg);
   //srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 0.5);
-  perlinGradientGrid<2, 2, 128>(grids[1].first);
-  strech(grids[1].first);
-  map(grids[1].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<2, 2, 256>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.5);
   //srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 0.25);
-  perlinGradientGrid<4, 4, 64>(grids[2].first);
-  strech(grids[2].first);
-  map(grids[2].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<4, 4, 128>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.25);
+  //*
   //srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 0.125);
-  perlinGradientGrid<8, 8, 32>(grids[3].first);
-  strech(grids[3].first);
-  map(grids[3].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<8, 8, 64>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.125);
   //srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 0.0625);
-  perlinGradientGrid<16, 16, 16>(grids[4].first);
-  strech(grids[4].first);
-  map(grids[4].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<16, 16, 32>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.0625);
   //srand(time(NULL));
-  grids.emplace_back(Grid<float, 256, 256, GrayscaleComponent>(), 0.03125);
-  perlinGradientGrid<32, 32, 8>(grids[5].first);
-  strech(grids[5].first);
-  map(grids[5].first, 0., 1., -1.0, 1.0);
+  perlinGradientGrid<32, 32, 16>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.03125);
+  //srand(time(NULL));
+  perlinGradientGrid<64, 64, 8>(perlin);
+  strech(perlin);
+  map(perlin, 0., 1., -1.0, 1.0);
+  add(fpg, perlin, 0.015625);
   //*/
-  auto fpg = weightedSum(grids);
-  strech(*fpg);
-  Grid<float, 256, 256, GrayscaleComponent> dx;
-  Grid<float, 256, 256, GrayscaleComponent> dy;
-  Grid<std::array<float, 3>, 256, 256, NormalComponent> normal;
-  diff(*fpg, dx, dy, normal);
+  strech(fpg);
+  fpg.save((char *) "fractal_perlin.ppm");
+}
+
+void calcNormal(Grid<float, 512, 512, GrayscaleComponent>& fpg, Grid<std::array<float, 3>, 512, 512, NormalComponent>& normal) {
+  Grid<float, 512, 512, GrayscaleComponent> dx;
+  Grid<float, 512, 512, GrayscaleComponent> dy;
+  diff(fpg, dx, dy, normal);
+  /*
   auto r = range(dx);
   float R = fmax(fabs(r.first), r.second);
   map(dx, -R, R, 0.0, 1.0);
   r = range(dy);
   R = fmax(fabs(r.first), r.second);
   map(dy, -R, R, 0.0, 1.0);
-  fpg->save((char *) "fractal_perlin.ppm");
   dx.save((char *) "fractal_perlin_dx.ppm");
   dy.save((char *) "fractal_perlin_dy.ppm");
   normal.save((char *) "fractal_perlin_normal.ppm");
-  float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-  float y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-  float vx = 0, vy = 0;
+  //*/
 }
 
 int main() {
-  fractal_perlin();
+  Grid<float, 512, 512, GrayscaleComponent> fpg;
+  fractal_perlin(fpg);
+  //*
+  Grid<std::array<float, 3>, 512, 512, NormalComponent> normal;
+  //calcNormal(fpg, normal);
+  //*/
+  /*
+  float mg = 1;
+  GridPath cur;
+  cur.x_start = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+  cur.y_start = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+  cur.i = (size_t) floor(cur.x_start * 512);
+  cur.j = (size_t) floor(cur.y_start * 512);
+  cur.x_start = cur.x_start * 512 - cur.i;
+  cur.y_start = cur.y_start * 512 - cur.j;
+  cur.vx_start = 0;
+  cur.vy_start = 0;
+  std::vector<GridPath> path;
+  int iteration = 0;
+  while(cur.i >= 0 && cur.i < 512 && cur.j >= 0 && cur.j < 512 && iteration < 1024) {
+    auto n = normal.get(cur.i, cur.j);
+    float c = n[2];
+    float s = sqrt(1 - c * c);
+    float p = sqrt(1 - c);
+    float px = n[0] / p;
+    float py = n[1] / p;
+    float a = mg * s;
+    cur.ax = a * px;
+    cur.ay = a * py;
+    float _dxp = cur.vx_start * cur.vx_start - 2 * cur.ax * (1 - cur.x_start);
+    float dxp = sqrt(_dxp);
+    float txp1 = -cur.vx_start + dxp, txp2 = -cur.vx_start - dxp;
+    float _dyp = cur.vy_start * cur.vy_start - 2 * cur.ay * (1 - cur.y_start);
+    float dyp = sqrt(_dyp);
+    float typ1 = -cur.vx_start + dyp, typ2 = -cur.vy_start - dyp;
+    float _dxn = cur.vx_start * cur.vx_start - 2 * cur.ax * cur.x_start;
+    float dxn = sqrt(_dxn);
+    float txn1 = -cur.vx_start + dxn, txn2 = -cur.vx_start - dxn;
+    float _dyn = cur.vy_start * cur.vy_start - 2 * cur.ay * cur.y_start;
+    float dyn = sqrt(_dyn);
+    float tyn1 = -cur.vx_start + dyn, tyn2 = -cur.vy_start - dyn;
+    int ni, nj;
+    float t;
+    bool tset = false;
+    if(_dxp > 0) {
+      if(txp1 > 0) {
+        cur.t = txp1;
+        ni = cur.i + 1;
+        nj = cur.j;
+        tset = true;
+      }
+      if(txp2 > 0 && (!tset || txp2 < t)) {
+        cur.t = txp2;
+        ni = cur.i + 1;
+        nj = cur.j;
+        tset = true;
+      }
+    }
+    if(_dyp > 0) {
+      if(typ1 > 0 && (!tset || typ1 < t)) {
+        cur.t = typ1;
+        ni = cur.i;
+        nj = cur.j + 1;
+        tset = true;
+      }
+      if(typ2 > 0 && (!tset || typ2 < t)) {
+        cur.t = typ2;
+        ni = cur.i;
+        nj = cur.j + 1;
+        tset = true;
+      }
+    }
+    if(_dxn > 0) {
+      if(txn1 > 0 && (!tset || txn1 < t)) {
+        cur.t = txn1;
+        ni = cur.i - 1;
+        nj = cur.j;
+        tset = true;
+      }
+      if(txn2 > 0 && (!tset || txn2 < t)) {
+        cur.t = txn2;
+        ni = cur.i - 1;
+        nj = cur.j;
+        tset = true;
+      }
+    }
+    if(_dyn > 0) {
+      if(tyn1 > 0 && (!tset || tyn1 < t)) {
+        cur.t = tyn1;
+        ni = cur.i;
+        nj = cur.j - 1;
+        tset = true;
+      }
+      if(tyn2 > 0 && (!tset || tyn2 < t)) {
+        cur.t = tyn2;
+        ni = cur.i;
+        nj = cur.j - 1;
+        tset = true;
+      }
+    }
+    cur.vx = cur.vx_start + cur.ax * cur.t;
+    cur.vy = cur.vy_start + cur.ay * cur.t;
+    cur.x = cur.x_start + cur.vx_start * cur.t + cur.ax * cur.t * cur.t / 2.0;
+    cur.y = cur.y_start + cur.vy_start * cur.t + cur.ay * cur.t * cur.t / 2.0;
+    path.push_back(cur);
+    cur.i = ni;
+    cur.j = nj;
+    cur.x_start = cur.x;
+    cur.y_start = cur.y;
+    cur.vx_start = cur.vx;
+    cur.vy_start = cur.vy;
+    iteration++;
+  }
+  Grid<Color, 512, 512, ColorComponent> fpgc;
+  grayToColor(*fpg, fpgc);
+  float step = 0.5;
+  for(const auto& node : path) {
+    //node.print(std::cout);
+    //node.print();
+    auto& c = fpgc.get(node.i, node.j);
+    //c.print();
+    c.r(c.r() * 0.5 + step);
+    c.g(c.g() * 0.5);
+    c.b(c.b() * 0.5);
+    //c.print();
+    fpgc.set(node.i, node.j, c);
+  }
+  fpgc.save((char *) "fractal_perlin_path.ppm");
+  //*/
   return 0;
 }
