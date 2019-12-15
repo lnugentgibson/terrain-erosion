@@ -18,8 +18,9 @@ make rand_col || exit
 make bin2ppm_col || exit
 ./bin2ppm_col rand_col_`printf %03d $s`.bin rand_col_`printf %03d $s`.ppm || exit
 convert rand_col_`printf %03d $s`.ppm rand_col_`printf %03d $s`.png
+d=2
 make rand_vec || exit
-./rand_vec $s $s rand_vec_`printf %03d $s` 0 || exit
-#make bin2ppm_vec || exit
-#./bin2ppm_vec rand_vec_`printf %03d $s`.bin rand_vec_`printf %03d $s`.ppm || exit
-convert rand_vec_`printf %03d $s`.ppm rand_vec_`printf %03d $s`.png
+./rand_vec $s $s $d rand_vec_`printf %03d $s`_$d 1 || exit
+make bin2ppm_vec || exit
+./bin2ppm_vec rand_vec_`printf %03d $s`_$d.bin rand_vec_`printf %03d $s`_$d.ppm || exit
+convert rand_vec_`printf %03d $s`_$d.ppm rand_vec_`printf %03d $s`_$d.png

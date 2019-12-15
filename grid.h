@@ -24,9 +24,10 @@ class Grid {
   void allocate();
   bool readTxt(char *filename);
   T& getFirst(int i, int j);
+  const T& getFirst(int i, int j) const;
   T *get(int i, int j);
+  const T *get(int i, int j) const;
   T& get(int i, int j, int k);
-  const T& get(int i, int j) const;
   T& set(int i, int j, T v);
   T *set(int i, int j, T *v);
   T *set(int i, int j, int k, T v);
@@ -104,18 +105,25 @@ T& Grid<T, C>::getFirst(int i, int j) {
 }
 
 template<typename T, typename C>
+const T& Grid<T, C>::getFirst(int i, int j) const {
+  return *data[i * cols + j];
+}
+
+template<typename T, typename C>
 T *Grid<T, C>::get(int i, int j) {
   return &data[(i * cols + j) * dim];
 }
 
 template<typename T, typename C>
-T& Grid<T, C>::get(int i, int j, int k) {
-  return data[(i * cols + j) * dim + k];
+const T *Grid<T, C>::get(int i, int j) const {
+  int index = (i * cols + j) * dim;
+  //std::cout << "get(" << i << ", " << j << ") -> &data[" << index << "]" << std::endl;
+  return &data[index];
 }
 
 template<typename T, typename C>
-const T& Grid<T, C>::get(int i, int j) const {
-  return *data[i * cols + j];
+T& Grid<T, C>::get(int i, int j, int k) {
+  return data[(i * cols + j) * dim + k];
 }
 
 template<typename T, typename C>
@@ -134,19 +142,27 @@ T *Grid<T, C>::set(int i, int j, T *v) {
 
 template<typename T, typename C>
 T *Grid<T, C>::set(int i, int j, int k, T v) {
-  data[(i * cols + j) * dim + k] = v;
-  return &data[(i * cols + j) * dim + k];
+  int index = (i * cols + j) * dim + k;
+  /*
+  std::cout << "set(" << i << ", " << j << ", " << k << ", ";
+  getter.print(v, std::cout);
+  std::cout << ") -> &data[" << index << "]" << std::endl;
+  //*/
+  data[index] = v;
+  return &data[index];
 }
 
 template<typename T, typename C>
 void Grid<T, C>::savePpm(char *filename) const {
   std::ofstream ofs(filename, std::ios::out | std::ios::binary);
   ofs << "P6\n" << cols << " " << rows << "\n255\n";
-  for (unsigned i = 0; i < rows * cols; ++i) {
-    ofs << (unsigned char)(std::max(float(0), std::min(float(1), getter.r(&data[i * dim], dim))) * 255) <<
-           (unsigned char)(std::max(float(0), std::min(float(1), getter.g(&data[i * dim], dim))) * 255) <<
-           (unsigned char)(std::max(float(0), std::min(float(1), getter.b(&data[i * dim], dim))) * 255);
-  }
+  for (unsigned i = 0; i < rows; ++i)
+    for (unsigned j = 0; j < cols; ++j) {
+      const T *v = get(i, j);
+      ofs << (unsigned char)(std::max(float(0), std::min(float(1), getter.r(v, dim))) * 255) <<
+             (unsigned char)(std::max(float(0), std::min(float(1), getter.g(v, dim))) * 255) <<
+             (unsigned char)(std::max(float(0), std::min(float(1), getter.b(v, dim))) * 255);
+    }
   ofs.close();
 }
 
@@ -186,12 +202,15 @@ void Grid<T, C>::saveTxt(char *filename) const {
 
 template<typename T, typename C>
 void Grid<T, C>::print() const {
-  for (unsigned i = 0; i < rows; ++i) {
-    for (unsigned j = 0; j < cols; ++j) {
+  for (unsigned i = 0; i < rows; i++) {
+    std::cout << "Row " << i << ": ";
+    for (unsigned j = 0; j < cols; j++) {
+      const T *v = get(i, j);
+      std::cout << "Col " << j << ": ";
       std::cout << "(" <<
-             (int)(std::max(float(0), std::min(float(1), getter.r(data[i * cols + j]))) * 255) << "," <<
-             (int)(std::max(float(0), std::min(float(1), getter.g(data[i * cols + j]))) * 255) << "," <<
-             (int)(std::max(float(0), std::min(float(1), getter.b(data[i * cols + j]))) * 255) << ") ";
+             (int)(std::max(float(0), std::min(float(1), getter.r(v, dim))) * 255) << "," <<
+             (int)(std::max(float(0), std::min(float(1), getter.g(v, dim))) * 255) << "," <<
+             (int)(std::max(float(0), std::min(float(1), getter.b(v, dim))) * 255) << ") ";
     }
     std::cout << std::endl;
   }
@@ -234,6 +253,10 @@ class ArrayComponent {
 
   float b(const float *c, int dim) const {
     return dim > 2 ? c[2] : 0.0;
+  }
+
+  void print(const float& c, std::ostream& os) {
+    os << c;
   }
 };
 
