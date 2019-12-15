@@ -15,13 +15,15 @@ void randGrid(Grid<float, C>& grid) {
     }
 }
 
-template<size_t d, typename C>
+template<typename C>
 void randGridVector(Grid<float, C>& grid) {
   for(int i = 0; i < grid.rows; i++)
     for(int j = 0; j < grid.cols; j++) {
-      std::array<float, d> v;
-      for(int k = 0; k < d; k++) v[k] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      grid.set(i, j, v);
+      float v;
+      for(int k = 0; k < grid.dim; k++) {
+        v = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        grid.set(i, j, k, v);
+      }
     }
 }
 

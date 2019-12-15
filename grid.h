@@ -18,14 +18,18 @@ class Grid {
   T *data;
   C getter;
  public:
-  const int rows, cols;
-  Grid(int _rows, int _cols) : rows(_rows), cols(_cols), data(0) {}
+  const int rows, cols, dim;
+  Grid(int _rows, int _cols, int _dim) : rows(_rows), cols(_cols), dim(_dim), data(0) {}
   ~Grid();
   void allocate();
   bool readTxt(char *filename);
-  T& get(int i, int j);
+  T& getFirst(int i, int j);
+  T *get(int i, int j);
+  T& get(int i, int j, int k);
   const T& get(int i, int j) const;
   T& set(int i, int j, T v);
+  T *set(int i, int j, T *v);
+  T *set(int i, int j, int k, T v);
   void savePpm(char *fn) const;
   void saveBin(char *fn) const;
   void saveTxt(char *fn) const;
@@ -36,7 +40,7 @@ class Grid {
 template<typename T, typename C>
 Grid<T, C> readBin(char *filename) {
   std::ifstream ifs(filename, std::ios::in | std::ios::binary);
-  int rows, cols;
+  int rows, cols, dim;
   /*
   char *d = (char *) &rows;
   for(int i = 0; i < sizeof(int); i++) {
@@ -49,9 +53,10 @@ Grid<T, C> readBin(char *filename) {
   //*/
   ifs.read((char *) &rows, sizeof(int));
   ifs.read((char *) &cols, sizeof(int));
-  Grid<T, C> grid(rows, cols);
+  ifs.read((char *) &dim, sizeof(int));
+  Grid<T, C> grid(rows, cols, dim);
   grid.allocate();
-  ifs.read((char *) grid.data, rows * cols * sizeof(T));
+  ifs.read((char *) grid.data, rows * cols * dim * sizeof(T));
   ifs.close();
   return grid;
 }
@@ -90,12 +95,22 @@ void Grid<T, C>::allocate() {
   if(data != 0) {
     return;
   }
-  data = new T[rows * cols];
+  data = new T[rows * cols * dim];
 }
 
 template<typename T, typename C>
-T& Grid<T, C>::get(int i, int j) {
-  return *data[i * cols + j];
+T& Grid<T, C>::getFirst(int i, int j) {
+  return data[(i * cols + j) * dim];
+}
+
+template<typename T, typename C>
+T *Grid<T, C>::get(int i, int j) {
+  return &data[(i * cols + j) * dim];
+}
+
+template<typename T, typename C>
+T& Grid<T, C>::get(int i, int j, int k) {
+  return data[(i * cols + j) * dim + k];
 }
 
 template<typename T, typename C>
@@ -106,7 +121,21 @@ const T& Grid<T, C>::get(int i, int j) const {
 template<typename T, typename C>
 T& Grid<T, C>::set(int i, int j, T v) {
   data[i * cols + j] = v;
-  return data[i * cols + j];
+  return data[(i * cols + j) * dim];
+}
+
+template<typename T, typename C>
+T *Grid<T, C>::set(int i, int j, T *v) {
+  for(int k = 0; k < dim; k++) {
+    data[(i * cols + j) * dim + k] = v[k];
+  }
+  return &data[(i * cols + j) * dim];
+}
+
+template<typename T, typename C>
+T *Grid<T, C>::set(int i, int j, int k, T v) {
+  data[(i * cols + j) * dim + k] = v;
+  return &data[(i * cols + j) * dim + k];
 }
 
 template<typename T, typename C>
@@ -114,9 +143,9 @@ void Grid<T, C>::savePpm(char *filename) const {
   std::ofstream ofs(filename, std::ios::out | std::ios::binary);
   ofs << "P6\n" << cols << " " << rows << "\n255\n";
   for (unsigned i = 0; i < rows * cols; ++i) {
-    ofs << (unsigned char)(std::max(float(0), std::min(float(1), getter.r(data[i]))) * 255) <<
-           (unsigned char)(std::max(float(0), std::min(float(1), getter.g(data[i]))) * 255) <<
-           (unsigned char)(std::max(float(0), std::min(float(1), getter.b(data[i]))) * 255);
+    ofs << (unsigned char)(std::max(float(0), std::min(float(1), getter.r(&data[i * dim], dim))) * 255) <<
+           (unsigned char)(std::max(float(0), std::min(float(1), getter.g(&data[i * dim], dim))) * 255) <<
+           (unsigned char)(std::max(float(0), std::min(float(1), getter.b(&data[i * dim], dim))) * 255);
   }
   ofs.close();
 }
@@ -132,7 +161,11 @@ void Grid<T, C>::saveBin(char *filename) const {
   for(int i = 0; i < sizeof(int); i++) {
     ofs << d[i];
   }
-  ofs.write((char *) data, rows * cols * sizeof(T));
+  d = (char *) &dim;
+  for(int i = 0; i < sizeof(int); i++) {
+    ofs << d[i];
+  }
+  ofs.write((char *) data, rows * cols * dim * sizeof(T));
   ofs.flush();
   ofs.close();
 }
@@ -166,29 +199,46 @@ void Grid<T, C>::print() const {
 
 class GrayscaleComponent {
  public:
-  float r(const float& c) const {
-    return c;
+  float r(const float *c, int dim) const {
+    return *c;
   }
 
-  float g(const float& c) const {
-    return c;
+  float g(const float *c, int dim) const {
+    return *c;
   }
 
-  float b(const float& c) const {
-    return c;
+  float b(const float *c, int dim) const {
+    return *c;
   }
 
-  void print(float& c, std::ostream& os) {
-    os << c;
+  void print(const float *c, int dim, std::ostream& os) {
+    os << *c;
   }
 
-  void parse(float& c, std::istream& is) {
-    is >> c;
+  void parse(float *c, int dim, std::istream& is) {
+    float _c;
+    is >> _c;
+    *c = _c;
+  }
+};
+
+class ArrayComponent {
+ public:
+  float r(const float *c, int dim) const {
+    return c[0];
+  }
+
+  float g(const float *c, int dim) const {
+    return dim > 1 ? c[1] : 0.0;
+  }
+
+  float b(const float *c, int dim) const {
+    return dim > 2 ? c[2] : 0.0;
   }
 };
 
 template<size_t d>
-class ArrayComponent {
+class StandardArrayComponent {
  public:
   float r(const std::array<float, d>& c) const {
     return c[0];
@@ -233,14 +283,14 @@ class Color {
 
 class ColorComponent {
  public:
-  float r(const Color& c) const {
-    return c.r();
+  float r(const Color *c, int dim) const {
+    return c->r();
   }
-  float g(const Color& c) const {
-    return c.g();
+  float g(const Color *c, int dim) const {
+    return c->g();
   }
-  float b(const Color& c) const {
-    return c.b();
+  float b(const Color *c, int dim) const {
+    return c->b();
   }
 };
 
