@@ -260,6 +260,25 @@ class ArrayComponent {
   }
 };
 
+class NormalComponent {
+ public:
+  float r(const float *c, int dim) const {
+    return c[0] * 0.5 + 0.5;
+  }
+
+  float g(const float *c, int dim) const {
+    return dim > 1 ? c[1] * 0.5 + 0.5 : 0.0;
+  }
+
+  float b(const float *c, int dim) const {
+    return dim > 2 ? c[2] * 0.5 + 0.5 : 0.0;
+  }
+
+  void print(const float& c, std::ostream& os) {
+    os << c * 0.5 + 0.5;
+  }
+};
+
 template<size_t d>
 class StandardArrayComponent {
  public:

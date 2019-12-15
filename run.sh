@@ -7,7 +7,7 @@
 #convert fractal_perlin_path.png fractal_perlin_dx.ppm +append fractal_perlin_top.png
 #convert fractal_perlin_normal.ppm fractal_perlin_dy.ppm +append fractal_perlin_bottom.png
 #convert fractal_perlin_top.png fractal_perlin_bottom.png -append fractal_perlin_diff.png
-s=256
+s=1024
 make rand_gray || exit
 ./rand_gray $s $s rand_gray_`printf %03d $s` 1 || exit
 make bin2ppm_gray || exit
@@ -24,3 +24,8 @@ make rand_vec || exit
 make bin2ppm_vec || exit
 ./bin2ppm_vec rand_vec_`printf %03d $s`_$d.bin rand_vec_`printf %03d $s`_$d.ppm || exit
 convert rand_vec_`printf %03d $s`_$d.ppm rand_vec_`printf %03d $s`_$d.png
+make rand_dir || exit
+./rand_dir $s $s $d rand_dir_`printf %03d $s`_$d 1 || exit
+make bin2ppm_dir || exit
+./bin2ppm_dir rand_dir_`printf %03d $s`_$d.bin rand_dir_`printf %03d $s`_$d.ppm || exit
+convert rand_dir_`printf %03d $s`_$d.ppm rand_dir_`printf %03d $s`_$d.png

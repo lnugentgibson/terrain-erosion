@@ -27,18 +27,18 @@ void randGridVector(Grid<float, C>& grid) {
     }
 }
 
-template<size_t d, typename C>
+template<typename C>
 void randGridDirection(Grid<float, C>& grid) {
   for(int i = 0; i < grid.rows; i++)
     for(int j = 0; j < grid.cols; j++) {
-      std::array<float, d> v;
+      float *v = new float[grid.dim];
       float l = 0;
-      for(int k = 0; k < d; k++) {
+      for(int k = 0; k < grid.dim; k++) {
         v[k] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5;
         l += v[k] * v[k];
       }
       l = sqrt(l);
-      for(int k = 0; k < d; k++) {
+      for(int k = 0; k < grid.dim; k++) {
         v[k] = v[k] / l;
       }
       grid.set(i, j, v);
