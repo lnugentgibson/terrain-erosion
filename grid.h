@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <optional>
 
 template<typename T, typename C>
 class Grid;
@@ -59,6 +60,44 @@ Grid<T, C> readBin(const char *filename) {
   grid.allocate();
   ifs.read((char *) grid.data, rows * cols * dim * sizeof(T));
   ifs.close();
+  return grid;
+}
+
+template<typename T, typename T1, typename T2, typename C>
+std::optional<Grid<T, C>> combineBin(const char *filename1, const char *filename2, int dim, void (*combiner)(const T1 *a, const T2 *b, T *c)) {
+  std::ifstream ifs1(filename1, std::ios::in | std::ios::binary);
+  std::ifstream ifs2(filename2, std::ios::in | std::ios::binary);
+  int rows, cols, dim1;
+  int _rows, _cols, dim2;
+  ifs1.read((char *) &rows, sizeof(int));
+  ifs1.read((char *) &cols, sizeof(int));
+  ifs1.read((char *) &dim1, sizeof(int));
+  ifs2.read((char *) &_rows, sizeof(int));
+  ifs2.read((char *) &_cols, sizeof(int));
+  ifs2.read((char *) &dim2, sizeof(int));
+  if(rows != _rows) {
+    std::nullopt;
+  }
+  if(cols != _cols) {
+    std::nullopt;
+  }
+  if(dim1 != dim2) {
+    std::nullopt;
+  }
+  Grid<T, C> grid(rows, cols, dim);
+  grid.allocate();
+  T *combined = new T[dim];
+  T1 *pixel1 = new T1[dim1];
+  T2 *pixel2 = new T2[dim2];
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      ifs1.read((char *) pixel1, dim1 * sizeof(T1));
+      ifs2.read((char *) pixel2, dim2 * sizeof(T2));
+      combiner(pixel1, pixel2, combined);
+      grid.set(i, j, combined);
+    }
+  ifs1.close();
+  ifs2.close();
   return grid;
 }
 
