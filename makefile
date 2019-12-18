@@ -64,7 +64,37 @@ rand_col_1024.png: rand_col_1024.ppm
 perlin_val: perlin_val.cc grid.h random.h noise.h
 	g++ $< -o $@ -Icxxopts/include
 
-all: rand_gray_1024.png rand_vec_1024_2.png rand_dir_1024_2.png rand_col_1024.png
+perlin_val_1024_256.bin: perlin_val
+	./perlin_val -w 1024 -h 1024 -c 256 -o perlin_val_1024_256 -t 1
+
+perlin_val_1024_256.ppm: perlin_val_1024_256.bin bin2ppm_gray
+	./bin2ppm_gray -i $< -o $@
+
+perlin_val_1024_256.png: perlin_val_1024_256.ppm
+	convert $< $@
+
+perlin_grad: perlin_grad.cc grid.h random.h noise.h
+	g++ $< -o $@ -Icxxopts/include
+
+perlin_grad_0512_128.bin: perlin_grad
+	./perlin_grad -w 512 -h 512 -c 128 -o perlin_grad_0512_128 -t 1
+
+perlin_grad_0512_128.ppm: perlin_grad_0512_128.bin bin2ppm_gray
+	./bin2ppm_gray -i $< -o $@
+
+perlin_grad_0512_128.png: perlin_grad_0512_128.ppm
+	convert $< $@
+
+perlin_grad_1024_256.bin: perlin_grad
+	./perlin_grad -w 1024 -h 1024 -c 256 -o perlin_grad_1024_256 -t 1
+
+perlin_grad_1024_256.ppm: perlin_grad_1024_256.bin bin2ppm_gray
+	./bin2ppm_gray -i $< -o $@
+
+perlin_grad_1024_256.png: perlin_grad_1024_256.ppm
+	convert $< $@
+
+all: rand_gray_1024.png rand_vec_1024_2.png rand_dir_1024_2.png rand_col_1024.png perlin_val_1024_256.png perlin_grad_1024_256.png
 
 clean:
 	rm rand_gray
@@ -75,6 +105,7 @@ clean:
 	rm bin2ppm_vec
 	rm bin2ppm_col
 	rm perlin_val
+	rm perlin_grad
 	rm *.ppm
 	rm *.bin
 	rm *.png
