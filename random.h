@@ -1,7 +1,6 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
-#include <array>
 #include <cmath>
 
 #include "grid.h"
@@ -11,7 +10,7 @@ void randGrid(Grid<float, C>& grid) {
   for(int i = 0; i < grid.rows; i++)
     for(int j = 0; j < grid.cols; j++) {
       float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      grid.set(i, j, g);
+      grid.setFirst(i, j, g);
     }
 }
 
@@ -52,7 +51,7 @@ void randGrid(Grid<Color, C>& grid) {
       float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
       float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
       float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      grid.set(i, j, Color(r, g, b));
+      grid.setFirst(i, j, Color(r, g, b));
     }
 }
 

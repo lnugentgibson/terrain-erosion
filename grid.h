@@ -11,7 +11,7 @@ template<typename T, typename C>
 class Grid;
 
 template<typename T, typename C>
-Grid<T, C> readBin(char *filename);
+Grid<T, C> readBin(const char *filename);
 
 template<typename T, typename C>
 class Grid {
@@ -22,24 +22,24 @@ class Grid {
   Grid(int _rows, int _cols, int _dim) : rows(_rows), cols(_cols), dim(_dim), data(0) {}
   ~Grid();
   void allocate();
-  bool readTxt(char *filename);
+  bool readTxt(const char *filename);
   T& getFirst(int i, int j);
   const T& getFirst(int i, int j) const;
   T *get(int i, int j);
   const T *get(int i, int j) const;
   T& get(int i, int j, int k);
-  T& set(int i, int j, T v);
+  T& setFirst(int i, int j, T v);
   T *set(int i, int j, T *v);
   T *set(int i, int j, int k, T v);
-  void savePpm(char *fn) const;
-  void saveBin(char *fn) const;
-  void saveTxt(char *fn) const;
+  void savePpm(const char *fn) const;
+  void saveBin(const char *fn) const;
+  void saveTxt(const char *fn) const;
   void print() const;
-  friend Grid readBin<T, C>(char *filename);
+  friend Grid readBin<T, C>(const char *filename);
 };
 
 template<typename T, typename C>
-Grid<T, C> readBin(char *filename) {
+Grid<T, C> readBin(const char *filename) {
   std::ifstream ifs(filename, std::ios::in | std::ios::binary);
   int rows, cols, dim;
   /*
@@ -63,7 +63,7 @@ Grid<T, C> readBin(char *filename) {
 }
 
 template<typename T, typename C>
-bool Grid<T, C>::readTxt(char *filename) {
+bool Grid<T, C>::readTxt(const char *filename) {
   std::ifstream ifs(filename, std::ios::in);
   int _rows, _cols;
   ifs >> _rows;
@@ -127,7 +127,7 @@ T& Grid<T, C>::get(int i, int j, int k) {
 }
 
 template<typename T, typename C>
-T& Grid<T, C>::set(int i, int j, T v) {
+T& Grid<T, C>::setFirst(int i, int j, T v) {
   data[i * cols + j] = v;
   return data[(i * cols + j) * dim];
 }
@@ -153,7 +153,7 @@ T *Grid<T, C>::set(int i, int j, int k, T v) {
 }
 
 template<typename T, typename C>
-void Grid<T, C>::savePpm(char *filename) const {
+void Grid<T, C>::savePpm(const char *filename) const {
   std::ofstream ofs(filename, std::ios::out | std::ios::binary);
   ofs << "P6\n" << cols << " " << rows << "\n255\n";
   for (unsigned i = 0; i < rows; ++i)
@@ -167,7 +167,7 @@ void Grid<T, C>::savePpm(char *filename) const {
 }
 
 template<typename T, typename C>
-void Grid<T, C>::saveBin(char *filename) const {
+void Grid<T, C>::saveBin(const char *filename) const {
   std::ofstream ofs(filename, std::ios::out | std::ios::binary);
   char *d = (char *) &rows;
   for(int i = 0; i < sizeof(int); i++) {
@@ -187,7 +187,7 @@ void Grid<T, C>::saveBin(char *filename) const {
 }
 
 template<typename T, typename C>
-void Grid<T, C>::saveTxt(char *filename) const {
+void Grid<T, C>::saveTxt(const char *filename) const {
   std::ofstream ofs(filename, std::ios::out);
   ofs << cols << " " << rows << std::endl;
   for (unsigned i = 0; i < rows; ++i) {
