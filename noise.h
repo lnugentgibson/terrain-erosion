@@ -58,12 +58,14 @@ void perlinGradientGrid(Grid<float, C>& grid, Grid<float, C>& r_grid, float cell
       nx = xx;
       xx = r_grid.get(i + 1, j + 1);
       for(int _i = 0; _i < cell_size; _i++) {
-        float y = (_i + 0.5) / cell_size;
+        // float y = curve3((_i + 0.5) / cell_size);
+        float y = curve3(_i / cell_size);
         float _y = 1 - y;
         float Y = curve3(y);
         float _Y = 1 - Y;
         for(int _j = 0; _j < cell_size; _j++) {
-          float x = (_j + 0.5) / cell_size;
+          // float x = curve3((_j + 0.5) / cell_size);
+          float x = curve3(_j / cell_size);
           float _x = 1 - x;
           float X = curve3(x);
           float _X = 1 - X;

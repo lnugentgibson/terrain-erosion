@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   r_grid.allocate();
   Grid<float, GrayscaleComponent> grid(result["h"].as<int>(), result["w"].as<int>(), 1);
   grid.allocate();
-  randGrid(r_grid);
+  randGridDirection(r_grid);
   perlinGradientGrid(grid, r_grid, cell_size);
   if(bin) {
     grid.saveBin(filename.c_str());
