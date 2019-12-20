@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   auto result = options.parse(argc, argv);
   bool bin = !!result["t"].as<int>();
   std::string filename = result["o"].as<std::string>();
-  filename = filename + (bin ? ".bin" : ".ppm");
+  // filename = filename + (bin ? ".bin" : ".ppm");
   int cell_size = result["c"].as<int>();
   Grid<float, GrayscaleComponent> r_grid(result["h"].as<int>() / cell_size + 1, result["w"].as<int>() / cell_size + 1, 2);
   r_grid.allocate();

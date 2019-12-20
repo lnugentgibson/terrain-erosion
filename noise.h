@@ -79,7 +79,7 @@ void perlinGradientGrid(Grid<float, C>& grid, Grid<float, C>& r_grid, float cell
             (
               _X * _Y * nnv + X * _Y * xnv + _X * Y * nxv + X * Y * xxv
               //x > 0.5 ? (y > 0.5 ? xxv : xnv) : (y > 0.5 ? nxv : nnv)
-            ) * 0.5 + 0.5
+            )
           );
         }
       }

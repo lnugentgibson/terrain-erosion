@@ -12,15 +12,21 @@ int main(int argc, char *argv[]) {
     ("w,width", "Width of image", cxxopts::value<int>())
     ("h,height", "Height of image", cxxopts::value<int>())
     ("d,dim", "Dimensions of image", cxxopts::value<int>())
+    ("s,seed", "random seed", cxxopts::value<int>())
     ("t,type", "format of output image", cxxopts::value<int>())
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
   bool bin = !!result["t"].as<int>();
   std::string filename = result["o"].as<std::string>();
-  filename = filename + (bin ? ".bin" : ".ppm");
+  // filename = filename + (bin ? ".bin" : ".ppm");
   Grid<float, NormalComponent> grid(result["h"].as<int>(), result["w"].as<int>(), result["d"].as<int>());
   grid.allocate();
+  int seed = result["s"].as<int>();
+  if(seed < 0) {
+    seed = time(NULL);
+  }
+  srand(seed);
   randGridDirection(grid);
   if(bin) {
     grid.saveBin(filename.c_str());

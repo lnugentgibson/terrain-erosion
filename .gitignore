@@ -10,5 +10,9 @@ bin2ppm_gray
 bin2ppm_vec
 bin2ppm_dir
 bin2ppm_col
+bin2ppm_sign
 perlin_val
 perlin_grad
+add_bin
+bin_range
+remap_bin
