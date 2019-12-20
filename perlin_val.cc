@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
     ("h,height", "Height of image", cxxopts::value<int>())
     ("c,cell-size", "Height of image", cxxopts::value<int>())
     ("t,type", "format of output image", cxxopts::value<int>())
+    ("i,input", "first binary image file path", cxxopts::value<std::string>())
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
@@ -21,11 +22,12 @@ int main(int argc, char *argv[]) {
   std::string filename = result["o"].as<std::string>();
   filename = filename + (bin ? ".bin" : ".ppm");
   int cell_size = result["c"].as<int>();
-  Grid<float, GrayscaleComponent> r_grid(result["h"].as<int>() / cell_size + 1, result["w"].as<int>() / cell_size + 1, 1);
-  r_grid.allocate();
+  //Grid<float, GrayscaleComponent> r_grid(result["h"].as<int>() / cell_size + 1, result["w"].as<int>() / cell_size + 1, 1);
+  //r_grid.allocate();
+  Grid<float, GrayscaleComponent> r_grid = readBin(result["i"].as<std::string>().c_str());
   Grid<float, GrayscaleComponent> grid(result["h"].as<int>(), result["w"].as<int>(), 1);
   grid.allocate();
-  randGrid(r_grid);
+  //randGrid(r_grid);
   perlinGrid(grid, r_grid, cell_size);
   if(bin) {
     grid.saveBin(filename.c_str());
