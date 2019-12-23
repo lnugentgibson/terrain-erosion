@@ -149,6 +149,9 @@ perlin_grad_1024_1024_c.ppm: perlin_grad_1024_1024_c.bin bin2ppm_sign
 perlin_grad_1024_1024_c.png: perlin_grad_1024_1024_c.ppm
 	convert $< $@
 
+calc_norm: calc_norm.cc binimg.h
+	g++ -std=c++17 $< -o $@ -Icxxopts/include
+
 all: rand_gray_1024.png rand_vec_1024_2.png rand_dir_1024_2.png rand_col_1024.png perlin_val_1024_0256.png perlin_grad_1024
 
 clean: clean_images
