@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 
 make perlin_grad
 make bin2ppm_sign
-make remap_bin
-make bin_range
+#make remap_bin
+#make bin_range
 make add_bin
 
 width=$1
@@ -17,23 +17,24 @@ i=0
 f=1
 for scale
 do
-  perlin_bin=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`.bin
-  perlin_ppm=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`.ppm
-  perlin_png=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`.png
-  perlin_contrast_bin=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`_c.bin
-  perlin_contrast_ppm=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`_c.ppm
-  perlin_contrast_png=perlin_grad_${width}_${height}_`printf %04d $scale`_0000_`printf %03d $i`_c.png
+  perlin_bin=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000.bin
+  #perlin_ppm=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000.ppm
+  #perlin_png=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000.png
+  perlin_contrast_bin=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000_c.bin
+  #perlin_contrast_ppm=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000_c.ppm
+  #perlin_contrast_png=perlin_grad_`printf %04d $width`_`printf %04d $height`_`printf %.5e $scale`_`printf %04d $i`_000_c.png
+  #echo $perlin_bin
+  #echo $perlin_ppm
+  #echo $perlin_bin
+  #echo $perlin_contrast_bin
+  #echo $perlin_contrast_ppm
+  #echo $perlin_contrast_png
 
-  ./perlin_grad -w $width -h $height -c $scale -t 1 \
-    -i rand_dir_${width}_${height}_2_0000_`printf %03d $i`.bin \
-    -o $perlin_bin
-  ./bin2ppm_sign -i $perlin_bin -o $perlin_ppm
-  convert $perlin_ppm $perlin_png
-
-  ./remap_bin -i $perlin_bin -o $perlin_contrast_bin \
-    `./bin_range -i $perlin_bin` -t '-1.0' -u 1.0
-  ./bin2ppm_sign -i $perlin_contrast_bin -o $perlin_contrast_ppm
-  convert $perlin_contrast_ppm $perlin_contrast_png
+  ./perlin_grad -w $width -h $height -c 1 -s $i -e $scale -o perlin_grad
+  #./bin2ppm_sign -i $perlin_bin -o $perlin_ppm
+  #convert $perlin_ppm $perlin_png
+  #./bin2ppm_sign -i $perlin_contrast_bin -o $perlin_contrast_ppm
+  #convert $perlin_contrast_ppm $perlin_contrast_png
 
   if [ $i -gt 0 ]
   then
@@ -47,6 +48,8 @@ do
   else
     cp $perlin_contrast_bin $o.bin
   fi
+  rm $perlin_bin
+  rm $perlin_contrast_bin
   let "i=i+1"
   let "f=f*5"
 done

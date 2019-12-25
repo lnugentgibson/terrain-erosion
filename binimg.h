@@ -20,6 +20,20 @@ void generateBin(int rows, int cols, int dim, size_t element_size, std::ostream&
 }
 
 template<typename S, typename G>
+void generateStatefulBin(int rows, int cols, int dim, size_t element_size, std::ostream& os, G generator) {
+  os.write((char *) &rows, sizeof(int));
+  os.write((char *) &cols, sizeof(int));
+  os.write((char *) &dim, sizeof(int));
+  char *pixel = new char[dim * element_size];
+  S state;
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      generator(i, j, rows, cols, pixel, dim, element_size, &state);
+      os.write((char *) pixel, dim * element_size);
+    }
+}
+
+template<typename S, typename G>
 void generateStatefulBin(int rows, int cols, int dim, size_t element_size, std::ostream& os, G generator, S *init) {
   os.write((char *) &rows, sizeof(int));
   os.write((char *) &cols, sizeof(int));

@@ -15,8 +15,14 @@ int main(int argc, char *argv[]) {
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
-  combineBin<float, float, float>(result["a"].as<std::string>().c_str(), result["b"].as<std::string>().c_str(), result["o"].as<std::string>().c_str(), 1, [&result](const float *a, const float *b, float *c) -> void {
-    c[0] = result["m"].as<float>() * a[0] + result["n"].as<float>() * b[0];
+  std::ifstream ifs1(result["a"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
+  std::ifstream ifs2(result["b"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
+  std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
+  combineBin(sizeof(float), ifs1, sizeof(float), ifs2, sizeof(float), 1, ofs, [&result](int i, int j, int rows, int cols, void *pixel1, int dim1, size_t element_size1, void *pixel2, int dim2, size_t element_size2, void *pixel3, int dim3, size_t element_size3) -> void {
+    *static_cast<float *>(pixel3) = result["m"].as<float>() * static_cast<float *>(pixel1)[0] + result["n"].as<float>() * static_cast<float *>(pixel2)[0];
   });
+  ifs1.close();
+  ifs2.close();
+  ofs.close();
   return 0;
 }
