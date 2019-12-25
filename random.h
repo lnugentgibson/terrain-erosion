@@ -5,12 +5,15 @@
 
 #include "grid.h"
 
+float randGray() {
+  return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
+
 template<typename C>
 void randGrid(Grid<float, C>& grid) {
   for(int i = 0; i < grid.rows; i++)
     for(int j = 0; j < grid.cols; j++) {
-      float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      grid.setFirst(i, j, g);
+      grid.setFirst(i, j, randGray());
     }
 }
 
@@ -26,20 +29,24 @@ void randGridVector(Grid<float, C>& grid) {
     }
 }
 
+void randDirection(int dim, float *v) {
+  float l = 0;
+  for(int k = 0; k < dim; k++) {
+    v[k] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5;
+    l += v[k] * v[k];
+  }
+  l = sqrt(l);
+  for(int k = 0; k < dim; k++) {
+    v[k] = v[k] / l;
+  }
+}
+
 template<typename C>
 void randGridDirection(Grid<float, C>& grid) {
   for(int i = 0; i < grid.rows; i++)
     for(int j = 0; j < grid.cols; j++) {
       float *v = new float[grid.dim];
-      float l = 0;
-      for(int k = 0; k < grid.dim; k++) {
-        v[k] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5;
-        l += v[k] * v[k];
-      }
-      l = sqrt(l);
-      for(int k = 0; k < grid.dim; k++) {
-        v[k] = v[k] / l;
-      }
+      randDirection(grid.dim, v);
       grid.set(i, j, v);
     }
 }

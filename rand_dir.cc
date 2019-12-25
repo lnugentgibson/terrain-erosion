@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "cxxopts.hpp"
-#include "grid.h"
+#include "binimg.h"
 #include "random.h"
 
 int main(int argc, char *argv[]) {
@@ -16,16 +16,12 @@ int main(int argc, char *argv[]) {
     ("d,dim", "Dimensions of image", cxxopts::value<int>())
     ("s,seed", "random seed", cxxopts::value<int>())
     ("c,count", "number of image", cxxopts::value<int>())
-    ("t,type", "format of output image", cxxopts::value<int>())
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
-  bool bin = !!result["t"].as<int>();
-  int width = result["w"].as<int>();
-  int height = result["h"].as<int>();
+  int cols = result["w"].as<int>();
+  int rows = result["h"].as<int>();
   int dim = result["d"].as<int>();
-  Grid<float, NormalComponent> grid(height, width, dim);
-  grid.allocate();
   int seed = result["s"].as<int>();
   if(seed < 0) {
     seed = time(NULL);
@@ -35,19 +31,18 @@ int main(int argc, char *argv[]) {
   for(int i = 0; i < count; i++) {
     std::stringstream fs;
     fs << result["o"].as<std::string>();
-    fs << "_" << std::setfill('0') << std::setw(4) << height;
-    fs << "_" << std::setfill('0') << std::setw(4) << width;
+    fs << "_" << std::setfill('0') << std::setw(4) << rows;
+    fs << "_" << std::setfill('0') << std::setw(4) << cols;
     fs << "_" << dim;
     fs << "_" << std::setfill('0') << std::setw(4) << seed;
     fs << "_" << std::setfill('0') << std::setw(3) << i;
-    fs << (bin ? ".bin" : ".ppm");
+    fs << ".bin";
     std::string filename = fs.str();
-    randGridDirection(grid);
-    if(bin) {
-      grid.saveBin(filename.c_str());
-    } else {
-      grid.savePpm(filename.c_str());
-    }
+    std::ofstream ofs(filename, std::ios::out | std::ios::binary);
+    generateBin(rows, cols, dim, sizeof(float), ofs, [](int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) -> void {
+      randDirection(dim, static_cast<float *>(pixel));
+    });
+    ofs.close();
   }
   return 0;
 }

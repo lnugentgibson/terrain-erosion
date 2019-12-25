@@ -1,13 +1,13 @@
 main: main.cc
 	g++ $< -o $@ -lm
 
-rand_gray: rand_gray.cc grid.h random.h
+rand_gray: rand_gray.cc binimg.h random.h
 	g++ -std=c++17 $< -o $@ -Icxxopts/include
 
 rand_gray_1024.bin: rand_gray
 	./rand_gray -w 1024 -h 1024 -o $@ -t 1 --seed=-1
 
-bin2ppm_gray: bin2ppm_gray.cc grid.h
+bin2ppm_gray: bin2ppm_gray.cc binimg.h
 	g++ -std=c++17 $< -o $@ -Icxxopts/include
 
 rand_gray_1024.ppm: rand_gray_1024.bin bin2ppm_gray
@@ -31,13 +31,13 @@ rand_vec_1024_2.ppm: rand_vec_1024_2.bin bin2ppm_vec
 rand_vec_1024_2.png: rand_vec_1024_2.ppm
 	convert $< $@
 
-rand_dir: rand_dir.cc grid.h random.h
+rand_dir: rand_dir.cc binimg.h random.h
 	g++ -std=c++17 $< -o $@ -Icxxopts/include
 
 rand_dir_1024_2.bin: rand_dir
 	./rand_dir -w 1024 -h 1024 -d 2 -o $@ -t 1 --seed=-1
 
-bin2ppm_dir: bin2ppm_dir.cc grid.h
+bin2ppm_dir: bin2ppm_dir.cc binimg.h
 	g++ -std=c++17 $< -o $@ -Icxxopts/include
 
 rand_dir_1024_2.ppm: rand_dir_1024_2.bin bin2ppm_dir
@@ -76,7 +76,7 @@ perlin_val_1024_0256.ppm: perlin_val_1024_0256.bin bin2ppm_sign
 perlin_val_1024_0256.png: perlin_val_1024_0256.ppm
 	convert $< $@
 
-perlin_grad: perlin_grad.cc grid.h random.h noise.h
+perlin_grad: perlin_grad.cc binimg.h random.h noise.h
 	g++ -std=c++17 $< -o $@ -Icxxopts/include
 
 perlin_grad_0512_0128.bin: perlin_grad
