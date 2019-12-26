@@ -2,8 +2,12 @@
 #define BINIMG_H
 
 #include <algorithm>
+#include <array>
+#include <deque>
 #include <fstream>
 #include <iostream>
+#include <iterator>
+#include <memory>
 #include <optional>
 
 template<typename G>
@@ -114,6 +118,79 @@ void mapStatefulBin(size_t element_size1, std::istream& is, size_t element_size2
       map(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, &state);
       os.write((char *) pixel2, dim2 * element_size2);
     }
+}
+
+class Neighborhood {
+  std::deque<char *>& buffer;
+  int span;
+  int cols;
+  int dim;
+  size_t element_size;
+  int center_i, center_j;
+ public:
+  Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j) :
+    buffer(_buffer), span(_span), cols(_cols), dim(_dim), element_size(_element_size), center_i(_center_i), center_j(_center_j) {}
+
+  std::array<int, 4> range() {
+    if(buffer.empty()) return {0, 0, 0, 0};
+    return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
+  }
+  std::unique_ptr<char[]> get(int i, int j) {
+    i += center_i;
+    if(i < 0 || i >= buffer.size()) {
+      return nullptr;
+    }
+    j += center_j;
+    if(j < 0 || j >= cols) {
+      return nullptr;
+    }
+    char *row = buffer[i];
+    std::unique_ptr<char[]> pixel(new char[dim * element_size]);
+    std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel.get());
+    return pixel;
+  }
+};
+
+template<typename M>
+void mapNeighborhoodBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, M map) {
+  int rows, cols, dim1;
+  is.read((char *) &rows, sizeof(int));
+  is.read((char *) &cols, sizeof(int));
+  is.read((char *) &dim1, sizeof(int));
+  os.write((char *) &rows, sizeof(int));
+  os.write((char *) &cols, sizeof(int));
+  os.write((char *) &dim2, sizeof(int));
+  char *pixel2 = new char[dim2 * element_size2];
+  std::deque<char *> buffer;
+  for(int i = 0; i < span; i++) {
+    char *row = new char[dim1 * element_size1 * cols];
+    is.read((char *) row, dim1 * element_size1);
+    buffer.push_back(row);
+  }
+  for(int i = 0; i < rows; i++)
+    for(int j = 0; j < cols; j++) {
+      char *row = 0;
+      if(i > span) {
+        row = buffer.front();
+        buffer.pop_front();
+      }
+      if(rows - i > span) {
+        if(row == 0) row = new char[dim1 * element_size1 * cols];
+        is.read((char *) row, dim1 * element_size1);
+        buffer.push_back(row);
+      } else if(row != 0) {
+        delete[] row;
+      }
+      map(i, j, rows, cols,
+        Neighborhood(buffer, span, cols, dim1, element_size1, std::min(i, span), j),
+        pixel2, dim2, element_size2);
+      os.write((char *) pixel2, dim2 * element_size2);
+    }
+  while(!buffer.empty()) {
+    char *row = buffer.front();
+    buffer.pop_front();
+    delete[] row;
+  }
 }
 
 template<typename R, typename A>
