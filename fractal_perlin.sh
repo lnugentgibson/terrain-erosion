@@ -53,9 +53,9 @@ do
   let "i=i+1"
   let "f=f*5"
 done
-./remap_bin -i $o.bin -o ${o}_c.bin \
-  `./bin_range -i $o.bin` -t '-1.0' -u 1.0
+#./remap_bin -i $o.bin -o ${o}_c.bin \
+#  `./bin_range -i $o.bin` -t '-1.0' -u 1.0
 ./bin2ppm_sign -i $o.bin -o $o.ppm
 convert $o.ppm $o.png
-./bin2ppm_sign -i ${o}_c.bin -o ${o}_c.ppm
-convert ${o}_c.ppm ${o}_c.png
+#./bin2ppm_sign -i ${o}_c.bin -o ${o}_c.ppm
+#convert ${o}_c.ppm ${o}_c.png

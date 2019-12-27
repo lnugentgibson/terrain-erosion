@@ -8,6 +8,8 @@
 #include <iostream>
 #include <optional>
 
+#include "color.h"
+
 template<typename T, typename C>
 class Grid;
 
@@ -314,34 +316,6 @@ class StandardArrayComponent {
 
   float b(const std::array<float, d>& c) const {
     return d > 2 ? c[2] : 0.0;
-  }
-};
-
-class Color {
-  float r_, g_, b_;
- public:
-  Color() : Color(0, 0, 0) {}
-  Color(float r, float g, float b): r_(r), g_(g), b_(b) {}
-  float r() const {
-    return r_;
-  }
-  void r(float _r) {
-    r_ = _r;
-  }
-  float g() const {
-    return g_;
-  }
-  void g(float _g) {
-    g_ = _g;
-  }
-  float b() const {
-    return b_;
-  }
-  void b(float _b) {
-    b_ = _b;
-  }
-  void print() const {
-    std::cout << "Color(" << r_ << ", " << g_ << ", " << b_ << ")" << std::endl;
   }
 };
 

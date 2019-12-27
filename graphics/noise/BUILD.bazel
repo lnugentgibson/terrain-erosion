@@ -1,0 +1,20 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "random",
+    hdrs = ["random.h"],
+    srcs = ["random.cc"],
+    deps = [
+        "//graphics/color:color",
+    ],
+)
+
+cc_binary(
+    name = "rand_gray",
+    srcs = ["rand_gray.cc"],
+    deps = [
+        ":random",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
