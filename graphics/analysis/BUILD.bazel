@@ -1,0 +1,14 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "normal",
+    hdrs = ["normal.h"],
+)
+
+cc_binary(
+    name = "bin_range",
+    srcs = ["bin_range.cc"],
+    deps = [
+        "//graphics/image/binary:binimg",
+    ],
+)

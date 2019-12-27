@@ -4,10 +4,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "cxxopts.hpp"
-#include "binimg.h"
-#include "color.h"
-#include "random.h"
+#include "cxxopts/cxxopts.h"
+#include "graphics/color/color.h"
+#include "graphics/image/binary/binimg.h"
+#include "graphics/noise/random.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a color image from binary to ppm");

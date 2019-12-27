@@ -1,13 +1,13 @@
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
-#include "cxxopts.hpp"
-#include "binimg.h"
-#include "random.h"
-#include "noise.h"
+#include "cxxopts/cxxopts.h"
+#include "graphics/image/binary/binimg.h"
+#include "graphics/noise/random.h"
 
 struct PerlinState {
   float *row_a;

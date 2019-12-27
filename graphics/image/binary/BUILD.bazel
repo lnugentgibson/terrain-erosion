@@ -4,3 +4,49 @@ cc_library(
     name = "binimg",
     hdrs = ["binimg.h"],
 )
+
+cc_binary(
+    name = "bin2ppm_gray",
+    srcs = ["bin2ppm_gray.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2ppm_sign",
+    srcs = ["bin2ppm_sign.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2ppm_col",
+    srcs = ["bin2ppm_col.cc"],
+    deps = [
+        ":binimg",
+        "//graphics/color:color",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2ppm_vec",
+    srcs = ["bin2ppm_vec.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2ppm_dir",
+    srcs = ["bin2ppm_dir.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)

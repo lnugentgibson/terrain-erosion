@@ -9,9 +9,69 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "noise",
+    hdrs = ["noise.h"],
+    deps = [
+        ":random",
+    ],
+)
+
 cc_binary(
     name = "rand_gray",
     srcs = ["rand_gray.cc"],
+    deps = [
+        ":random",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "rand_col",
+    srcs = ["rand_col.cc"],
+    deps = [
+        ":random",
+        "//graphics/color:color",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "rand_vec",
+    srcs = ["rand_vec.cc"],
+    deps = [
+        ":random",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "rand_dir",
+    srcs = ["rand_vec.cc"],
+    deps = [
+        ":random",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "perlin_val",
+    srcs = ["perlin_val.cc"],
+    deps = [
+        ":random",
+        ":noise",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "perlin_grad",
+    srcs = ["perlin_grad.cc"],
     deps = [
         ":random",
         "//graphics/image/binary:binimg",

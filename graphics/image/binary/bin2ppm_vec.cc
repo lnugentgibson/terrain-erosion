@@ -2,9 +2,8 @@
 #include <cstring>
 #include <iostream>
 
-#include "cxxopts.hpp"
-#include "grid.h"
-#include "random.h"
+#include "cxxopts/cxxopts.h"
+#include "graphics/image/binary/binimg.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a vector image from binary to ppm");
