@@ -2,54 +2,34 @@
 #define RANDOM_H
 
 #include "graphics/color/color.h"
+#include "graphics/image/binary/binimg.h"
 
 float randGray();
 
-void randVector(int dim, float *v);
-
-void randDirection(int dim, float *v);
+class RandomGrayscaleGenerator : public graphics::image::binary::StatelessGenerator {
+ public:
+  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+};
 
 void randCol(Color *c);
 
-/*
-template<typename C>
-void randGrid(Grid<float, C>& grid) {
-  for(int i = 0; i < grid.rows; i++)
-    for(int j = 0; j < grid.cols; j++) {
-      grid.setFirst(i, j, randGray());
-    }
-}
+class RandomColorGenerator : public graphics::image::binary::StatelessGenerator {
+ public:
+  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+};
 
-template<typename C>
-void randGridVector(Grid<float, C>& grid) {
-  for(int i = 0; i < grid.rows; i++)
-    for(int j = 0; j < grid.cols; j++) {
-      float *v = new float[grid.dim];
-      randVector(grid.dim, v);
-      grid.set(i, j, v);
-    }
-}
+void randVector(int dim, float *v);
 
-template<typename C>
-void randGridDirection(Grid<float, C>& grid) {
-  for(int i = 0; i < grid.rows; i++)
-    for(int j = 0; j < grid.cols; j++) {
-      float *v = new float[grid.dim];
-      randDirection(grid.dim, v);
-      grid.set(i, j, v);
-    }
-}
+class RandomVectorGenerator : public graphics::image::binary::StatelessGenerator {
+ public:
+  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+};
 
-template<typename C>
-void randGrid(Grid<Color, C>& grid) {
-  for(int i = 0; i < grid.rows; i++)
-    for(int j = 0; j < grid.cols; j++) {
-      float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-      grid.setFirst(i, j, Color(r, g, b));
-    }
-}
-//*/
+void randDirection(int dim, float *v);
+
+class RandomDirectionGenerator : public graphics::image::binary::StatelessGenerator {
+ public:
+  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+};
 
 #endif // RANDOM_H

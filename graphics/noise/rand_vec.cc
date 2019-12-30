@@ -39,9 +39,8 @@ int main(int argc, char *argv[]) {
     fs << ".bin";
     std::string filename = fs.str();
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
-    generateBin(rows, cols, dim, sizeof(float), ofs, [](int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) -> void {
-      randVector(dim, static_cast<float *>(pixel));
-    });
+    RandomVectorGenerator generator;
+    graphics::image::binary::Generate(rows, cols, 1, sizeof(float), ofs, &generator);
     ofs.close();
   }
   return 0;

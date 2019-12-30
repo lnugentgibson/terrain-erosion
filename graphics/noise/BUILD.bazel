@@ -6,12 +6,14 @@ cc_library(
     srcs = ["random.cc"],
     deps = [
         "//graphics/color:color",
+        "//graphics/image/binary:binimg",
     ],
 )
 
 cc_library(
     name = "noise",
     hdrs = ["noise.h"],
+    srcs = ["noise.cc"],
     deps = [
         ":random",
     ],

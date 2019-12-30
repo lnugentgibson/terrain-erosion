@@ -10,115 +10,9 @@
 #include <memory>
 #include <optional>
 
-template<typename G>
-void generateBin(int rows, int cols, int dim, size_t element_size, std::ostream& os, G generator) {
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      generator(i, j, rows, cols, pixel, dim, element_size);
-      os.write((char *) pixel, dim * element_size);
-    }
-}
-
-template<typename S, typename G>
-void generateStatefulBin(int rows, int cols, int dim, size_t element_size, std::ostream& os, G generator) {
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  S state;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      generator(i, j, rows, cols, pixel, dim, element_size, &state);
-      os.write((char *) pixel, dim * element_size);
-    }
-}
-
-template<typename S, typename G>
-void generateStatefulBin(int rows, int cols, int dim, size_t element_size, std::ostream& os, G generator, S *init) {
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  S *state = init == 0 ? new S() : init;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      generator(i, j, rows, cols, pixel, dim, element_size, state);
-      os.write((char *) pixel, dim * element_size);
-    }
-  if(init == 0) delete state;
-}
-
-template<typename F>
-void forEachBin(size_t element_size, std::istream& is, F func) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      func(i, j, rows, cols, pixel, dim, element_size);
-    }
-}
-
-template<typename S, typename F>
-void forEachStatefulBin(size_t element_size, std::istream& is, F func) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  S state;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      func(i, j, rows, cols, pixel, dim, element_size, &state);
-    }
-}
-
-template<typename M>
-void mapBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, M map) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel1, dim1 * element_size1);
-      map(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2);
-      os.write((char *) pixel2, dim2 * element_size2);
-    }
-}
-
-template<typename S, typename M>
-void mapStatefulBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, M map) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  S state;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel1, dim1 * element_size1);
-      map(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, &state);
-      os.write((char *) pixel2, dim2 * element_size2);
-    }
-}
+namespace graphics {
+namespace image {
+namespace binary {
 
 class Neighborhood {
   std::deque<char *>& buffer;
@@ -128,163 +22,102 @@ class Neighborhood {
   size_t element_size;
   int center_i, center_j;
  public:
-  Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j) :
-    buffer(_buffer), span(_span), cols(_cols), dim(_dim), element_size(_element_size), center_i(_center_i), center_j(_center_j) {}
+  Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j);
 
-  std::array<int, 4> range() {
-    if(buffer.empty()) return {0, 0, 0, 0};
-    return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
-  }
-  char* get(int i, int j) {
-    i += center_i;
-    if(i < 0 || i >= buffer.size()) {
-      return nullptr;
-    }
-    j += center_j;
-    if(j < 0 || j >= cols) {
-      return nullptr;
-    }
-    char *row = buffer[i];
-    char *pixel = new char[dim * element_size];
-    std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel);
-    return pixel;
+  std::array<int, 4> range();
+  char* get(int i, int j);
+};
+
+class Generator {
+ public:
+  virtual void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) = 0;
+  
+  virtual void GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) = 0;
+};
+
+class StatelessGenerator : public Generator {
+ public:
+  virtual void GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) override {
+    this->Generate(i, j, rows, cols, pixel, dim, element_size);
   }
 };
 
-template<typename M>
-void mapNeighborhoodBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, M map) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel2 = new char[dim2 * element_size2];
-  std::deque<char *> buffer;
-  for(int i = 0; i < span; i++) {
-    char *row = new char[dim1 * element_size1 * cols];
-    is.read((char *) row, dim1 * element_size1);
-    buffer.push_back(row);
-  }
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      char *row = 0;
-      if(i > span) {
-        row = buffer.front();
-        buffer.pop_front();
-      }
-      if(rows - i > span) {
-        if(row == 0) row = new char[dim1 * element_size1 * cols];
-        is.read((char *) row, dim1 * element_size1);
-        buffer.push_back(row);
-      } else if(row != 0) {
-        delete[] row;
-      }
-      map(i, j, rows, cols,
-        Neighborhood(buffer, span, cols, dim1, element_size1, std::min(i, span), j),
-        pixel2, dim2, element_size2);
-      os.write((char *) pixel2, dim2 * element_size2);
-    }
-  while(!buffer.empty()) {
-    char *row = buffer.front();
-    buffer.pop_front();
-    delete[] row;
-  }
-}
+void Generate(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator);
 
-template<typename A, typename R>
-A reduceBin(size_t element_size, std::istream& is, R reducer) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
-  A aggregate;
-  int n = 0;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      reducer(i, j, rows, cols, pixel, dim, element_size, n, &aggregate);
-      n++;
-    }
-  return aggregate;
-}
+void *GenerateStateful(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator, void *initial);
 
-template<typename C>
-void combineBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, C combiner) {
-  int rows, cols, dim1;
-  int _rows, _cols, dim2;
-  is1.read((char *) &rows, sizeof(int));
-  is1.read((char *) &cols, sizeof(int));
-  is1.read((char *) &dim1, sizeof(int));
-  is2.read((char *) &_rows, sizeof(int));
-  is2.read((char *) &_cols, sizeof(int));
-  is2.read((char *) &dim2, sizeof(int));
-  if(rows != _rows || cols != _cols) {
-    return;
-  }
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim3, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  char *pixel3 = new char[dim3 * element_size3];
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is1.read((char *) pixel1, dim1 * element_size1);
-      is2.read((char *) pixel2, dim2 * element_size2);
-      combiner(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, pixel3, dim3, element_size3);
-      os.write((char *) pixel3, dim3 * element_size3);
-    }
-}
+class Functor {
+ public:
+  virtual void Do(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size) = 0;
+  
+  virtual void DoStateful(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, void *state) = 0;
+};
 
-template<typename S, typename C>
-void combineStatefulBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, C combiner) {
-  int rows, cols, dim1;
-  int _rows, _cols, dim2;
-  is1.read((char *) &rows, sizeof(int));
-  is1.read((char *) &cols, sizeof(int));
-  is1.read((char *) &dim1, sizeof(int));
-  is2.read((char *) &_rows, sizeof(int));
-  is2.read((char *) &_cols, sizeof(int));
-  is2.read((char *) &dim2, sizeof(int));
-  if(rows != _rows || cols != _cols) {
-    return;
-  }
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim3, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  char *pixel3 = new char[dim3 * element_size3];
-  S state;
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is1.read((char *) pixel1, dim1 * element_size1);
-      is2.read((char *) pixel2, dim2 * element_size2);
-      combiner(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, pixel3, dim3, element_size3, &state);
-      os.write((char *) pixel3, dim3 * element_size3);
-    }
-}
+void ForEach(size_t element_size, std::istream& is, Functor *functor);
 
-template<typename C>
-void ppmBin(size_t element_size, std::istream& is, std::ostream& os, C component) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  os << "P6\n" << cols << " " << rows << "\n255\n";
-  char *pixel = new char[dim * element_size];
-  float *rgb = new float[3];
-  for(int i = 0; i < rows; i++)
-    for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      component(pixel, dim, element_size, rgb);
-      os << (unsigned char)(std::max(float(0), std::min(float(1), rgb[0])) * 255) <<
-             (unsigned char)(std::max(float(0), std::min(float(1), rgb[1])) * 255) <<
-             (unsigned char)(std::max(float(0), std::min(float(1), rgb[2])) * 255);
-    }
-}
+void *ForEachStateful(size_t element_size, std::istream& is, Functor *func, void *initial);
+
+class Transformer {
+ public:
+  virtual void Transform(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2) = 0;
+  
+  virtual void TransformStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2,
+    void *state) = 0;
+  
+  virtual void TransformNeighborhood(
+    int i, int j, int rows, int cols,
+    Neighborhood&& neighborhood,
+    void *pixel2, int dim2, size_t element_size2) = 0;
+};
+
+void mapBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
+
+void *mapStatefulBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
+
+void mapNeighborhoodBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, Transformer *map);
+
+class Accumulator {
+ public:
+  virtual void Aggregate(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, int n, void *aggregate) = 0;
+};
+
+void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *initial);
+
+class Combiner {
+ public:
+  virtual void Combine(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    const void *pixel2, int dim2, size_t element_size2,
+    void *pixel3, int dim3, size_t element_size3) = 0;
+    
+  virtual void CombineStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    const void *pixel2, int dim2, size_t element_size2,
+    void *pixel3, int dim3, size_t element_size3,
+    void *state) = 0;
+};
+
+void CombineBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
+
+void *CombineStateful(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
+
+class Colorizer {
+ public:
+  virtual void ToRGB(const void *pixel, int dim, size_t element_size, float *rgb) = 0;
+};
+
+void ToPPM(size_t element_size, std::istream& is, std::ostream& os, Colorizer *component);
+
+} // namespace binary
+} // namespace image
+} // namespace graphics
 
 #endif // BINIMG_H

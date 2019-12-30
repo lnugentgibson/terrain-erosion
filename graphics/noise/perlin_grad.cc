@@ -10,15 +10,6 @@
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
-struct PerlinState {
-  float *row_a;
-  float *row_b;
-  int cur;
-  int row;
-  float min_val;
-  float max_val;
-};
-
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a color image from binary to ppm");
   options.add_options()
@@ -52,6 +43,7 @@ int main(int argc, char *argv[]) {
     std::string filename = fs.str();
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
     PerlinState init;
+    init.cell_size = cell_size;
     int row_size = static_cast<int>(ceil(cols / cell_size + 1));
     init.row_a = new float[2 * row_size];
     init.row_b = new float[2 * row_size];
@@ -64,50 +56,8 @@ int main(int argc, char *argv[]) {
       init.row_a[2 * i + 1] = y / m;
     }
     init.row = -1;
-    generateStatefulBin<PerlinState>(rows, cols, 1, sizeof(float), ofs, [cell_size, row_size](int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, PerlinState *state) -> void {
-      int row = static_cast<int>(floor(i / cell_size));
-      int col = static_cast<int>(floor(j / cell_size));
-      if(j == 0 && row != state->row) {
-        float *row = state->cur == 0 ? state->row_a : state->row_b;
-        for(int i = 0; i < row_size; i++) {
-          float x = randGray() * 2 - 1;
-          float y = randGray() * 2 - 1;
-          float m = sqrt(x * x + y * y);
-          row[2 * i] = x / m;
-          row[2 * i + 1] = y / m;
-        }
-        state->cur = 1 - state->cur;
-      }
-      state->row = row;
-      float *base_row = state->cur == 0 ? state->row_a : state->row_b;
-      float *next_row = state->cur == 1 ? state->row_a : state->row_b;
-      float *nn = base_row + 2 * col;
-      float *xn = base_row + 2 * col + 2;
-      float *nx = next_row + 2 * col;
-      float *xx = next_row + 2 * col + 2;
-      float y = curve3((i - row * cell_size) / cell_size);
-      float _y = 1 - y;
-      float Y = curve3(y);
-      float _Y = 1 - Y;
-      float x = curve3((j - col * cell_size) / cell_size);
-      float _x = 1 - x;
-      float X = curve3(x);
-      float _X = 1 - X;
-      float nnv = nn[0] * x + nn[1] * y;
-      float xnv = -xn[0] * _x + xn[1] * y;
-      float nxv = nx[0] * x - nx[1] * _y;
-      float xxv = -xx[0] * _x - xx[1] * _y;
-      float v = _X * _Y * nnv + X * _Y * xnv + _X * Y * nxv + X * Y * xxv;
-      if(i == 0 && j == 0) {
-        state->min_val = v;
-        state->max_val = v;
-      } else {
-        if(v < state->min_val) state->min_val = v;
-        if(v > state->max_val) state->max_val = v;
-      }
-      *static_cast<float *>(pixel) = v;
-      //*static_cast<float *>(pixel) = nn[0] * 0.5 + 0.5;
-    }, &init);
+    PerlinValueGenerator generator;
+    graphics::image::binary::GenerateStateful(rows, cols, 1, sizeof(float), ofs, &generator, &init);
     ofs.close();
     std::stringstream fsc;
     fsc << result["o"].as<std::string>();

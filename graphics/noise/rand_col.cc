@@ -37,9 +37,8 @@ int main(int argc, char *argv[]) {
     fs << ".bin";
     std::string filename = fs.str();
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
-    generateBin(rows, cols, 1, sizeof(Color), ofs, [](int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) -> void {
-      randCol(static_cast<Color *>(pixel));
-    });
+    RandomColorGenerator generator;
+    graphics::image::binary::Generate(rows, cols, 1, sizeof(float), ofs, &generator);
     ofs.close();
   }
   return 0;
