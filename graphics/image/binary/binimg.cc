@@ -13,6 +13,29 @@ namespace graphics {
 namespace image {
 namespace binary {
 
+Neighborhood::Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j) :
+  buffer(_buffer), span(_span), cols(_cols), dim(_dim), element_size(_element_size), center_i(_center_i), center_j(_center_j) {}
+
+std::array<int, 4> Neighborhood::range() {
+  if(buffer.empty()) return {0, 0, 0, 0};
+  return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
+}
+
+char *Neighborhood::get(int i, int j) {
+  i += center_i;
+  if(i < 0 || i >= (int) buffer.size()) {
+    return nullptr;
+  }
+  j += center_j;
+  if(j < 0 || j >= cols) {
+    return nullptr;
+  }
+  char *row = buffer[i];
+  char *pixel = new char[dim * element_size];
+  std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel);
+  return pixel;
+}
+
 void Generate(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator) {
   os.write((char *) &rows, sizeof(int));
   os.write((char *) &cols, sizeof(int));
@@ -105,29 +128,6 @@ void *MapStateful(size_t element_size1, std::istream& is, size_t element_size2, 
       os.write((char *) pixel2, dim2 * element_size2);
     }
   return state;
-}
-
-Neighborhood::Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j) :
-  buffer(_buffer), span(_span), cols(_cols), dim(_dim), element_size(_element_size), center_i(_center_i), center_j(_center_j) {}
-
-std::array<int, 4> Neighborhood::range() {
-  if(buffer.empty()) return {0, 0, 0, 0};
-  return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
-}
-
-char *Neighborhood::get(int i, int j) {
-  i += center_i;
-  if(i < 0 || i >= (int) buffer.size()) {
-    return nullptr;
-  }
-  j += center_j;
-  if(j < 0 || j >= cols) {
-    return nullptr;
-  }
-  char *row = buffer[i];
-  char *pixel = new char[dim * element_size];
-  std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel);
-  return pixel;
 }
 
 void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, Transformer *map) {

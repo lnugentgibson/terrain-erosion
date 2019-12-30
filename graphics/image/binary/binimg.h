@@ -16,10 +16,12 @@ namespace binary {
 
 class Neighborhood {
   std::deque<char *>& buffer;
-  int span;
-  int cols;
-  int dim;
-  size_t element_size;
+ public:
+  const int span;
+  const int cols;
+  const int dim;
+  const size_t element_size;
+ private:
   int center_i, center_j;
  public:
   Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j);
@@ -38,7 +40,7 @@ class Generator {
 class StatelessGenerator : public Generator {
  public:
   virtual void GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) override {
-    this->Generate(i, j, rows, cols, pixel, dim, element_size);
+    Generate(i, j, rows, cols, pixel, dim, element_size);
   }
 };
 
@@ -51,6 +53,13 @@ class Functor {
   virtual void Do(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size) = 0;
   
   virtual void DoStateful(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, void *state) = 0;
+};
+
+class StatelessFunctor : public Functor {
+ public:
+  virtual void DoStateful(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, void *state) override {
+    Do(i, j, rows, cols, pixel, dim, element_size);
+  }
 };
 
 void ForEach(size_t element_size, std::istream& is, Functor *functor);
@@ -74,6 +83,49 @@ class Transformer {
     int i, int j, int rows, int cols,
     Neighborhood&& neighborhood,
     void *pixel2, int dim2, size_t element_size2) = 0;
+};
+
+class StatelessTransformer : public Transformer {
+ public:
+  virtual void TransformStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2,
+    void *state) override {
+      Transform(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2);
+    }
+};
+
+class PixelTransformer : public Transformer {
+ public:
+  virtual void TransformNeighborhood(
+    int i, int j, int rows, int cols,
+    Neighborhood&& neighborhood,
+    void *pixel2, int dim2, size_t element_size2) override {
+      char *pixel1 = neighborhood.get(0, 0);
+      Transform(i, j, rows, cols, pixel1, neighborhood.dim, neighborhood.element_size, pixel2, dim2, element_size2);
+      delete[] pixel1;
+    };
+};
+
+class SimpleTransformer : public Transformer {
+ public:
+  virtual void TransformStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2,
+    void *state) override {
+      Transform(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2);
+    }
+  
+  virtual void TransformNeighborhood(
+    int i, int j, int rows, int cols,
+    Neighborhood&& neighborhood,
+    void *pixel2, int dim2, size_t element_size2) override {
+      char *pixel1 = neighborhood.get(0, 0);
+      Transform(i, j, rows, cols, pixel1, neighborhood.dim, neighborhood.element_size, pixel2, dim2, element_size2);
+      delete[] pixel1;
+    };
 };
 
 void mapBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
@@ -103,6 +155,18 @@ class Combiner {
     const void *pixel2, int dim2, size_t element_size2,
     void *pixel3, int dim3, size_t element_size3,
     void *state) = 0;
+};
+
+class StatelessCombiner : public Combiner {
+ public:
+  virtual void CombineStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    const void *pixel2, int dim2, size_t element_size2,
+    void *pixel3, int dim3, size_t element_size3,
+    void *state) override {
+      Combine(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, pixel3, dim3, element_size3);
+    }
 };
 
 void CombineBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
