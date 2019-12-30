@@ -10,5 +10,16 @@ cc_binary(
     srcs = ["bin_range.cc"],
     deps = [
         "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "calc_norm",
+    srcs = ["calc_norm.cc"],
+    deps = [
+        ":normal",
+        "//graphics/image/binary:binimg",
+        "//cxxopts:cxxopts",
     ],
 )

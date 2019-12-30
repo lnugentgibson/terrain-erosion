@@ -135,7 +135,7 @@ class Neighborhood {
     if(buffer.empty()) return {0, 0, 0, 0};
     return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
   }
-  std::unique_ptr<char[]> get(int i, int j) {
+  char* get(int i, int j) {
     i += center_i;
     if(i < 0 || i >= buffer.size()) {
       return nullptr;
@@ -145,8 +145,8 @@ class Neighborhood {
       return nullptr;
     }
     char *row = buffer[i];
-    std::unique_ptr<char[]> pixel(new char[dim * element_size]);
-    std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel.get());
+    char *pixel = new char[dim * element_size];
+    std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel);
     return pixel;
   }
 };
@@ -193,7 +193,7 @@ void mapNeighborhoodBin(size_t element_size1, std::istream& is, size_t element_s
   }
 }
 
-template<typename R, typename A>
+template<typename A, typename R>
 A reduceBin(size_t element_size, std::istream& is, R reducer) {
   int rows, cols, dim;
   is.read((char *) &rows, sizeof(int));
@@ -205,7 +205,7 @@ A reduceBin(size_t element_size, std::istream& is, R reducer) {
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
       is.read((char *) pixel, dim * element_size);
-      reducer(i, j, rows, cols, pixel, dim, element_size, n, aggregate);
+      reducer(i, j, rows, cols, pixel, dim, element_size, n, &aggregate);
       n++;
     }
   return aggregate;

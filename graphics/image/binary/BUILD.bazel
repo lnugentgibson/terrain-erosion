@@ -50,3 +50,21 @@ cc_binary(
         "//cxxopts:cxxopts",
     ],
 )
+
+cc_binary(
+    name = "add_bin",
+    srcs = ["add_bin.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "remap_bin",
+    srcs = ["remap_bin.cc"],
+    deps = [
+        ":binimg",
+        "//cxxopts:cxxopts",
+    ],
+)

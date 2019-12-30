@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   ppmBin(sizeof(float), ifs, ofs, [](void *pixel, int dim, size_t element_size, float *rgb) -> void {
-    rgb[0] = static_cast<float *>(pixel)[0];
-    rgb[1] = dim > 0 ? static_cast<float *>(pixel)[1] : 0.0;
-    rgb[2] = dim > 1 ? static_cast<float *>(pixel)[2] : 0.0;
+    rgb[0] = static_cast<float *>(pixel)[0] * 0.5 + 0.5;
+    rgb[1] = dim > 0 ? static_cast<float *>(pixel)[1] * 0.5 + 0.5 : 0.5;
+    rgb[2] = dim > 1 ? static_cast<float *>(pixel)[2] * 0.5 + 0.5 : 0.5;
   });
   return 0;
 }

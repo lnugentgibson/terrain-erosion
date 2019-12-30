@@ -12,7 +12,12 @@ int main(int argc, char *argv[]) {
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
-  auto grid = readBin<float, SignedGrayscaleComponent>(result["i"].as<std::string>().c_str());
-  grid.savePpm(result["o"].as<std::string>().c_str());
+  std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
+  std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
+  ppmBin(sizeof(float), ifs, ofs, [](void *pixel, int dim, size_t element_size, float *rgb) -> void {
+    rgb[0] = *static_cast<float *>(pixel) * 0.5 + 0.5;
+    rgb[1] = *static_cast<float *>(pixel) * 0.5 + 0.5;
+    rgb[2] = *static_cast<float *>(pixel) * 0.5 + 0.5;
+  });
   return 0;
 }

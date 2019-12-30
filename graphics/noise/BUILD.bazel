@@ -50,7 +50,7 @@ cc_binary(
 
 cc_binary(
     name = "rand_dir",
-    srcs = ["rand_vec.cc"],
+    srcs = ["rand_dir.cc"],
     deps = [
         ":random",
         "//graphics/image/binary:binimg",
@@ -74,6 +74,7 @@ cc_binary(
     srcs = ["perlin_grad.cc"],
     deps = [
         ":random",
+        ":noise",
         "//graphics/image/binary:binimg",
         "//cxxopts:cxxopts",
     ],

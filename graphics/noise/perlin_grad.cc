@@ -8,6 +8,7 @@
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
 #include "graphics/noise/random.h"
+#include "graphics/noise/noise.h"
 
 struct PerlinState {
   float *row_a;
