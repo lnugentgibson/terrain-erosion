@@ -128,11 +128,11 @@ class SimpleTransformer : public Transformer {
     };
 };
 
-void mapBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
+void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
 
-void *mapStatefulBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
+void *MapStateful(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);
 
-void mapNeighborhoodBin(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, Transformer *map);
+void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, Transformer *map);
 
 class Accumulator {
  public:
@@ -169,7 +169,7 @@ class StatelessCombiner : public Combiner {
     }
 };
 
-void CombineBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
+void Combine(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
 
 void *CombineStateful(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
 

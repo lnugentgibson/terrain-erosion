@@ -90,7 +90,6 @@ void *ForEachStateful(size_t element_size, std::istream& is, Functor *functor, v
   return state;
 }
 
-template<typename M>
 void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map) {
   int rows, cols, dim1;
   is.read((char *) &rows, sizeof(int));
@@ -109,7 +108,6 @@ void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2,
     }
 }
 
-template<typename S, typename M>
 void *MapStateful(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map, void *initial) {
   int rows, cols, dim1;
   is.read((char *) &rows, sizeof(int));
@@ -188,7 +186,7 @@ void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *
   return aggregate;
 }
 
-void combineBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner) {
+void Combine(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner) {
   int rows, cols, dim1;
   int _rows, _cols, dim2;
   is1.read((char *) &rows, sizeof(int));

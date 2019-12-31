@@ -25,9 +25,9 @@ void PerlinValueGenerator::Generate(int i, int j, int rows, int cols, void *pixe
 
 void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) {
   PerlinState *perlin_state = static_cast<PerlinState*>(state);
-  int row = static_cast<int>(floor(i / perlin_state->cell_size));
-  int col = static_cast<int>(floor(j / perlin_state->cell_size));
-  int row_size = static_cast<int>(ceil(cols / perlin_state->cell_size + 1));
+  int row = static_cast<int>(floor(i / cell_size));
+  int col = static_cast<int>(floor(j / cell_size));
+  int row_size = static_cast<int>(ceil(cols / cell_size + 1));
   if(j == 0 && row != perlin_state->row) {
     float *row = perlin_state->cur == 0 ? perlin_state->row_a : perlin_state->row_b;
     for(int i = 0; i < row_size; i++) {
@@ -43,10 +43,10 @@ void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, vo
   float xn = base_row[col + 1];
   float nx = next_row[col];
   float xx = next_row[col + 1];
-  float y = curve3((i - row * perlin_state->cell_size) / perlin_state->cell_size);
+  float y = curve3((i - row * cell_size) / cell_size);
   float Y = curve3(y);
   float _Y = 1 - Y;
-  float x = curve3((j - col * perlin_state->cell_size) / perlin_state->cell_size);
+  float x = curve3((j - col * cell_size) / cell_size);
   float X = curve3(x);
   float _X = 1 - X;
   float v = _X * _Y * nn + X * _Y * xn + _X * Y * nx + X * Y * xx;
@@ -65,9 +65,9 @@ void PerlinGradientGenerator::Generate(int i, int j, int rows, int cols, void *p
 
 void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) {
   PerlinState *perlin_state = static_cast<PerlinState*>(state);
-  int row = static_cast<int>(floor(i / perlin_state->cell_size));
-  int col = static_cast<int>(floor(j / perlin_state->cell_size));
-  int row_size = static_cast<int>(ceil(cols / perlin_state->cell_size + 1));
+  int row = static_cast<int>(floor(i / cell_size));
+  int col = static_cast<int>(floor(j / cell_size));
+  int row_size = static_cast<int>(ceil(cols / cell_size + 1));
   if(j == 0 && row != perlin_state->row) {
     float *row = perlin_state->cur == 0 ? perlin_state->row_a : perlin_state->row_b;
     for(int i = 0; i < row_size; i++) {
@@ -86,11 +86,11 @@ void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols,
   float *xn = base_row + 2 * col + 2;
   float *nx = next_row + 2 * col;
   float *xx = next_row + 2 * col + 2;
-  float y = curve3((i - row * perlin_state->cell_size) / perlin_state->cell_size);
+  float y = curve3((i - row * cell_size) / cell_size);
   float _y = 1 - y;
   float Y = curve3(y);
   float _Y = 1 - Y;
-  float x = curve3((j - col * perlin_state->cell_size) / perlin_state->cell_size);
+  float x = curve3((j - col * cell_size) / cell_size);
   float _x = 1 - x;
   float X = curve3(x);
   float _X = 1 - X;

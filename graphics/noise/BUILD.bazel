@@ -67,6 +67,7 @@ cc_binary(
         ":random",
         ":noise",
         "//graphics/image/binary:binimg",
+        "//graphics/image/binary:scaling_transformer",
         "//cxxopts:cxxopts",
     ],
 )
@@ -78,6 +79,7 @@ cc_binary(
         ":random",
         ":noise",
         "//graphics/image/binary:binimg",
+        "//graphics/image/binary:scaling_transformer",
         "//cxxopts:cxxopts",
     ],
 )

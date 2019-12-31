@@ -1,14 +1,28 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "normal",
-    hdrs = ["normal.h"],
+    name = "differential",
+    hdrs = ["differential.h"],
+    srcs = ["differential.cc"],
+    deps = [
+        "//graphics/image/binary:binimg",
+    ],
+)
+
+cc_library(
+    name = "min_max",
+    hdrs = ["min_max.h"],
+    srcs = ["min_max.cc"],
+    deps = [
+        "//graphics/image/binary:binimg",
+    ],
 )
 
 cc_binary(
     name = "bin_range",
     srcs = ["bin_range.cc"],
     deps = [
+        ":min_max",
         "//graphics/image/binary:binimg",
         "//cxxopts:cxxopts",
     ],
@@ -18,7 +32,7 @@ cc_binary(
     name = "calc_norm",
     srcs = ["calc_norm.cc"],
     deps = [
-        ":normal",
+        ":differential",
         "//graphics/image/binary:binimg",
         "//cxxopts:cxxopts",
     ],

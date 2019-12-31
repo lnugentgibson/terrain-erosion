@@ -7,6 +7,7 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
+#include "graphics/image/binary/scaling_transformer.h"
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[]) {
       init.row_a[i] = v;
     }
     init.row = -1;
-    PerlinValueGenerator generator;
+    PerlinValueGenerator generator(cell_size);
     graphics::image::binary::GenerateStateful(rows, cols, 1, sizeof(float), ofs, &generator, &init);
     ofs.close();
     std::stringstream fsc;
@@ -67,10 +68,8 @@ int main(int argc, char *argv[]) {
     std::string filenamec = fsc.str();
     std::ifstream ifsc(filename, std::ios::in | std::ios::binary);
     std::ofstream ofsc(filenamec, std::ios::out | std::ios::binary);
-    float range = init.max_val - init.min_val;
-    mapBin(sizeof(float), ifsc, sizeof(float), 1, ofsc, [init, range](int i, int j, int rows, int cols, void *pixel1, int dim1, size_t element_size1, void *pixel2, int dim2, size_t element_size2) -> void {
-      *static_cast<float *>(pixel2) = (static_cast<float *>(pixel1)[0] - init.min_val) / range * 2.0 - 1.0;
-    });
+    graphics::image::binary::ScalingTransformer transformer(init.min_val, init.max_val, -1.0, 1.0);
+    graphics::image::binary::Map(sizeof(float), ifsc, sizeof(float), 1, ofsc, &transformer);
     ifsc.close();
     ofsc.close();
   }

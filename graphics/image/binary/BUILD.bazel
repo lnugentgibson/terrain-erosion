@@ -6,6 +6,15 @@ cc_library(
     srcs = ["binimg.cc"],
 )
 
+cc_library(
+    name = "scaling_transformer",
+    hdrs = ["scaling_transformer.h"],
+    srcs = ["scaling_transformer.cc"],
+    deps = [
+        ":binimg",
+    ],
+)
+
 cc_binary(
     name = "bin2ppm_gray",
     srcs = ["bin2ppm_gray.cc"],
@@ -66,6 +75,7 @@ cc_binary(
     srcs = ["remap_bin.cc"],
     deps = [
         ":binimg",
+        ":scaling_transformer",
         "//cxxopts:cxxopts",
     ],
 )
