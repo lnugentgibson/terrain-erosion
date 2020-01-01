@@ -134,17 +134,21 @@ class TransformerBuilder {
   TransformerBuilder() = default;
   virtual ~TransformerBuilder() = default;
   virtual std::unique_ptr<Transformer> operator ()() = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
 };
+
+typedef std::unique_ptr<TransformerBuilder> (*TransformerBuilderInstanceGenerator)();
 
 class TransformerFactory {
  public:
-  using TransformerBuilderCreateFunction = std::unique_ptr<TransformerBuilder>(*)();
-  
-  TransformerFactory() = delete;
-  static bool Register(const std::string name, TransformerBuilderCreateFunction create_function);
-  static std::unique_ptr<TransformerBuilder> Create(const std::string& name);
+  bool Register(const std::string name, TransformerBuilderInstanceGenerator create_function);
+  std::unique_ptr<TransformerBuilder> Create(const std::string& name);
+	static TransformerFactory& get();
  private:
-  static std::map<std::string, TransformerBuilderCreateFunction> create_functions;
+  TransformerFactory() {}
+  ~TransformerFactory() {}
+  
+  std::map<std::string, TransformerBuilderInstanceGenerator> create_functions;
 };
 
 void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);

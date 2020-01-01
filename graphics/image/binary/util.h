@@ -5,6 +5,7 @@
 
 #include "graphics/color/color.h"
 #include "graphics/image/binary/binimg.h"
+#include "graphics/image/binary/binimg_registration.h"
 
 namespace graphics {
 namespace image {
@@ -23,22 +24,10 @@ class ScalingTransformer : public SimpleTransformer {
 class ScalingTransformerBuilder : public TransformerBuilder {
   float fn, fx, tn, tx;
  public:
-  void setRange(float _fn, float _fx, float _tn, float _tx) {
-    fn = _fn;
-    fx = _fx;
-    tn = _tn;
-    tx = _tx;
-  }
   std::unique_ptr<Transformer> operator ()() override {
-    if(!registered) return nullptr;
     return std::unique_ptr<Transformer>(new ScalingTransformer(fn, fx, tn, tx));
   }
-  static std::unique_ptr<TransformerBuilder> Create() {
-   return std::unique_ptr<TransformerBuilder>(new ScalingTransformerBuilder());
-  }
-  static std::string GetFactoryName() { return "ScalingTransformer"; }
- private:
-  static bool registered;
+  bool SetFloatParam(const std::string& param, float value) override;
 };
 
 class MinMax : public image::binary::Accumulator {

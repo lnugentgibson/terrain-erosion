@@ -90,7 +90,7 @@ void *ForEachStateful(size_t element_size, std::istream& is, Functor *functor, v
   return state;
 }
 
-bool TransformerFactory::Register(const std::string name, TransformerBuilderCreateFunction create_function) {
+bool TransformerFactory::Register(const std::string name, TransformerBuilderInstanceGenerator create_function) {
   auto it = TransformerFactory::create_functions.find(name);
   if(it == TransformerFactory::create_functions.end())
   {
@@ -105,6 +105,12 @@ std::unique_ptr<TransformerBuilder> TransformerFactory::Create(const std::string
   if(it != TransformerFactory::create_functions.end()) 
     return it->second();
   return nullptr;
+}
+
+TransformerFactory& TransformerFactory::get()
+{
+	static TransformerFactory instance;
+	return instance;
 }
 
 void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map) {

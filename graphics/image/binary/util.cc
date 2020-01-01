@@ -11,9 +11,29 @@ void ScalingTransformer::Transform(
   *static_cast<float *>(pixel2) = (static_cast<const float *>(pixel1)[0] - from_min) / from_range * to_range + to_min;
 }
 
-bool ScalingTransformerBuilder::registered =
-  TransformerFactory::Register(ScalingTransformerBuilder::GetFactoryName(),   
-                                     ScalingTransformerBuilder::Create);
+bool ScalingTransformerBuilder::SetFloatParam(const std::string& param, float value) {
+  if(param == "fn") {
+    fn = value;
+    return true;
+  }
+  if(param == "fx") {
+    fx = value;
+    return true;
+  }
+  if(param == "tn") {
+    tn = value;
+    return true;
+  }
+  if(param == "tx") {
+    tx = value;
+    return true;
+  }
+  return false;
+}
+
+namespace TransformerRegistrations {
+	TransformerFactoryRegistration<ScalingTransformerBuilder> _ScalingTransformerBuilder("ScalingTransformer");
+}
 
 void MinMax::Aggregate(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, int n, void *aggregate) {
   float v = static_cast<const float *>(pixel)[0];
