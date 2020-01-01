@@ -9,21 +9,12 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "min_max",
-    hdrs = ["min_max.h"],
-    srcs = ["min_max.cc"],
-    deps = [
-        "//graphics/image/binary:binimg",
-    ],
-)
-
 cc_binary(
     name = "bin_range",
     srcs = ["bin_range.cc"],
     deps = [
-        ":min_max",
         "//graphics/image/binary:binimg",
+        "//graphics/image/binary:util",
         "//cxxopts:cxxopts",
     ],
 )

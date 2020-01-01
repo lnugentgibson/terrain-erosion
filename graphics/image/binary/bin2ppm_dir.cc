@@ -4,16 +4,7 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-
-class DirectionColorizer : public graphics::image::binary::Colorizer {
- public:
-  void ToRGB(const void *pixel, int dim, size_t element_size, float *rgb) override {
-    auto *v = static_cast<const float*>(pixel);
-    rgb[0] = *v * 0.5 + 0.5;
-    rgb[1] = dim > 0 ? *v * 0.5 + 0.5 : 0.5;
-    rgb[2] = dim > 1 ? *v * 0.5 + 0.5 : 0.5;
-  }
-};
+#include "graphics/image/binary/util.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a normal image from binary to ppm");
@@ -24,7 +15,7 @@ int main(int argc, char *argv[]) {
   auto result = options.parse(argc, argv);
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  DirectionColorizer colorizer;
+  graphics::image::binary::DirectionColorizer colorizer;
   graphics::image::binary::ToPPM(sizeof(float), ifs, ofs, &colorizer);
   ifs.close();
   ofs.close();

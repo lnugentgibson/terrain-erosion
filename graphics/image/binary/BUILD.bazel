@@ -4,14 +4,17 @@ cc_library(
     name = "binimg",
     hdrs = ["binimg.h"],
     srcs = ["binimg.cc"],
+    alwayslink = 1,
 )
 
 cc_library(
-    name = "scaling_transformer",
-    hdrs = ["scaling_transformer.h"],
-    srcs = ["scaling_transformer.cc"],
+    name = "util",
+    hdrs = ["util.h"],
+    srcs = ["util.cc"],
+    alwayslink = 1,
     deps = [
         ":binimg",
+        "//graphics/color:color",
     ],
 )
 
@@ -20,6 +23,7 @@ cc_binary(
     srcs = ["bin2ppm_gray.cc"],
     deps = [
         ":binimg",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -29,6 +33,7 @@ cc_binary(
     srcs = ["bin2ppm_sign.cc"],
     deps = [
         ":binimg",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -38,7 +43,7 @@ cc_binary(
     srcs = ["bin2ppm_col.cc"],
     deps = [
         ":binimg",
-        "//graphics/color:color",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -48,6 +53,7 @@ cc_binary(
     srcs = ["bin2ppm_vec.cc"],
     deps = [
         ":binimg",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -57,6 +63,7 @@ cc_binary(
     srcs = ["bin2ppm_dir.cc"],
     deps = [
         ":binimg",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -66,6 +73,7 @@ cc_binary(
     srcs = ["add_bin.cc"],
     deps = [
         ":binimg",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )
@@ -75,7 +83,7 @@ cc_binary(
     srcs = ["remap_bin.cc"],
     deps = [
         ":binimg",
-        ":scaling_transformer",
+        ":util",
         "//cxxopts:cxxopts",
     ],
 )

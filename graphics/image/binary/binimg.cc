@@ -90,6 +90,23 @@ void *ForEachStateful(size_t element_size, std::istream& is, Functor *functor, v
   return state;
 }
 
+bool TransformerFactory::Register(const std::string name, TransformerBuilderCreateFunction create_function) {
+  auto it = TransformerFactory::create_functions.find(name);
+  if(it == TransformerFactory::create_functions.end())
+  {
+    TransformerFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<TransformerBuilder> TransformerFactory::Create(const std::string& name) {
+  auto it = TransformerFactory::create_functions.find(name);
+  if(it != TransformerFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
 void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map) {
   int rows, cols, dim1;
   is.read((char *) &rows, sizeof(int));

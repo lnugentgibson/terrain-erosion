@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <optional>
 
@@ -126,6 +127,24 @@ class SimpleTransformer : public Transformer {
       Transform(i, j, rows, cols, pixel1, neighborhood.dim, neighborhood.element_size, pixel2, dim2, element_size2);
       delete[] pixel1;
     };
+};
+
+class TransformerBuilder {
+ public:
+  TransformerBuilder() = default;
+  virtual ~TransformerBuilder() = default;
+  virtual std::unique_ptr<Transformer> operator ()() = 0;
+};
+
+class TransformerFactory {
+ public:
+  using TransformerBuilderCreateFunction = std::unique_ptr<TransformerBuilder>(*)();
+  
+  TransformerFactory() = delete;
+  static bool Register(const std::string name, TransformerBuilderCreateFunction create_function);
+  static std::unique_ptr<TransformerBuilder> Create(const std::string& name);
+ private:
+  static std::map<std::string, TransformerBuilderCreateFunction> create_functions;
 };
 
 void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map);

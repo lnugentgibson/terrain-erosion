@@ -4,7 +4,7 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-#include "graphics/image/binary/scaling_transformer.h"
+#include "graphics/image/binary/util.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a grayscale image from binary to ppm");
@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) {
   float tx = result["u"].as<float>();
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  graphics::image::binary::ScalingTransformer transformer(fn, fx, tn, tx);
-  graphics::image::binary::Map(sizeof(float), ifs, sizeof(float), 1, ofs, &transformer);
+  auto builder = graphics::image::binary::TransformerFactory::Create("ScalingTransformer");
+  static_cast<graphics::image::binary::ScalingTransformerBuilder*>(builder.get())->setRange(fn, fx, tn, tx);
+  auto transformer = (*builder)();
+  graphics::image::binary::Map(sizeof(float), ifs, sizeof(float), 1, ofs, transformer.get());
   ifs.close();
   ofs.close();
   return 0;

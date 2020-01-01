@@ -7,7 +7,7 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-#include "graphics/image/binary/scaling_transformer.h"
+#include "graphics/image/binary/util.h"
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
     std::string filename = fs.str();
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
     PerlinState init;
-    init.cell_size = cell_size;
     int row_size = static_cast<int>(ceil(cols / cell_size + 1));
     init.row_a = new float[2 * row_size];
     init.row_b = new float[2 * row_size];
