@@ -4,8 +4,10 @@ cc_library(
     name = "differential",
     hdrs = ["differential.h"],
     srcs = ["differential.cc"],
+    alwayslink = 1,
     deps = [
         "//graphics/image/binary:binimg",
+        "//graphics/image/binary:binimg_registration",
     ],
 )
 

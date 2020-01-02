@@ -4,7 +4,6 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-#include "graphics/image/binary/util.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a normal image from binary to ppm");
@@ -15,8 +14,9 @@ int main(int argc, char *argv[]) {
   auto result = options.parse(argc, argv);
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  graphics::image::binary::ColorColorizer colorizer;
-  graphics::image::binary::ToPPM(sizeof(float), ifs, ofs, &colorizer);
+  auto builder = graphics::image::binary::ColorizerFactory::get().Create("ColorColorizer");
+  auto colorizer = (*builder)();
+  graphics::image::binary::ToPPM(sizeof(float), ifs, ofs, colorizer.get());
   ifs.close();
   ofs.close();
   return 0;

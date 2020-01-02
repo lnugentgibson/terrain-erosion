@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "graphics/noise/random.h"
+#include "graphics/image/binary/binimg_registration.h"
 
 float curve1(float x) {
   return x;
@@ -61,6 +62,14 @@ void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, vo
   //*static_cast<float *>(pixel) = nn[0] * 0.5 + 0.5;
 }
 
+bool PerlinValueGeneratorBuilder::SetIntParam(const std::string& param, int value) {
+  if(param == "cell_size") {
+    cell_size = value;
+    return true;
+  }
+  return false;
+}
+
 void PerlinGradientGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {}
 
 void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) {
@@ -109,3 +118,22 @@ void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols,
   *static_cast<float *>(pixel) = v;
   //*static_cast<float *>(pixel) = nn[0] * 0.5 + 0.5;
 }
+
+bool PerlinGradientGeneratorBuilder::SetIntParam(const std::string& param, int value) {
+  if(param == "cell_size") {
+    cell_size = value;
+    return true;
+  }
+  return false;
+}
+
+namespace graphics {
+namespace image {
+namespace binary {
+namespace GeneratorRegistrations {
+	GeneratorFactoryRegistration<PerlinValueGeneratorBuilder> _PerlinValueGeneratorBuilder("PerlinValueGenerator");
+	GeneratorFactoryRegistration<PerlinGradientGeneratorBuilder> _PerlinGradientGeneratorBuilder("PerlinGradientGenerator");
+}
+} // namespace binary
+} // namespace image
+} // namespace graphics

@@ -36,6 +36,29 @@ char *Neighborhood::get(int i, int j) {
   return pixel;
 }
 
+bool GeneratorFactory::Register(const std::string name, GeneratorBuilderInstanceGenerator create_function) {
+  auto it = GeneratorFactory::create_functions.find(name);
+  if(it == GeneratorFactory::create_functions.end())
+  {
+    GeneratorFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<GeneratorBuilder> GeneratorFactory::Create(const std::string& name) {
+  auto it = GeneratorFactory::create_functions.find(name);
+  if(it != GeneratorFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
+GeneratorFactory& GeneratorFactory::get()
+{
+	static GeneratorFactory instance;
+	return instance;
+}
+
 void Generate(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator) {
   os.write((char *) &rows, sizeof(int));
   os.write((char *) &cols, sizeof(int));
@@ -60,6 +83,29 @@ void *GenerateStateful(int rows, int cols, int dim, size_t element_size, std::os
       os.write((char *) pixel, dim * element_size);
     }
   return state;
+}
+
+bool FunctorFactory::Register(const std::string name, FunctorBuilderInstanceGenerator create_function) {
+  auto it = FunctorFactory::create_functions.find(name);
+  if(it == FunctorFactory::create_functions.end())
+  {
+    FunctorFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<FunctorBuilder> FunctorFactory::Create(const std::string& name) {
+  auto it = FunctorFactory::create_functions.find(name);
+  if(it != FunctorFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
+FunctorFactory& FunctorFactory::get()
+{
+	static FunctorFactory instance;
+	return instance;
 }
 
 void ForEach(size_t element_size, std::istream& is, Functor *functor) {
@@ -192,6 +238,29 @@ void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size
   }
 }
 
+bool AccumulatorFactory::Register(const std::string name, AccumulatorBuilderInstanceGenerator create_function) {
+  auto it = AccumulatorFactory::create_functions.find(name);
+  if(it == AccumulatorFactory::create_functions.end())
+  {
+    AccumulatorFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<AccumulatorBuilder> AccumulatorFactory::Create(const std::string& name) {
+  auto it = AccumulatorFactory::create_functions.find(name);
+  if(it != AccumulatorFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
+AccumulatorFactory& AccumulatorFactory::get()
+{
+	static AccumulatorFactory instance;
+	return instance;
+}
+
 void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *initial) {
   int rows, cols, dim;
   is.read((char *) &rows, sizeof(int));
@@ -207,6 +276,29 @@ void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *
       n++;
     }
   return aggregate;
+}
+
+bool CombinerFactory::Register(const std::string name, CombinerBuilderInstanceGenerator create_function) {
+  auto it = CombinerFactory::create_functions.find(name);
+  if(it == CombinerFactory::create_functions.end())
+  {
+    CombinerFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<CombinerBuilder> CombinerFactory::Create(const std::string& name) {
+  auto it = CombinerFactory::create_functions.find(name);
+  if(it != CombinerFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
+CombinerFactory& CombinerFactory::get()
+{
+	static CombinerFactory instance;
+	return instance;
 }
 
 void Combine(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner) {
@@ -263,6 +355,29 @@ void *CombineStatefulBin(size_t element_size1, std::istream& is1, size_t element
       os.write((char *) pixel3, dim3 * element_size3);
     }
   return state;
+}
+
+bool ColorizerFactory::Register(const std::string name, ColorizerBuilderInstanceGenerator create_function) {
+  auto it = ColorizerFactory::create_functions.find(name);
+  if(it == ColorizerFactory::create_functions.end())
+  {
+    ColorizerFactory::create_functions[name] = create_function;
+    return true;
+  }
+  return false;
+}
+
+std::unique_ptr<ColorizerBuilder> ColorizerFactory::Create(const std::string& name) {
+  auto it = ColorizerFactory::create_functions.find(name);
+  if(it != ColorizerFactory::create_functions.end()) 
+    return it->second();
+  return nullptr;
+}
+
+ColorizerFactory& ColorizerFactory::get()
+{
+	static ColorizerFactory instance;
+	return instance;
 }
 
 void ToPPM(size_t element_size, std::istream& is, std::ostream& os, Colorizer *component) {

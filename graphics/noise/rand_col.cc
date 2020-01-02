@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
     fs << ".bin";
     std::string filename = fs.str();
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
-    RandomColorGenerator generator;
-    graphics::image::binary::Generate(rows, cols, 1, sizeof(float), ofs, &generator);
+    auto builder = graphics::image::binary::GeneratorFactory::get().Create("RandomColorGenerator");
+    auto generator = (*builder)();
+    graphics::image::binary::Generate(rows, cols, 1, sizeof(float), ofs, generator.get());
     ofs.close();
   }
   return 0;

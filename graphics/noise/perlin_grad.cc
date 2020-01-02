@@ -7,7 +7,6 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-#include "graphics/image/binary/util.h"
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
@@ -56,8 +55,10 @@ int main(int argc, char *argv[]) {
       init.row_a[2 * i + 1] = y / m;
     }
     init.row = -1;
-    PerlinValueGenerator generator(cell_size);
-    graphics::image::binary::GenerateStateful(rows, cols, 1, sizeof(float), ofs, &generator, &init);
+    auto g_builder = graphics::image::binary::GeneratorFactory::get().Create("PerlinValueGenerator");
+    g_builder->SetIntParam("cell_size", cell_size);
+    auto generator = (*g_builder)();
+    graphics::image::binary::GenerateStateful(rows, cols, 1, sizeof(float), ofs, generator.get(), &init);
     ofs.close();
     std::stringstream fsc;
     fsc << result["o"].as<std::string>();
@@ -70,8 +71,13 @@ int main(int argc, char *argv[]) {
     std::string filenamec = fsc.str();
     std::ifstream ifsc(filename, std::ios::in | std::ios::binary);
     std::ofstream ofsc(filenamec, std::ios::out | std::ios::binary);
-    graphics::image::binary::ScalingTransformer transformer(init.min_val, init.max_val, -1.0, 1.0);
-    graphics::image::binary::Map(sizeof(float), ifsc, sizeof(float), 1, ofsc, &transformer);
+    auto t_builder = graphics::image::binary::TransformerFactory::get().Create("ScalingTransformer");
+    t_builder->SetFloatParam("fn", init.min_val);
+    t_builder->SetFloatParam("fx", init.max_val);
+    t_builder->SetFloatParam("tn", -1.0);
+    t_builder->SetFloatParam("tx", 1.0);
+    auto transformer = (*t_builder)();
+    graphics::image::binary::Map(sizeof(float), ifsc, sizeof(float), 1, ofsc, transformer.get());
     ifsc.close();
     ofsc.close();
   }

@@ -4,7 +4,6 @@
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
-#include "graphics/image/binary/util.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a grayscale image from binary to ppm");
@@ -19,8 +18,11 @@ int main(int argc, char *argv[]) {
   std::ifstream ifs1(result["a"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::ifstream ifs2(result["b"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  graphics::image::binary::SumCombiner combiner(result["m"].as<float>(), result["n"].as<float>());
-  graphics::image::binary::Combine(sizeof(float), ifs1, sizeof(float), ifs2, sizeof(float), 1, ofs, &combiner);
+  auto builder = graphics::image::binary::CombinerFactory::get().Create("SumCombiner");
+  builder->SetFloatParam("wa", result["m"].as<float>());
+  builder->SetFloatParam("wb", result["n"].as<float>());
+  auto combiner = (*builder)();
+  graphics::image::binary::Combine(sizeof(float), ifs1, sizeof(float), ifs2, sizeof(float), 1, ofs, combiner.get());
   ifs1.close();
   ifs2.close();
   ofs.close();

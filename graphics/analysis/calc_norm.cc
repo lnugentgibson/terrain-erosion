@@ -3,8 +3,8 @@
 #include <iostream>
 
 #include "cxxopts/cxxopts.h"
-#include "graphics/image/binary/binimg.h"
 #include "graphics/analysis/differential.h"
+#include "graphics/image/binary/binimg.h"
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a grayscale image from binary to ppm");
@@ -18,8 +18,10 @@ int main(int argc, char *argv[]) {
   int smoothing = 16;
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  graphics::analysis::Differentiator transformer(d);
-  graphics::image::binary::MapNeighborhood(sizeof(float), ifs, sizeof(graphics::analysis::Differential), 1, ofs, smoothing, &transformer);
+  auto builder = graphics::image::binary::TransformerFactory::get().Create("Differentiator");
+  builder->SetFloatParam("d", d);
+  auto transformer = (*builder)();
+  graphics::image::binary::MapNeighborhood(sizeof(float), ifs, sizeof(graphics::analysis::Differential), 1, ofs, smoothing, transformer.get());
   ifs.close();
   ofs.close();
   return 0;

@@ -2,8 +2,45 @@
 
 #include <cmath>
 
+#include "graphics/image/binary/binimg_registration.h"
+
 namespace graphics {
 namespace analysis {
+
+class Differentiator : public Transformer {
+  float depth;
+ public:
+  Differentiator(float d) : depth(d) {}
+  virtual void Transform(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2) override {
+      return;
+    }
+  
+  virtual void TransformStateful(
+    int i, int j, int rows, int cols,
+    const void *pixel1, int dim1, size_t element_size1,
+    void *pixel2, int dim2, size_t element_size2,
+    void *state) override {
+      return;
+    }
+  
+  virtual void TransformNeighborhood(
+    int i, int j, int rows, int cols,
+    Neighborhood&& neighborhood,
+    void *pixel2, int dim2, size_t element_size2) override;
+};
+  
+class DifferentiatorBuilder : public TransformerBuilder {
+  float d;
+ public:
+  std::unique_ptr<Transformer> operator ()() override {
+    return std::unique_ptr<Transformer>(new Differentiator(d));
+  }
+  bool SetIntParam(const std::string& param, int value) override { return false; }
+  bool SetFloatParam(const std::string& param, float value) override;
+};
 
 void Differentiator::TransformNeighborhood(
   int i, int j, int rows, int cols,
@@ -29,5 +66,22 @@ void Differentiator::TransformNeighborhood(
   diff->normal[2] = 1.0 / _g;
 }
 
+bool DifferentiatorBuilder::SetFloatParam(const std::string& param, float value) {
+  if(param == "d") {
+    d = value;
+    return true;
+  }
+  return false;
+}
+
 } // namespace analysis
+
+namespace image {
+namespace binary {
+namespace TransformerRegistrations {
+	TransformerFactoryRegistration<analysis::DifferentiatorBuilder> _DifferentiatorBuilder("Differentiator");
+}
+} // namespace binary
+} // namespace image
+
 } // namespace graphics

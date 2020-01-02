@@ -45,6 +45,29 @@ class StatelessGenerator : public Generator {
   }
 };
 
+class GeneratorBuilder {
+ public:
+  GeneratorBuilder() = default;
+  virtual ~GeneratorBuilder() = default;
+  virtual std::unique_ptr<Generator> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+};
+
+typedef std::unique_ptr<GeneratorBuilder> (*GeneratorBuilderInstanceGenerator)();
+
+class GeneratorFactory {
+ public:
+  bool Register(const std::string name, GeneratorBuilderInstanceGenerator create_function);
+  std::unique_ptr<GeneratorBuilder> Create(const std::string& name);
+	static GeneratorFactory& get();
+ private:
+  GeneratorFactory() {}
+  ~GeneratorFactory() {}
+  
+  std::map<std::string, GeneratorBuilderInstanceGenerator> create_functions;
+};
+
 void Generate(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator);
 
 void *GenerateStateful(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator, void *initial);
@@ -61,6 +84,29 @@ class StatelessFunctor : public Functor {
   virtual void DoStateful(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, void *state) override {
     Do(i, j, rows, cols, pixel, dim, element_size);
   }
+};
+
+class FunctorBuilder {
+ public:
+  FunctorBuilder() = default;
+  virtual ~FunctorBuilder() = default;
+  virtual std::unique_ptr<Functor> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+};
+
+typedef std::unique_ptr<FunctorBuilder> (*FunctorBuilderInstanceGenerator)();
+
+class FunctorFactory {
+ public:
+  bool Register(const std::string name, FunctorBuilderInstanceGenerator create_function);
+  std::unique_ptr<FunctorBuilder> Create(const std::string& name);
+	static FunctorFactory& get();
+ private:
+  FunctorFactory() {}
+  ~FunctorFactory() {}
+  
+  std::map<std::string, FunctorBuilderInstanceGenerator> create_functions;
 };
 
 void ForEach(size_t element_size, std::istream& is, Functor *functor);
@@ -134,6 +180,7 @@ class TransformerBuilder {
   TransformerBuilder() = default;
   virtual ~TransformerBuilder() = default;
   virtual std::unique_ptr<Transformer> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
   virtual bool SetFloatParam(const std::string& param, float value) = 0;
 };
 
@@ -160,6 +207,29 @@ void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size
 class Accumulator {
  public:
   virtual void Aggregate(int i, int j, int rows, int cols, const void *pixel, int dim, size_t element_size, int n, void *aggregate) = 0;
+};
+
+class AccumulatorBuilder {
+ public:
+  AccumulatorBuilder() = default;
+  virtual ~AccumulatorBuilder() = default;
+  virtual std::unique_ptr<Accumulator> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+};
+
+typedef std::unique_ptr<AccumulatorBuilder> (*AccumulatorBuilderInstanceGenerator)();
+
+class AccumulatorFactory {
+ public:
+  bool Register(const std::string name, AccumulatorBuilderInstanceGenerator create_function);
+  std::unique_ptr<AccumulatorBuilder> Create(const std::string& name);
+	static AccumulatorFactory& get();
+ private:
+  AccumulatorFactory() {}
+  ~AccumulatorFactory() {}
+  
+  std::map<std::string, AccumulatorBuilderInstanceGenerator> create_functions;
 };
 
 void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *initial);
@@ -192,6 +262,29 @@ class StatelessCombiner : public Combiner {
     }
 };
 
+class CombinerBuilder {
+ public:
+  CombinerBuilder() = default;
+  virtual ~CombinerBuilder() = default;
+  virtual std::unique_ptr<Combiner> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+};
+
+typedef std::unique_ptr<CombinerBuilder> (*CombinerBuilderInstanceGenerator)();
+
+class CombinerFactory {
+ public:
+  bool Register(const std::string name, CombinerBuilderInstanceGenerator create_function);
+  std::unique_ptr<CombinerBuilder> Create(const std::string& name);
+	static CombinerFactory& get();
+ private:
+  CombinerFactory() {}
+  ~CombinerFactory() {}
+  
+  std::map<std::string, CombinerBuilderInstanceGenerator> create_functions;
+};
+
 void Combine(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
 
 void *CombineStateful(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner);
@@ -199,6 +292,29 @@ void *CombineStateful(size_t element_size1, std::istream& is1, size_t element_si
 class Colorizer {
  public:
   virtual void ToRGB(const void *pixel, int dim, size_t element_size, float *rgb) = 0;
+};
+
+class ColorizerBuilder {
+ public:
+  ColorizerBuilder() = default;
+  virtual ~ColorizerBuilder() = default;
+  virtual std::unique_ptr<Colorizer> operator ()() = 0;
+  virtual bool SetIntParam(const std::string& param, int value) = 0;
+  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+};
+
+typedef std::unique_ptr<ColorizerBuilder> (*ColorizerBuilderInstanceGenerator)();
+
+class ColorizerFactory {
+ public:
+  bool Register(const std::string name, ColorizerBuilderInstanceGenerator create_function);
+  std::unique_ptr<ColorizerBuilder> Create(const std::string& name);
+	static ColorizerFactory& get();
+ private:
+  ColorizerFactory() {}
+  ~ColorizerFactory() {}
+  
+  std::map<std::string, ColorizerBuilderInstanceGenerator> create_functions;
 };
 
 void ToPPM(size_t element_size, std::istream& is, std::ostream& os, Colorizer *component);

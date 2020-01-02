@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "graphics/image/binary/binimg_registration.h"
+
 float randGray() {
   return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
@@ -45,3 +47,16 @@ void randDirection(int dim, float *v) {
 void RandomDirectionGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {
   randDirection(dim, static_cast<float *>(pixel));
 }
+
+namespace graphics {
+namespace image {
+namespace binary {
+namespace GeneratorRegistrations {
+	GeneratorFactoryRegistration<RandomGrayscaleGeneratorBuilder> _RandomGrayscaleGeneratorBuilder("RandomGrayscaleGenerator");
+	GeneratorFactoryRegistration<RandomColorGeneratorBuilder> _RandomColorGeneratorBuilder("RandomColorGenerator");
+	GeneratorFactoryRegistration<RandomVectorGeneratorBuilder> _RandomVectorGeneratorBuilder("RandomVectorGenerator");
+	GeneratorFactoryRegistration<RandomDirectionGeneratorBuilder> _RandomDirectionGeneratorBuilder("RandomDirectionGenerator");
+}
+} // namespace binary
+} // namespace image
+} // namespace graphics
