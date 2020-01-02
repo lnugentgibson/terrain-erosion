@@ -13,8 +13,8 @@ namespace graphics {
 namespace image {
 namespace binary {
 
-Neighborhood::Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, int _dim, size_t _element_size, int _center_i, int _center_j) :
-  buffer(_buffer), span(_span), cols(_cols), dim(_dim), element_size(_element_size), center_i(_center_i), center_j(_center_j) {}
+Neighborhood::Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, DataSpecifier _in_spec, int _center_i, int _center_j) :
+  buffer(_buffer), span(_span), cols(_cols), in_spec(_in_spec), center_i(_center_i), center_j(_center_j) {}
 
 std::array<int, 4> Neighborhood::range() {
   if(buffer.empty()) return {0, 0, 0, 0};
@@ -31,8 +31,8 @@ char *Neighborhood::get(int i, int j) {
     return nullptr;
   }
   char *row = buffer[i];
-  char *pixel = new char[dim * element_size];
-  std::copy(row + j * dim * element_size, row + (j + 1) * dim * element_size, pixel);
+  char *pixel = new char[in_spec.PixelSize()];
+  std::copy(row + j * in_spec.PixelSize(), row + (j + 1) * in_spec.PixelSize(), pixel);
   return pixel;
 }
 
@@ -59,28 +59,28 @@ GeneratorFactory& GeneratorFactory::get()
 	return instance;
 }
 
-void Generate(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator) {
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
+void Generate(int rows, int cols, OutputSpecifier out_spec, Generator *generator) {
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel = new char[out_spec.data.PixelSize()];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      generator->Generate(i, j, rows, cols, pixel, dim, element_size);
-      os.write((char *) pixel, dim * element_size);
+      generator->Generate(i, j, rows, cols, pixel, out_spec.data);
+      out_spec.os.write((char *) pixel, out_spec.data.PixelSize());
     }
 }
 
-void *GenerateStateful(int rows, int cols, int dim, size_t element_size, std::ostream& os, Generator *generator, void *initial) {
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
+void *GenerateStateful(int rows, int cols, OutputSpecifier out_spec, Generator *generator, void *initial) {
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel = new char[out_spec.data.PixelSize()];
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      generator->GenerateStateful(i, j, rows, cols, pixel, dim, element_size, state);
-      os.write((char *) pixel, dim * element_size);
+      generator->GenerateStateful(i, j, rows, cols, pixel, out_spec.data, state);
+      out_spec.os.write((char *) pixel, out_spec.data.PixelSize());
     }
   return state;
 }
@@ -108,30 +108,30 @@ FunctorFactory& FunctorFactory::get()
 	return instance;
 }
 
-void ForEach(size_t element_size, std::istream& is, Functor *functor) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
+void ForEach(InputSpecifier in_spec, Functor *functor) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  char *pixel = new char[in_spec.data.PixelSize()];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      functor->Do(i, j, rows, cols, pixel, dim, element_size);
+      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
+      functor->Do(i, j, rows, cols, pixel, in_spec.data);
     }
 }
 
-void *ForEachStateful(size_t element_size, std::istream& is, Functor *functor, void *initial) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
+void *ForEachStateful(InputSpecifier in_spec, Functor *functor, void *initial) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  char *pixel = new char[in_spec.data.PixelSize()];
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      functor->DoStateful(i, j, rows, cols, pixel, dim, element_size, state);
+      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
+      functor->DoStateful(i, j, rows, cols, pixel, in_spec.data, state);
     }
   return state;
 }
@@ -159,57 +159,57 @@ TransformerFactory& TransformerFactory::get()
 	return instance;
 }
 
-void Map(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
+void Map(InputSpecifier in_spec, OutputSpecifier out_spec, Transformer *map) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel1 = new char[in_spec.data.PixelSize()];
+  char *pixel2 = new char[out_spec.data.PixelSize()];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel1, dim1 * element_size1);
-      map->Transform(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2);
-      os.write((char *) pixel2, dim2 * element_size2);
+      in_spec.is.read((char *) pixel1, in_spec.data.PixelSize());
+      map->Transform(i, j, rows, cols, pixel1, in_spec.data, pixel2, out_spec.data);
+      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
     }
 }
 
-void *MapStateful(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, Transformer *map, void *initial) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
+void *MapStateful(InputSpecifier in_spec, OutputSpecifier out_spec, Transformer *map, void *initial) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel1 = new char[in_spec.data.PixelSize()];
+  char *pixel2 = new char[out_spec.data.PixelSize()];
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel1, dim1 * element_size1);
-      map->TransformStateful(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, state);
-      os.write((char *) pixel2, dim2 * element_size2);
+      in_spec.is.read((char *) pixel1, in_spec.data.PixelSize());
+      map->TransformStateful(i, j, rows, cols, pixel1, in_spec.data, pixel2, out_spec.data, state);
+      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
     }
   return state;
 }
 
-void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size2, int dim2, std::ostream& os, int span, Transformer *map) {
-  int rows, cols, dim1;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim1, sizeof(int));
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim2, sizeof(int));
-  char *pixel2 = new char[dim2 * element_size2];
+void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span, Transformer *map) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel2 = new char[out_spec.data.PixelSize()];
   std::deque<char *> buffer;
   for(int i = 0; i < span; i++) {
-    char *row = new char[dim1 * element_size1 * cols];
-    is.read((char *) row, dim1 * element_size1);
+    char *row = new char[in_spec.data.PixelSize() * cols];
+    in_spec.is.read((char *) row, in_spec.data.PixelSize());
     buffer.push_back(row);
   }
   for(int i = 0; i < rows; i++)
@@ -220,16 +220,16 @@ void MapNeighborhood(size_t element_size1, std::istream& is, size_t element_size
         buffer.pop_front();
       }
       if(rows - i > span) {
-        if(row == 0) row = new char[dim1 * element_size1 * cols];
-        is.read((char *) row, dim1 * element_size1);
+        if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
+        in_spec.is.read((char *) row, in_spec.data.PixelSize());
         buffer.push_back(row);
       } else if(row != 0) {
         delete[] row;
       }
       map->TransformNeighborhood(i, j, rows, cols,
-        Neighborhood(buffer, span, cols, dim1, element_size1, std::min(i, span), j),
-        pixel2, dim2, element_size2);
-      os.write((char *) pixel2, dim2 * element_size2);
+        Neighborhood(buffer, span, cols, in_spec.data, std::min(i, span), j),
+        pixel2, out_spec.data);
+      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
     }
   while(!buffer.empty()) {
     char *row = buffer.front();
@@ -261,18 +261,18 @@ AccumulatorFactory& AccumulatorFactory::get()
 	return instance;
 }
 
-void *Reduce(size_t element_size, std::istream& is, Accumulator *reducer, void *initial) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
-  char *pixel = new char[dim * element_size];
+void *Reduce(InputSpecifier in_spec, Accumulator *reducer, void *initial) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  char *pixel = new char[in_spec.data.PixelSize()];
   void *aggregate = initial;
   int n = 0;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      reducer->Aggregate(i, j, rows, cols, pixel, dim, element_size, n, aggregate);
+      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
+      reducer->Aggregate(i, j, rows, cols, pixel, in_spec.data, n, aggregate);
       n++;
     }
   return aggregate;
@@ -301,58 +301,58 @@ CombinerFactory& CombinerFactory::get()
 	return instance;
 }
 
-void Combine(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner) {
-  int rows, cols, dim1;
-  int _rows, _cols, dim2;
-  is1.read((char *) &rows, sizeof(int));
-  is1.read((char *) &cols, sizeof(int));
-  is1.read((char *) &dim1, sizeof(int));
-  is2.read((char *) &_rows, sizeof(int));
-  is2.read((char *) &_cols, sizeof(int));
-  is2.read((char *) &dim2, sizeof(int));
+void Combine(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier out_spec, Combiner *combiner) {
+  int rows, cols;
+  int _rows, _cols;
+  in_spec1.is.read((char *) &rows, sizeof(int));
+  in_spec1.is.read((char *) &cols, sizeof(int));
+  in_spec1.is.read((char *) &in_spec1.data.dim, sizeof(int));
+  in_spec2.is.read((char *) &_rows, sizeof(int));
+  in_spec2.is.read((char *) &_cols, sizeof(int));
+  in_spec2.is.read((char *) &in_spec2.data.dim, sizeof(int));
   if(rows != _rows || cols != _cols) {
     return;
   }
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim3, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  char *pixel3 = new char[dim3 * element_size3];
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel1 = new char[in_spec1.data.PixelSize()];
+  char *pixel2 = new char[in_spec2.data.PixelSize()];
+  char *pixel3 = new char[out_spec.data.PixelSize()];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is1.read((char *) pixel1, dim1 * element_size1);
-      is2.read((char *) pixel2, dim2 * element_size2);
-      combiner->Combine(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, pixel3, dim3, element_size3);
-      os.write((char *) pixel3, dim3 * element_size3);
+      in_spec1.is.read((char *) pixel1, in_spec1.data.PixelSize());
+      in_spec2.is.read((char *) pixel2, in_spec2.data.PixelSize());
+      combiner->Combine(i, j, rows, cols, pixel1, in_spec1.data, pixel2, in_spec2.data, pixel3, out_spec.data);
+      out_spec.os.write((char *) pixel3, out_spec.data.PixelSize());
     }
 }
 
-void *CombineStatefulBin(size_t element_size1, std::istream& is1, size_t element_size2, std::istream& is2, size_t element_size3, int dim3, std::ostream& os, Combiner *combiner, void *initial) {
-  int rows, cols, dim1;
-  int _rows, _cols, dim2;
-  is1.read((char *) &rows, sizeof(int));
-  is1.read((char *) &cols, sizeof(int));
-  is1.read((char *) &dim1, sizeof(int));
-  is2.read((char *) &_rows, sizeof(int));
-  is2.read((char *) &_cols, sizeof(int));
-  is2.read((char *) &dim2, sizeof(int));
+void *CombineStatefulBin(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier out_spec, Combiner *combiner, void *initial) {
+  int rows, cols;
+  int _rows, _cols;
+  in_spec1.is.read((char *) &rows, sizeof(int));
+  in_spec1.is.read((char *) &cols, sizeof(int));
+  in_spec1.is.read((char *) &in_spec1.data.dim, sizeof(int));
+  in_spec2.is.read((char *) &_rows, sizeof(int));
+  in_spec2.is.read((char *) &_cols, sizeof(int));
+  in_spec2.is.read((char *) &in_spec2.data.dim, sizeof(int));
   if(rows != _rows || cols != _cols) {
     return 0;
   }
-  os.write((char *) &rows, sizeof(int));
-  os.write((char *) &cols, sizeof(int));
-  os.write((char *) &dim3, sizeof(int));
-  char *pixel1 = new char[dim1 * element_size1];
-  char *pixel2 = new char[dim2 * element_size2];
-  char *pixel3 = new char[dim3 * element_size3];
+  out_spec.os.write((char *) &rows, sizeof(int));
+  out_spec.os.write((char *) &cols, sizeof(int));
+  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
+  char *pixel1 = new char[in_spec1.data.PixelSize()];
+  char *pixel2 = new char[in_spec2.data.PixelSize()];
+  char *pixel3 = new char[out_spec.data.PixelSize()];
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is1.read((char *) pixel1, dim1 * element_size1);
-      is2.read((char *) pixel2, dim2 * element_size2);
-      combiner->CombineStateful(i, j, rows, cols, pixel1, dim1, element_size1, pixel2, dim2, element_size2, pixel3, dim3, element_size3, state);
-      os.write((char *) pixel3, dim3 * element_size3);
+      in_spec1.is.read((char *) pixel1, in_spec1.data.PixelSize());
+      in_spec2.is.read((char *) pixel2, in_spec2.data.PixelSize());
+      combiner->CombineStateful(i, j, rows, cols, pixel1, in_spec1.data, pixel2, in_spec2.data, pixel3, out_spec.data, state);
+      out_spec.os.write((char *) pixel3, out_spec.data.PixelSize());
     }
   return state;
 }
@@ -380,18 +380,18 @@ ColorizerFactory& ColorizerFactory::get()
 	return instance;
 }
 
-void ToPPM(size_t element_size, std::istream& is, std::ostream& os, Colorizer *component) {
-  int rows, cols, dim;
-  is.read((char *) &rows, sizeof(int));
-  is.read((char *) &cols, sizeof(int));
-  is.read((char *) &dim, sizeof(int));
+void ToPPM(InputSpecifier in_spec, std::ostream& os, Colorizer *component) {
+  int rows, cols;
+  in_spec.is.read((char *) &rows, sizeof(int));
+  in_spec.is.read((char *) &cols, sizeof(int));
+  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
   os << "P6\n" << cols << " " << rows << "\n255\n";
-  char *pixel = new char[dim * element_size];
+  char *pixel = new char[in_spec.data.PixelSize()];
   float *rgb = new float[3];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      is.read((char *) pixel, dim * element_size);
-      component->ToRGB(pixel, dim, element_size, rgb);
+      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
+      component->ToRGB(pixel, in_spec.data, rgb);
       os << (unsigned char)(std::max(float(0), std::min(float(1), rgb[0])) * 255) <<
              (unsigned char)(std::max(float(0), std::min(float(1), rgb[1])) * 255) <<
              (unsigned char)(std::max(float(0), std::min(float(1), rgb[2])) * 255);
