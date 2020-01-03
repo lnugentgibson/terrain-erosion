@@ -191,22 +191,22 @@ class SimpleTransformer : public Transformer {
 
 class Accumulator {
  public:
-  virtual void Aggregate(int i, int j, int rows, int cols, const void *pixel, DataSpecifier in_spec, int n, void *aggregate) = 0;
+  virtual void Aggregate(int i, int j, int rows, int cols, const PixelSpecifier pixel, int n, void *aggregate) = 0;
 };
 
 class Combiner {
  public:
   virtual void Combine(
     int i, int j, int rows, int cols,
-    const void *pixel1, DataSpecifier in_spec1,
-    const void *pixel2, DataSpecifier in_spec2,
-    void *pixel3, DataSpecifier out_spec) = 0;
+    const PixelSpecifier in_pixel1,
+    const PixelSpecifier in_pixel2,
+    PixelSpecifier out_pixel) = 0;
     
   virtual void CombineStateful(
     int i, int j, int rows, int cols,
-    const void *pixel1, DataSpecifier in_spec1,
-    const void *pixel2, DataSpecifier in_spec2,
-    void *pixel3, DataSpecifier out_spec,
+    const PixelSpecifier in_pixel1,
+    const PixelSpecifier in_pixel2,
+    PixelSpecifier out_pixel,
     void *state) = 0;
 };
 
@@ -214,17 +214,17 @@ class StatelessCombiner : public Combiner {
  public:
   virtual void CombineStateful(
     int i, int j, int rows, int cols,
-    const void *pixel1, DataSpecifier in_spec1,
-    const void *pixel2, DataSpecifier in_spec2,
-    void *pixel3, DataSpecifier out_spec,
+    const PixelSpecifier in_pixel1,
+    const PixelSpecifier in_pixel2,
+    PixelSpecifier out_pixel,
     void *state) override {
-      Combine(i, j, rows, cols, pixel1, in_spec1, pixel2, in_spec2, pixel3, out_spec);
+      Combine(i, j, rows, cols, in_pixel1, in_pixel2, out_pixel);
     }
 };
 
 class Colorizer {
  public:
-  virtual void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) = 0;
+  virtual void ToRGB(const PixelSpecifier pixel, float *rgb) = 0;
 };
 
 class GeneratorBuilder {

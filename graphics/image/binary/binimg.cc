@@ -268,18 +268,18 @@ AccumulatorFactory& AccumulatorFactory::get()
 
 void *Reduce(InputSpecifier in_spec, Accumulator *reducer, void *initial) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  char *pixel = new char[in_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  PixelSpecifier pixel(in_spec);
+  pixel.allocate();
   void *aggregate = initial;
   int n = 0;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
-      reducer->Aggregate(i, j, rows, cols, pixel, in_spec.data, n, aggregate);
+      pixel.read(in_spec);
+      reducer->Aggregate(i, j, rows, cols, pixel, n, aggregate);
       n++;
     }
+  pixel.deallocate();
   return aggregate;
 }
 
@@ -309,56 +309,56 @@ CombinerFactory& CombinerFactory::get()
 void Combine(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier out_spec, Combiner *combiner) {
   int rows, cols;
   int _rows, _cols;
-  in_spec1.is.read((char *) &rows, sizeof(int));
-  in_spec1.is.read((char *) &cols, sizeof(int));
-  in_spec1.is.read((char *) &in_spec1.data.dim, sizeof(int));
-  in_spec2.is.read((char *) &_rows, sizeof(int));
-  in_spec2.is.read((char *) &_cols, sizeof(int));
-  in_spec2.is.read((char *) &in_spec2.data.dim, sizeof(int));
+  in_spec1.read(&rows, &cols);
+  in_spec2.read(&_rows, &_cols);
   if(rows != _rows || cols != _cols) {
     return;
   }
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel1 = new char[in_spec1.data.PixelSize()];
-  char *pixel2 = new char[in_spec2.data.PixelSize()];
-  char *pixel3 = new char[out_spec.data.PixelSize()];
+  out_spec.write(&rows, &cols);
+  PixelSpecifier in_pixel1(in_spec1);
+  in_pixel1.allocate();
+  PixelSpecifier in_pixel2(in_spec2);
+  in_pixel2.allocate();
+  PixelSpecifier out_pixel(out_spec);
+  out_pixel.allocate();
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec1.is.read((char *) pixel1, in_spec1.data.PixelSize());
-      in_spec2.is.read((char *) pixel2, in_spec2.data.PixelSize());
-      combiner->Combine(i, j, rows, cols, pixel1, in_spec1.data, pixel2, in_spec2.data, pixel3, out_spec.data);
-      out_spec.os.write((char *) pixel3, out_spec.data.PixelSize());
+      in_pixel1.read(in_spec1);
+      in_pixel2.read(in_spec2);
+      combiner->Combine(i, j, rows, cols, in_pixel1, in_pixel2, out_pixel);
+      out_pixel.write(out_spec);
     }
+  in_pixel1.deallocate();
+  in_pixel2.deallocate();
+  out_pixel.deallocate();
 }
 
 void *CombineStatefulBin(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier out_spec, Combiner *combiner, void *initial) {
   int rows, cols;
   int _rows, _cols;
-  in_spec1.is.read((char *) &rows, sizeof(int));
-  in_spec1.is.read((char *) &cols, sizeof(int));
-  in_spec1.is.read((char *) &in_spec1.data.dim, sizeof(int));
-  in_spec2.is.read((char *) &_rows, sizeof(int));
-  in_spec2.is.read((char *) &_cols, sizeof(int));
-  in_spec2.is.read((char *) &in_spec2.data.dim, sizeof(int));
+  in_spec1.read(&rows, &cols);
+  in_spec2.read(&_rows, &_cols);
   if(rows != _rows || cols != _cols) {
     return 0;
   }
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel1 = new char[in_spec1.data.PixelSize()];
-  char *pixel2 = new char[in_spec2.data.PixelSize()];
-  char *pixel3 = new char[out_spec.data.PixelSize()];
+  out_spec.write(&rows, &cols);
+  PixelSpecifier in_pixel1(in_spec1);
+  in_pixel1.allocate();
+  PixelSpecifier in_pixel2(in_spec2);
+  in_pixel2.allocate();
+  PixelSpecifier out_pixel(out_spec);
+  out_pixel.allocate();
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec1.is.read((char *) pixel1, in_spec1.data.PixelSize());
-      in_spec2.is.read((char *) pixel2, in_spec2.data.PixelSize());
-      combiner->CombineStateful(i, j, rows, cols, pixel1, in_spec1.data, pixel2, in_spec2.data, pixel3, out_spec.data, state);
-      out_spec.os.write((char *) pixel3, out_spec.data.PixelSize());
+      in_pixel1.read(in_spec1);
+      in_pixel2.read(in_spec2);
+      combiner->CombineStateful(i, j, rows, cols, in_pixel1, in_pixel2, out_pixel, state);
+      out_pixel.write(out_spec);
     }
+  in_pixel1.deallocate();
+  in_pixel2.deallocate();
+  out_pixel.deallocate();
   return state;
 }
 
@@ -387,20 +387,20 @@ ColorizerFactory& ColorizerFactory::get()
 
 void ToPPM(InputSpecifier in_spec, std::ostream& os, Colorizer *component) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
+  in_spec.read(&rows, &cols);
   os << "P6\n" << cols << " " << rows << "\n255\n";
-  char *pixel = new char[in_spec.data.PixelSize()];
+  PixelSpecifier pixel(in_spec);
+  pixel.allocate();
   float *rgb = new float[3];
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
-      component->ToRGB(pixel, in_spec.data, rgb);
+      pixel.read(in_spec);
+      component->ToRGB(pixel, rgb);
       os << (unsigned char)(std::max(float(0), std::min(float(1), rgb[0])) * 255) <<
              (unsigned char)(std::max(float(0), std::min(float(1), rgb[1])) * 255) <<
              (unsigned char)(std::max(float(0), std::min(float(1), rgb[2])) * 255);
     }
+  pixel.deallocate();
 }
 
 } // namespace binary

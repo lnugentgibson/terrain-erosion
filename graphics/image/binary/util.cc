@@ -12,8 +12,8 @@ class ScalingTransformer : public SimpleTransformer {
   ScalingTransformer(float fn, float fx, float tn, float tx) : from_min(fn), from_max(fx), from_range(from_max - from_min), to_min(tn), to_max(tx), to_range(to_max - to_min) {}
   void Transform(
     int i, int j, int rows, int cols,
-    const void *pixel1, DataSpecifier in_spec,
-    void *pixel2, DataSpecifier out_spec) override;
+    const PixelSpecifier in_pixel,
+    PixelSpecifier out_pixel) override;
 };
   
 class ScalingTransformerBuilder : public TransformerBuilder {
@@ -27,7 +27,7 @@ class ScalingTransformerBuilder : public TransformerBuilder {
 };
 
 class MinMaxAccumulator : public image::binary::Accumulator {
-  void Aggregate(int i, int j, int rows, int cols, const void *pixel, DataSpecifier in_spec, int n, void *aggregate) override;
+  void Aggregate(int i, int j, int rows, int cols, const PixelSpecifier pixel, int n, void *aggregate) override;
 };
   
 class MinMaxAccumulatorBuilder : public AccumulatorBuilder {
@@ -45,9 +45,9 @@ class SumCombiner : public graphics::image::binary::StatelessCombiner {
   SumCombiner(float wa, float wb) : weight_a(wa), weight_b(wb) {}
   void Combine(
     int i, int j, int rows, int cols,
-    const void *pixel1, DataSpecifier in_spec1,
-    const void *pixel2, DataSpecifier in_spec2,
-    void *pixel3, DataSpecifier out_spec) override;
+    const PixelSpecifier in_pixel1,
+    const PixelSpecifier in_pixel2,
+    PixelSpecifier out_pixel) override;
 };
   
 class SumCombinerBuilder : public CombinerBuilder {
@@ -62,7 +62,7 @@ class SumCombinerBuilder : public CombinerBuilder {
 
 class GrayscaleColorizer : public graphics::image::binary::Colorizer {
  public:
-  void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) override;
+  void ToRGB(const PixelSpecifier pixel, float *rgb) override;
 };
   
 class GrayscaleColorizerBuilder : public ColorizerBuilder {
@@ -76,7 +76,7 @@ class GrayscaleColorizerBuilder : public ColorizerBuilder {
 
 class SignedColorizer : public graphics::image::binary::Colorizer {
  public:
-  void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) override;
+  void ToRGB(const PixelSpecifier pixel, float *rgb) override;
 };
   
 class SignedColorizerBuilder : public ColorizerBuilder {
@@ -90,7 +90,7 @@ class SignedColorizerBuilder : public ColorizerBuilder {
 
 class ColorColorizer : public graphics::image::binary::Colorizer {
  public:
-  void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) override;
+  void ToRGB(const PixelSpecifier pixel, float *rgb) override;
 };
   
 class ColorColorizerBuilder : public ColorizerBuilder {
@@ -104,7 +104,7 @@ class ColorColorizerBuilder : public ColorizerBuilder {
 
 class VectorColorizer : public graphics::image::binary::Colorizer {
  public:
-  void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) override;
+  void ToRGB(const PixelSpecifier pixel, float *rgb) override;
 };
   
 class VectorColorizerBuilder : public ColorizerBuilder {
@@ -118,7 +118,7 @@ class VectorColorizerBuilder : public ColorizerBuilder {
 
 class DirectionColorizer : public graphics::image::binary::Colorizer {
  public:
-  void ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) override;
+  void ToRGB(const PixelSpecifier pixel, float *rgb) override;
 };
   
 class DirectionColorizerBuilder : public ColorizerBuilder {
@@ -132,9 +132,9 @@ class DirectionColorizerBuilder : public ColorizerBuilder {
 
 void ScalingTransformer::Transform(
   int i, int j, int rows, int cols,
-  const void *pixel1, DataSpecifier in_spec,
-  void *pixel2, DataSpecifier out_spec) {
-  *static_cast<float *>(pixel2) = (static_cast<const float *>(pixel1)[0] - from_min) / from_range * to_range + to_min;
+    const PixelSpecifier in_pixel,
+    PixelSpecifier out_pixel) {
+  *reinterpret_cast<float *>(out_pixel.pixel) = (reinterpret_cast<const float *>(in_pixel.pixel)[0] - from_min) / from_range * to_range + to_min;
 }
 
 bool ScalingTransformerBuilder::SetFloatParam(const std::string& param, float value) {
@@ -161,9 +161,9 @@ namespace TransformerRegistrations {
 	TransformerFactoryRegistration<ScalingTransformerBuilder> _ScalingTransformerBuilder("ScalingTransformer");
 }
 
-void MinMaxAccumulator::Aggregate(int i, int j, int rows, int cols, const void *pixel, DataSpecifier in_spec, int n, void *aggregate) {
-  float v = static_cast<const float *>(pixel)[0];
-  auto minmax = static_cast<std::pair<float, float>*>(aggregate);
+void MinMaxAccumulator::Aggregate(int i, int j, int rows, int cols, const PixelSpecifier pixel, int n, void *aggregate) {
+  float v = reinterpret_cast<const float *>(pixel.pixel)[0];
+  auto minmax = reinterpret_cast<std::pair<float, float>*>(aggregate);
   if(n == 0) {
     minmax->first = v;
     minmax->second = v;
@@ -183,10 +183,10 @@ namespace AccumulatorRegistrations {
 
 void SumCombiner::Combine(
   int i, int j, int rows, int cols,
-  const void *pixel1, DataSpecifier in_spec1,
-  const void *pixel2, DataSpecifier in_spec2,
-  void *pixel3, DataSpecifier out_spec) {
-  *static_cast<float *>(pixel3) = weight_a * static_cast<const float *>(pixel1)[0] + weight_b * static_cast<const float *>(pixel2)[0];
+    const PixelSpecifier in_pixel1,
+    const PixelSpecifier in_pixel2,
+    PixelSpecifier out_pixel) {
+  *reinterpret_cast<float *>(out_pixel.pixel) = weight_a * reinterpret_cast<const float *>(in_pixel1.pixel)[0] + weight_b * reinterpret_cast<const float *>(in_pixel2.pixel)[0];
 }
 
 bool SumCombinerBuilder::SetFloatParam(const std::string& param, float value) {
@@ -205,39 +205,39 @@ namespace CombinerRegistrations {
 	CombinerFactoryRegistration<SumCombinerBuilder> _SumCombinerBuilder("SumCombiner");
 }
 
-void GrayscaleColorizer::ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) {
-  auto *v = static_cast<const float*>(pixel);
+void GrayscaleColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
+  auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v;
   rgb[1] = *v;
   rgb[2] = *v;
 }
 
-void SignedColorizer::ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) {
-  auto *v = static_cast<const float*>(pixel);
+void SignedColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
+  auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v * 0.5 + 0.5;
   rgb[1] = *v * 0.5 + 0.5;
   rgb[2] = *v * 0.5 + 0.5;
 }
 
-void ColorColorizer::ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) {
-  auto *v = static_cast<const Color*>(pixel);
+void ColorColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
+  auto *v = reinterpret_cast<const Color*>(pixel.pixel);
   rgb[0] = v->r();
   rgb[1] = v->g();
   rgb[2] = v->b();
 }
 
-void VectorColorizer::ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) {
-  auto *v = static_cast<const float*>(pixel);
+void VectorColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
+  auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v;
-  rgb[1] = in_spec.dim > 0 ? *v : 0.0;
-  rgb[2] = in_spec.dim > 1 ? *v : 0.0;
+  rgb[1] = pixel.data.dim > 0 ? *v : 0.0;
+  rgb[2] = pixel.data.dim > 1 ? *v : 0.0;
 }
 
-void DirectionColorizer::ToRGB(const void *pixel, DataSpecifier in_spec, float *rgb) {
-  auto *v = static_cast<const float*>(pixel);
+void DirectionColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
+  auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v * 0.5 + 0.5;
-  rgb[1] = in_spec.dim > 0 ? *v * 0.5 + 0.5 : 0.5;
-  rgb[2] = in_spec.dim > 1 ? *v * 0.5 + 0.5 : 0.5;
+  rgb[1] = pixel.data.dim > 0 ? *v * 0.5 + 0.5 : 0.5;
+  rgb[2] = pixel.data.dim > 1 ? *v * 0.5 + 0.5 : 0.5;
 }
 
 namespace ColorizerRegistrations {
