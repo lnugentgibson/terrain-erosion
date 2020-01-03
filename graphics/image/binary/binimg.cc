@@ -14,25 +14,32 @@ namespace image {
 namespace binary {
 
 Neighborhood::Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, DataSpecifier _in_spec, int _center_i, int _center_j) :
-  buffer(_buffer), span(_span), cols(_cols), in_spec(_in_spec), center_i(_center_i), center_j(_center_j) {}
+  buffer(_buffer), span(_span), cols(_cols), pixel(_in_spec), center_i(_center_i), center_j(_center_j) {
+  pixel.allocate();
+}
+
+Neighborhood::~Neighborhood() {
+  pixel.deallocate();
+}
 
 std::array<int, 4> Neighborhood::range() {
   if(buffer.empty()) return {0, 0, 0, 0};
   return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
 }
 
-char *Neighborhood::get(int i, int j) {
+const PixelSpecifier Neighborhood::get(int i, int j) {
   i += center_i;
+  j += center_j;
+  /*
   if(i < 0 || i >= (int) buffer.size()) {
     return nullptr;
   }
-  j += center_j;
   if(j < 0 || j >= cols) {
     return nullptr;
   }
+  */
   char *row = buffer[i];
-  char *pixel = new char[in_spec.PixelSize()];
-  std::copy(row + j * in_spec.PixelSize(), row + (j + 1) * in_spec.PixelSize(), pixel);
+  std::copy(row + j * pixel.PixelSize(), row + (j + 1) * pixel.PixelSize(), pixel.pixel);
   return pixel;
 }
 
@@ -60,28 +67,28 @@ GeneratorFactory& GeneratorFactory::get()
 }
 
 void Generate(int rows, int cols, OutputSpecifier out_spec, Generator *generator) {
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel = new char[out_spec.data.PixelSize()];
+  out_spec.write(&rows, &cols);
+  PixelSpecifier pixel(out_spec);
+  pixel.allocate();
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      generator->Generate(i, j, rows, cols, pixel, out_spec.data);
-      out_spec.os.write((char *) pixel, out_spec.data.PixelSize());
+      generator->Generate(i, j, rows, cols, pixel);
+      pixel.write(out_spec);
     }
+  pixel.deallocate();
 }
 
 void *GenerateStateful(int rows, int cols, OutputSpecifier out_spec, Generator *generator, void *initial) {
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel = new char[out_spec.data.PixelSize()];
+  out_spec.write(&rows, &cols);
+  PixelSpecifier pixel(out_spec);
+  pixel.allocate();
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      generator->GenerateStateful(i, j, rows, cols, pixel, out_spec.data, state);
-      out_spec.os.write((char *) pixel, out_spec.data.PixelSize());
+      generator->GenerateStateful(i, j, rows, cols, pixel, state);
+      pixel.write(out_spec);
     }
+  pixel.deallocate();
   return state;
 }
 
@@ -110,29 +117,29 @@ FunctorFactory& FunctorFactory::get()
 
 void ForEach(InputSpecifier in_spec, Functor *functor) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  char *pixel = new char[in_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  PixelSpecifier pixel(in_spec);
+  pixel.allocate();
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
-      functor->Do(i, j, rows, cols, pixel, in_spec.data);
+      pixel.read(in_spec);
+      functor->Do(i, j, rows, cols, pixel);
     }
+  pixel.deallocate();
 }
 
 void *ForEachStateful(InputSpecifier in_spec, Functor *functor, void *initial) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  char *pixel = new char[in_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  PixelSpecifier pixel(in_spec);
+  pixel.allocate();
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel, in_spec.data.PixelSize());
-      functor->DoStateful(i, j, rows, cols, pixel, in_spec.data, state);
+      pixel.read(in_spec);
+      functor->DoStateful(i, j, rows, cols, pixel, state);
     }
+  pixel.deallocate();
   return state;
 }
 
@@ -161,51 +168,48 @@ TransformerFactory& TransformerFactory::get()
 
 void Map(InputSpecifier in_spec, OutputSpecifier out_spec, Transformer *map) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel1 = new char[in_spec.data.PixelSize()];
-  char *pixel2 = new char[out_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  out_spec.write(&rows, &cols);
+  PixelSpecifier in_pixel(in_spec);
+  in_pixel.allocate();
+  PixelSpecifier out_pixel(out_spec);
+  out_pixel.allocate();
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel1, in_spec.data.PixelSize());
-      map->Transform(i, j, rows, cols, pixel1, in_spec.data, pixel2, out_spec.data);
-      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
+      in_pixel.read(in_spec);
+      map->Transform(i, j, rows, cols, in_pixel, out_pixel);
+      out_pixel.write(out_spec);
     }
+  in_pixel.deallocate();
+  out_pixel.deallocate();
 }
 
 void *MapStateful(InputSpecifier in_spec, OutputSpecifier out_spec, Transformer *map, void *initial) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel1 = new char[in_spec.data.PixelSize()];
-  char *pixel2 = new char[out_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  out_spec.write(&rows, &cols);
+  PixelSpecifier in_pixel(in_spec);
+  in_pixel.allocate();
+  PixelSpecifier out_pixel(out_spec);
+  out_pixel.allocate();
   void *state = initial;
   for(int i = 0; i < rows; i++)
     for(int j = 0; j < cols; j++) {
-      in_spec.is.read((char *) pixel1, in_spec.data.PixelSize());
-      map->TransformStateful(i, j, rows, cols, pixel1, in_spec.data, pixel2, out_spec.data, state);
-      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
+      in_pixel.read(in_spec);
+      map->TransformStateful(i, j, rows, cols, in_pixel, out_pixel, state);
+      out_pixel.write(out_spec);
     }
+  in_pixel.deallocate();
+  out_pixel.deallocate();
   return state;
 }
 
 void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span, Transformer *map) {
   int rows, cols;
-  in_spec.is.read((char *) &rows, sizeof(int));
-  in_spec.is.read((char *) &cols, sizeof(int));
-  in_spec.is.read((char *) &in_spec.data.dim, sizeof(int));
-  out_spec.os.write((char *) &rows, sizeof(int));
-  out_spec.os.write((char *) &cols, sizeof(int));
-  out_spec.os.write((char *) &out_spec.data.dim, sizeof(int));
-  char *pixel2 = new char[out_spec.data.PixelSize()];
+  in_spec.read(&rows, &cols);
+  out_spec.write(&rows, &cols);
+  PixelSpecifier out_pixel(out_spec);
+  out_pixel.allocate();
   std::deque<char *> buffer;
   for(int i = 0; i < span; i++) {
     char *row = new char[in_spec.data.PixelSize() * cols];
@@ -228,9 +232,10 @@ void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span,
       }
       map->TransformNeighborhood(i, j, rows, cols,
         Neighborhood(buffer, span, cols, in_spec.data, std::min(i, span), j),
-        pixel2, out_spec.data);
-      out_spec.os.write((char *) pixel2, out_spec.data.PixelSize());
+        out_pixel);
+      out_pixel.write(out_spec);
     }
+  out_pixel.deallocate();
   while(!buffer.empty()) {
     char *row = buffer.front();
     buffer.pop_front();
