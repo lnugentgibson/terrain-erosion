@@ -3,9 +3,6 @@
 
 #include "graphics/image/binary/binimg.h"
 
-using graphics::image::binary::Generator;
-using graphics::image::binary::GeneratorBuilder;
-
 float curve1(float x);
 
 float curve3(float x);

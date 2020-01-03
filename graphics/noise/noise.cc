@@ -5,6 +5,10 @@
 #include "graphics/noise/random.h"
 #include "graphics/image/binary/binimg_registration.h"
 
+using graphics::image::binary::Generator;
+using graphics::image::binary::GeneratorBuilder;
+using graphics::image::binary::PixelSpecifier;
+
 float curve1(float x) {
   return x;
 }
@@ -26,9 +30,9 @@ class PerlinValueGenerator : public Generator {
   int cell_size;
  public:
   PerlinValueGenerator(int cs) : cell_size(cs) {}
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size);
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel);
   
-  void GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) override;
+  void GenerateStateful(int i, int j, int rows, int cols, PixelSpecifier pixel, void *state) override;
 };
   
 class PerlinValueGeneratorBuilder : public GeneratorBuilder {
@@ -45,9 +49,9 @@ class PerlinGradientGenerator : public Generator {
   int cell_size;
  public:
   PerlinGradientGenerator(int cs) : cell_size(cs) {}
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size);
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel);
   
-  void GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) override;
+  void GenerateStateful(int i, int j, int rows, int cols, PixelSpecifier pixel, void *state) override;
 };
   
 class PerlinGradientGeneratorBuilder : public GeneratorBuilder {
@@ -60,9 +64,9 @@ class PerlinGradientGeneratorBuilder : public GeneratorBuilder {
   bool SetFloatParam(const std::string& param, float value) override { return false; }
 };
 
-void PerlinValueGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {}
+void PerlinValueGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {}
 
-void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) {
+void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, PixelSpecifier pixel, void *state) {
   PerlinState *perlin_state = static_cast<PerlinState*>(state);
   int row = static_cast<int>(floor(i / cell_size));
   int col = static_cast<int>(floor(j / cell_size));
@@ -96,7 +100,7 @@ void PerlinValueGenerator::GenerateStateful(int i, int j, int rows, int cols, vo
     if(v < perlin_state->min_val) perlin_state->min_val = v;
     if(v > perlin_state->max_val) perlin_state->max_val = v;
   }
-  *static_cast<float *>(pixel) = v;
+  *reinterpret_cast<float *>(pixel.pixel) = v;
   //*static_cast<float *>(pixel) = nn[0] * 0.5 + 0.5;
 }
 
@@ -108,9 +112,9 @@ bool PerlinValueGeneratorBuilder::SetIntParam(const std::string& param, int valu
   return false;
 }
 
-void PerlinGradientGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {}
+void PerlinGradientGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {}
 
-void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size, void *state) {
+void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols, PixelSpecifier pixel, void *state) {
   PerlinState *perlin_state = static_cast<PerlinState*>(state);
   int row = static_cast<int>(floor(i / cell_size));
   int col = static_cast<int>(floor(j / cell_size));
@@ -153,7 +157,7 @@ void PerlinGradientGenerator::GenerateStateful(int i, int j, int rows, int cols,
     if(v < perlin_state->min_val) perlin_state->min_val = v;
     if(v > perlin_state->max_val) perlin_state->max_val = v;
   }
-  *static_cast<float *>(pixel) = v;
+  *reinterpret_cast<float *>(pixel.pixel) = v;
   //*static_cast<float *>(pixel) = nn[0] * 0.5 + 0.5;
 }
 

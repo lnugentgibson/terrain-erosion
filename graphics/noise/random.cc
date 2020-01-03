@@ -4,9 +4,14 @@
 
 #include "graphics/image/binary/binimg_registration.h"
 
+using graphics::image::binary::Generator;
+using graphics::image::binary::GeneratorBuilder;
+using graphics::image::binary::PixelSpecifier;
+using graphics::image::binary::StatelessGenerator;
+
 class RandomGrayscaleGenerator : public StatelessGenerator {
  public:
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) override;
 };
   
 class RandomGrayscaleGeneratorBuilder : public GeneratorBuilder {
@@ -20,7 +25,7 @@ class RandomGrayscaleGeneratorBuilder : public GeneratorBuilder {
 
 class RandomColorGenerator : public StatelessGenerator {
  public:
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) override;
 };
   
 class RandomColorGeneratorBuilder : public GeneratorBuilder {
@@ -34,7 +39,7 @@ class RandomColorGeneratorBuilder : public GeneratorBuilder {
 
 class RandomVectorGenerator : public StatelessGenerator {
  public:
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) override;
 };
   
 class RandomVectorGeneratorBuilder : public GeneratorBuilder {
@@ -48,7 +53,7 @@ class RandomVectorGeneratorBuilder : public GeneratorBuilder {
 
 class RandomDirectionGenerator : public StatelessGenerator {
  public:
-  void Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) override;
+  void Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) override;
 };
   
 class RandomDirectionGeneratorBuilder : public GeneratorBuilder {
@@ -64,8 +69,8 @@ float randGray() {
   return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
 
-void RandomGrayscaleGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {
-  *static_cast<float *>(pixel) = randGray();
+void RandomGrayscaleGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {
+  *reinterpret_cast<float *>(pixel.pixel) = randGray();
 }
 
 void randCol(Color *c) {
@@ -74,8 +79,8 @@ void randCol(Color *c) {
   c->b(static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 }
 
-void RandomColorGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {
-  randCol(static_cast<Color *>(pixel));
+void RandomColorGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {
+  randCol(reinterpret_cast<Color *>(pixel.pixel));
 }
 
 void randVector(int dim, float *v) {
@@ -84,8 +89,8 @@ void randVector(int dim, float *v) {
   }
 }
 
-void RandomVectorGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {
-  randVector(dim, static_cast<float *>(pixel));
+void RandomVectorGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {
+  randVector(pixel.data.dim, reinterpret_cast<float *>(pixel.pixel));
 }
 
 void randDirection(int dim, float *v) {
@@ -100,8 +105,8 @@ void randDirection(int dim, float *v) {
   }
 }
 
-void RandomDirectionGenerator::Generate(int i, int j, int rows, int cols, void *pixel, int dim, size_t element_size) {
-  randDirection(dim, static_cast<float *>(pixel));
+void RandomDirectionGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier pixel) {
+  randDirection(pixel.data.dim, reinterpret_cast<float *>(pixel.pixel));
 }
 
 namespace graphics {

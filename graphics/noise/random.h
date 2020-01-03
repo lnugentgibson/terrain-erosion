@@ -4,10 +4,6 @@
 #include "graphics/color/color.h"
 #include "graphics/image/binary/binimg.h"
 
-using graphics::image::binary::Generator;
-using graphics::image::binary::GeneratorBuilder;
-using graphics::image::binary::StatelessGenerator;
-
 float randGray();
 
 void randCol(Color *c);
