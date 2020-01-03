@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "graphics/image/binary/binimg.h"
 #include "graphics/image/binary/binimg_registration.h"
 
 using graphics::image::binary::Generator;

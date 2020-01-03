@@ -10,6 +10,13 @@
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
+using graphics::image::binary::GeneratorFactory;
+using graphics::image::binary::GenerateStateful;
+using graphics::image::binary::InputSpecifier;
+using graphics::image::binary::Map;
+using graphics::image::binary::OutputSpecifier;
+using graphics::image::binary::TransformerFactory;
+
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a color image from binary to ppm");
   options.add_options()
@@ -52,10 +59,10 @@ int main(int argc, char *argv[]) {
       init.row_a[i] = v;
     }
     init.row = -1;
-    auto g_builder = graphics::image::binary::GeneratorFactory::get().Create("PerlinValueGenerator");
+    auto g_builder = GeneratorFactory::get().Create("PerlinValueGenerator");
     g_builder->SetIntParam("cell_size", cell_size);
     auto generator = (*g_builder)();
-    graphics::image::binary::GenerateStateful(rows, cols, 1, sizeof(float), ofs, generator.get(), &init);
+    GenerateStateful(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get(), &init);
     ofs.close();
     std::stringstream fsc;
     fsc << result["o"].as<std::string>();
@@ -68,13 +75,13 @@ int main(int argc, char *argv[]) {
     std::string filenamec = fsc.str();
     std::ifstream ifsc(filename, std::ios::in | std::ios::binary);
     std::ofstream ofsc(filenamec, std::ios::out | std::ios::binary);
-    auto t_builder = graphics::image::binary::TransformerFactory::get().Create("ScalingTransformer");
+    auto t_builder = TransformerFactory::get().Create("ScalingTransformer");
     t_builder->SetFloatParam("fn", init.min_val);
     t_builder->SetFloatParam("fx", init.max_val);
     t_builder->SetFloatParam("tn", -1.0);
     t_builder->SetFloatParam("tx", 1.0);
     auto transformer = (*t_builder)();
-    graphics::image::binary::Map(sizeof(float), ifsc, sizeof(float), 1, ofsc, transformer.get());
+    Map(InputSpecifier(ifsc, sizeof(float)), OutputSpecifier(ofsc, sizeof(float)), transformer.get());
     ifsc.close();
     ofsc.close();
   }

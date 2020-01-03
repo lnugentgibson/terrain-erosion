@@ -5,6 +5,11 @@
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::binary::InputSpecifier;
+using graphics::image::binary::Map;
+using graphics::image::binary::OutputSpecifier;
+using graphics::image::binary::TransformerFactory;
+
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a grayscale image from binary to ppm");
   options.add_options()
@@ -22,13 +27,13 @@ int main(int argc, char *argv[]) {
   float tx = result["u"].as<float>();
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  auto builder = graphics::image::binary::TransformerFactory::get().Create("ScalingTransformer");
+  auto builder = TransformerFactory::get().Create("ScalingTransformer");
   builder->SetFloatParam("fn", fn);
   builder->SetFloatParam("fx", fx);
   builder->SetFloatParam("tn", tn);
   builder->SetFloatParam("tx", tx);
   auto transformer = (*builder)();
-  graphics::image::binary::Map(sizeof(float), ifs, sizeof(float), 1, ofs, transformer.get());
+  Map(InputSpecifier(ifs, sizeof(float)), OutputSpecifier(ofs, sizeof(float)), transformer.get());
   ifs.close();
   ofs.close();
   return 0;

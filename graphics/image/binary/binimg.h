@@ -18,6 +18,8 @@ namespace binary {
 struct DataSpecifier {
   int dim;
   size_t element_size;
+  DataSpecifier() {}
+  DataSpecifier(size_t _element_size, int _dim = 1) : dim(_dim), element_size(_element_size) {}
   size_t PixelSize() const {
     return dim * element_size;
   }
@@ -32,6 +34,7 @@ struct DataSpecifier {
 struct InputSpecifier {
   DataSpecifier data;
   std::istream& is;
+  InputSpecifier(std::istream& _is, size_t element_size, int dim = 1) : data(element_size, dim), is(_is) {}
   void readDim() {
     data.readDim(is);
   }
@@ -45,6 +48,7 @@ struct InputSpecifier {
 struct OutputSpecifier {
   DataSpecifier data;
   std::ostream& os;
+  OutputSpecifier(std::ostream& _os, size_t element_size, int dim = 1) : data(element_size, dim), os(_os) {}
   void writeDim() {
     data.writeDim(os);
   }

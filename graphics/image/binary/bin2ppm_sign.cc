@@ -5,6 +5,10 @@
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::binary::ColorizerFactory;
+using graphics::image::binary::InputSpecifier;
+using graphics::image::binary::ToPPM;
+
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a grayscale image from binary to ppm");
   options.add_options()
@@ -14,9 +18,9 @@ int main(int argc, char *argv[]) {
   auto result = options.parse(argc, argv);
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
-  auto builder = graphics::image::binary::ColorizerFactory::get().Create("SignedColorizer");
+  auto builder = ColorizerFactory::get().Create("SignedColorizer");
   auto colorizer = (*builder)();
-  graphics::image::binary::ToPPM(sizeof(float), ifs, ofs, colorizer.get());
+  ToPPM(InputSpecifier(ifs, sizeof(float)), ofs, colorizer.get());
   ifs.close();
   ofs.close();
   return 0;

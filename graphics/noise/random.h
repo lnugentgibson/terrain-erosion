@@ -2,7 +2,6 @@
 #define RANDOM_H
 
 #include "graphics/color/color.h"
-#include "graphics/image/binary/binimg.h"
 
 float randGray();
 

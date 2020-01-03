@@ -1,8 +1,6 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include "graphics/image/binary/binimg.h"
-
 float curve1(float x);
 
 float curve3(float x);
