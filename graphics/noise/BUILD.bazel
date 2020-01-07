@@ -4,6 +4,7 @@ cc_library(
     name = "random",
     hdrs = ["random.h"],
     srcs = ["random.cc"],
+    alwayslink = 1,
     deps = [
         "//graphics/color:color",
         "//graphics/image/binary:binimg",
@@ -15,6 +16,7 @@ cc_library(
     name = "noise",
     hdrs = ["noise.h"],
     srcs = ["noise.cc"],
+    alwayslink = 1,
     deps = [
         ":random",
         "//graphics/image/binary:binimg",
