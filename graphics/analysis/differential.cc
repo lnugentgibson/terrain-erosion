@@ -10,6 +10,7 @@ namespace analysis {
   
 using image::binary::Neighborhood;
 using image::binary::PixelSpecifier;
+using image::binary::SimpleTransformer;
 using image::binary::Transformer;
 using image::binary::TransformerBuilder;
 
@@ -44,7 +45,6 @@ class DifferentiatorBuilder : public TransformerBuilder {
   std::unique_ptr<Transformer> operator ()() override {
     return std::unique_ptr<Transformer>(new Differentiator(d));
   }
-  bool SetIntParam(const std::string& param, int value) override { return false; }
   bool SetFloatParam(const std::string& param, float value) override;
 };
 
@@ -76,12 +76,85 @@ bool DifferentiatorBuilder::SetFloatParam(const std::string& param, float value)
   return false;
 }
 
+class DifferentialDXExtractor : public SimpleTransformer {
+ public:
+  virtual void Transform(
+    int i, int j, int rows, int cols,
+    const PixelSpecifier in_pixel,
+    PixelSpecifier out_pixel) override;
+};
+  
+class DifferentialDXExtractorBuilder : public TransformerBuilder {
+ public:
+  std::unique_ptr<Transformer> operator ()() override {
+    return std::unique_ptr<Transformer>(new DifferentialDXExtractor());
+  }
+};
+
+void DifferentialDXExtractor::Transform(
+  int i, int j, int rows, int cols,
+  const PixelSpecifier in_pixel,
+  PixelSpecifier out_pixel) {
+  const Differential *diff = reinterpret_cast<const Differential*>(in_pixel.pixel);
+  *reinterpret_cast<float*>(out_pixel.pixel) = diff->x_slope;
+}
+
+class DifferentialDYExtractor : public SimpleTransformer {
+ public:
+  virtual void Transform(
+    int i, int j, int rows, int cols,
+    const PixelSpecifier in_pixel,
+    PixelSpecifier out_pixel) override;
+};
+  
+class DifferentialDYExtractorBuilder : public TransformerBuilder {
+ public:
+  std::unique_ptr<Transformer> operator ()() override {
+    return std::unique_ptr<Transformer>(new DifferentialDYExtractor());
+  }
+};
+
+void DifferentialDYExtractor::Transform(
+  int i, int j, int rows, int cols,
+  const PixelSpecifier in_pixel,
+  PixelSpecifier out_pixel) {
+  const Differential *diff = reinterpret_cast<const Differential*>(in_pixel.pixel);
+  *reinterpret_cast<float*>(out_pixel.pixel) = diff->y_slope;
+}
+
+class DifferentialNormalExtractor : public SimpleTransformer {
+ public:
+  virtual void Transform(
+    int i, int j, int rows, int cols,
+    const PixelSpecifier in_pixel,
+    PixelSpecifier out_pixel) override;
+};
+  
+class DifferentialNormalExtractorBuilder : public TransformerBuilder {
+ public:
+  std::unique_ptr<Transformer> operator ()() override {
+    return std::unique_ptr<Transformer>(new DifferentialNormalExtractor());
+  }
+};
+
+void DifferentialNormalExtractor::Transform(
+  int i, int j, int rows, int cols,
+  const PixelSpecifier in_pixel,
+  PixelSpecifier out_pixel) {
+  const Differential *diff = reinterpret_cast<const Differential*>(in_pixel.pixel);
+  for(int i = 0; i < 3; i++)
+    reinterpret_cast<float*>(out_pixel.pixel)[i] = diff->normal[i];
+}
+
 } // namespace analysis
 
 namespace image {
 namespace binary {
 namespace TransformerRegistrations {
 	TransformerFactoryRegistration<analysis::DifferentiatorBuilder> _DifferentiatorBuilder("Differentiator");
+	TransformerFactoryRegistration<analysis::DifferentialDXExtractorBuilder> _DifferentialDXExtractorBuilder("DifferentialDXExtractor");
+	TransformerFactoryRegistration<analysis::DifferentialDYExtractorBuilder> _DifferentialDYExtractorBuilder("DifferentialDXExtractor");
+	TransformerFactoryRegistration<analysis::DifferentialNormalExtractorBuilder> _DifferentialNormalExtractorBuilder("DifferentialNormalExtractor");
 }
 } // namespace binary
 } // namespace image

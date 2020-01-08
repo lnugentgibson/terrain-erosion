@@ -176,7 +176,7 @@ class PixelTransformer : public Transformer {
 
 class SimpleTransformer : public Transformer {
  public:
-  virtual void TransformStateful(
+  void TransformStateful(
     int i, int j, int rows, int cols,
     const PixelSpecifier in_pixel,
     PixelSpecifier out_pixel,
@@ -184,7 +184,7 @@ class SimpleTransformer : public Transformer {
       Transform(i, j, rows, cols, in_pixel, out_pixel);
     }
   
-  virtual void TransformNeighborhood(
+  void TransformNeighborhood(
     int i, int j, int rows, int cols,
     Neighborhood&& neighborhood,
     PixelSpecifier out_pixel) override {
@@ -254,8 +254,8 @@ class TransformerBuilder {
   TransformerBuilder() = default;
   virtual ~TransformerBuilder() = default;
   virtual std::unique_ptr<Transformer> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
 };
 
 class AccumulatorBuilder {

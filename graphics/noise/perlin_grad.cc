@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
       init.row_a[2 * i + 1] = y / m;
     }
     init.row = -1;
-    auto g_builder = GeneratorFactory::get().Create("PerlinValueGenerator");
+    auto g_builder = GeneratorFactory::get().Create("PerlinGradientGenerator");
     g_builder->SetIntParam("cell_size", cell_size);
     auto generator = (*g_builder)();
     GenerateStateful(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get(), &init);
