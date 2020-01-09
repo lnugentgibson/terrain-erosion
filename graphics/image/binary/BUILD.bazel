@@ -7,6 +7,16 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_test(
+    name = "binimg_test",
+    srcs = ["binimg_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@gtest//:main",
+        ":binimg",
+    ],
+)
+
 cc_library(
     name = "binimg_registration",
     hdrs = ["binimg_registration.h"],
