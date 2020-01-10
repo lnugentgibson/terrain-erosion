@@ -1,0 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "vector",
+    hdrs = ["vector.h"],
+    srcs = ["vector.cc"],
+    alwayslink = 1,
+)
