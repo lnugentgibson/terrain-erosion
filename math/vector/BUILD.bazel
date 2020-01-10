@@ -4,5 +4,16 @@ cc_library(
     name = "vector",
     hdrs = ["vector.h"],
     srcs = ["vector.cc"],
-    alwayslink = 1,
+    deps = [
+        "//math:common",
+    ],
+)
+
+cc_library(
+    name = "matrix",
+    hdrs = ["matrix.h"],
+    srcs = ["matrix.cc"],
+    deps = [
+        "//math:common",
+    ],
 )
