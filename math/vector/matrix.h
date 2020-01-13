@@ -1,15 +1,15 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef MATH_VECTOR_MATRIX_H
+#define MATH_VECTOR_MATRIX_H
 
 //#include <algorithm>
 #include <string>
 
 class Matrix {
-  float *v;
+  float *c;
  public:
   const int m, n;
-  Matrix(int _m, int _n) : v(new float[_m * _n]), m(_m), n(_n) {}
-  Matrix(int _m, int _n, float *_v) : v(_v), m(_m), n(_n) {}
+  Matrix(int _m, int _n) : c(new float[_m * _n]), m(_m), n(_n) {}
+  Matrix(int _m, int _n, float *_c) : c(_c), m(_m), n(_n) {}
   /*
   float operator [](int i) const {
     return v[i];
@@ -90,4 +90,4 @@ class Matrix {
   std::string toStr() const;
 };
 
-#endif // MATRIX_H
+#endif // MATH_VECTOR_MATRIX_H

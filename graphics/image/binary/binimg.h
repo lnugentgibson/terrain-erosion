@@ -1,5 +1,5 @@
-#ifndef BINIMG_H
-#define BINIMG_H
+#ifndef GRAPHICS_IMAGE_BINARY_BINIMG_H
+#define GRAPHICS_IMAGE_BINARY_BINIMG_H
 
 #include <algorithm>
 #include <array>
@@ -236,8 +236,9 @@ class GeneratorBuilder {
   GeneratorBuilder() = default;
   virtual ~GeneratorBuilder() = default;
   virtual std::unique_ptr<Generator> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 class FunctorBuilder {
@@ -245,8 +246,9 @@ class FunctorBuilder {
   FunctorBuilder() = default;
   virtual ~FunctorBuilder() = default;
   virtual std::unique_ptr<Functor> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 class TransformerBuilder {
@@ -256,6 +258,7 @@ class TransformerBuilder {
   virtual std::unique_ptr<Transformer> operator ()() = 0;
   virtual bool SetIntParam(const std::string& param, int value) { return false; }
   virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 class AccumulatorBuilder {
@@ -263,8 +266,9 @@ class AccumulatorBuilder {
   AccumulatorBuilder() = default;
   virtual ~AccumulatorBuilder() = default;
   virtual std::unique_ptr<Accumulator> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 class CombinerBuilder {
@@ -272,8 +276,9 @@ class CombinerBuilder {
   CombinerBuilder() = default;
   virtual ~CombinerBuilder() = default;
   virtual std::unique_ptr<Combiner> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 class ColorizerBuilder {
@@ -281,8 +286,9 @@ class ColorizerBuilder {
   ColorizerBuilder() = default;
   virtual ~ColorizerBuilder() = default;
   virtual std::unique_ptr<Colorizer> operator ()() = 0;
-  virtual bool SetIntParam(const std::string& param, int value) = 0;
-  virtual bool SetFloatParam(const std::string& param, float value) = 0;
+  virtual bool SetIntParam(const std::string& param, int value) { return false; }
+  virtual bool SetFloatParam(const std::string& param, float value) { return false; }
+  virtual bool SetPtrParam(const std::string& param, void *value) { return false; }
 };
 
 typedef std::unique_ptr<GeneratorBuilder> (*GeneratorBuilderInstanceGenerator)();
@@ -395,4 +401,4 @@ void ToPPM(InputSpecifier in_spec, std::ostream& os, Colorizer *component);
 } // namespace image
 } // namespace graphics
 
-#endif // BINIMG_H
+#endif // GRAPHICS_IMAGE_BINARY_BINIMG_H

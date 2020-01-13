@@ -1,0 +1,14 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "status",
+    hdrs = ["status.h"],
+)
+
+cc_library(
+    name = "statusor",
+    hdrs = ["statusor.h"],
+    deps = [
+        ":status",
+    ],
+)

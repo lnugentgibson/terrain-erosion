@@ -6,6 +6,8 @@ cc_library(
     srcs = ["vector.cc"],
     deps = [
         "//math:common",
+        "//util:status",
+        "//util:statusor",
     ],
 )
 

@@ -1,5 +1,5 @@
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef GRAPHICS_COLORS_COLOR_H
+#define GRAPHICS_COLORS_COLOR_H
 
 class Color {
   float r_, g_, b_;
@@ -15,4 +15,4 @@ class Color {
   void print() const;
 };
 
-#endif // COLOR_H
+#endif // GRAPHICS_COLORS_COLOR_H

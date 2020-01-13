@@ -1,5 +1,5 @@
-#ifndef NOISE_H
-#define NOISE_H
+#ifndef GRAPHICS_NOISE_NOISE_H
+#define GRAPHICS_NOISE_NOISE_H
 
 float curve1(float x);
 
@@ -16,4 +16,4 @@ struct PerlinState {
   float max_val;
 };
 
-#endif // NOISE_H
+#endif // GRAPHICS_NOISE_NOISE_H

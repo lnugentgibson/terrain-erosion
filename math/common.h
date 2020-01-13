@@ -1,6 +1,10 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef MATH_COMMON_H
+#define MATH_COMMON_H
+
+namespace math {
 
 bool floatEquals(float a, float b, float tolerance = .0001);
 
-#endif // CONSTANTS_H
+} // namespace math
+
+#endif // MATH_COMMON_H

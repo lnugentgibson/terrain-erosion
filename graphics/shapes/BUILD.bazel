@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "shape",
+    hdrs = ["shape.h"],
+    srcs = ["shape.cc"],
+    deps = [
+        "//graphics/image/binary:binimg",
+        "//graphics/image/binary:binimg_registration",
+        "//math/geometry/shapes:shape",
+    ],
+)

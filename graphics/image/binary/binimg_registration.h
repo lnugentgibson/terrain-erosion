@@ -1,5 +1,5 @@
-#ifndef BINIMG_REGISTRATION_H
-#define BINIMG_REGISTRATION_H
+#ifndef GRAPHICS_IMAGE_BINARY_BINIMG_REGISTRATION_H
+#define GRAPHICS_IMAGE_BINARY_BINIMG_REGISTRATION_H
 
 #include "graphics/image/binary/binimg.h"
 
@@ -113,4 +113,4 @@ public:
 } // namespace image
 } // namespace graphics
 
-#endif // BINIMG_REGISTRATION_H
+#endif // GRAPHICS_IMAGE_BINARY_BINIMG_REGISTRATION_H

@@ -1,5 +1,5 @@
-#ifndef RANDOM_H
-#define RANDOM_H
+#ifndef GRAPHICS_NOISE_RANDOM_H
+#define GRAPHICS_NOISE_RANDOM_H
 
 #include "graphics/color/color.h"
 
@@ -11,4 +11,4 @@ void randVector(int dim, float *v);
 
 void randDirection(int dim, float *v);
 
-#endif // RANDOM_H
+#endif // GRAPHICS_NOISE_RANDOM_H

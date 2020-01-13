@@ -13,14 +13,14 @@ bool Matrix::equals(const Vector& v, float tolerance) const {
 std::string Matrix::toStr() const {
   std::stringstream ss;
   ss << "Matrix" << m << 'x' << n << '[';
-  ss << v[0];
+  ss << c[0];
   for(int i = 1; i < n; i++) {
-    ss << ',' << v[i];
+    ss << ',' << c[i];
   }
   for(int j = 1; j < m; j++) {
-    ss << ';' << v[j * n];
+    ss << ';' << c[j * n];
     for(int i = 1; i < n; i++) {
-      ss << ',' << v[j * n + i];
+      ss << ',' << c[j * n + i];
     }
   }
   ss << ']';

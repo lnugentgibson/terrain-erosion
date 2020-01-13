@@ -1,5 +1,5 @@
-#ifndef GRID_H
-#define GRID_H
+#ifndef GRAPHICS_IMAGE_GRID_GRID_H
+#define GRAPHICS_IMAGE_GRID_GRID_H
 
 #include <algorithm>
 #include <array>
@@ -332,4 +332,4 @@ class ColorComponent {
   }
 };
 
-#endif // GRID_H
+#endif // GRAPHICS_IMAGE_GRID_GRID_H

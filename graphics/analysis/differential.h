@@ -1,5 +1,5 @@
-#ifndef NORMAL_H
-#define NORMAL_H
+#ifndef GRAPHICS_ANALYSIS_DIFFERENTIAL_H
+#define GRAPHICS_ANALYSIS_DIFFERENTIAL_H
 
 namespace graphics {
 namespace analysis {
@@ -13,4 +13,4 @@ struct Differential {
 } // namespace analysis
 } // namespace graphics
 
-#endif // NORMAL_H
+#endif // GRAPHICS_ANALYSIS_DIFFERENTIAL_H

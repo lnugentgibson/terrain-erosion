@@ -1,55 +1,64 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef MATH_VECTOR_VECTOR_H
+#define MATH_VECTOR_VECTOR_H
 
 #include <algorithm>
 #include <string>
 
+#include "util/statusor.h"
+
+using util::StatusOr;
+
+namespace math {
+namespace vector {
+  
+class Matrix;
+
 class Vector {
-  float *v;
+  float *c;
  public:
   const int d;
-  Vector(int _d) : v(new float[_d]), d(_d) {}
-  Vector(int _d, float *_v) : v(_v), d(_d) {}
+  Vector(int _d) : c(new float[_d]), d(_d) {}
+  Vector(int _d, float *_c) : c(_c), d(_d) {}
   float operator [](int i) const {
-    return v[i];
+    return c[i];
   }
   float& operator [](int i) {
-    return v[i];
+    return c[i];
   }
   template<typename F>
   void forEach(F f) const {
     float *A = new float[d];
-    std::copy(v, v + d, A);
+    std::copy(c, c + d, A);
     for (int i = 0; i < d; i++) {
-      f(v[i], i, A);
+      f(c[i], i, A);
     }
   };
   template<typename F>
   Vector map(F f) const {
     float *A = new float[d];
-    std::copy(v, v + d, A);
+    std::copy(c, c + d, A);
     float *a = new float[d];
     for (int i = 0; i < d; i++) {
-      a[i] = f(v[i], i, A);
+      a[i] = f(c[i], i, A);
     }
     return Vector(d, a);
   };
   template<typename F>
   Vector& transform(F f) {
     float *A = new float[d];
-    std::copy(v, v + d, A);
+    std::copy(c, c + d, A);
     for (int i = 0; i < d; i++) {
-      v[i] = f(v[i], i, A);
+      c[i] = f(c[i], i, A);
     }
     return *this;
   };
   template<typename F, typename S>
   S reduce(F f, S s) const {
     float *A = new float[d];
-    std::copy(v, v + d, A);
+    std::copy(c, c + d, A);
     S a = s;
     for (int i = 0; i < d; i++) {
-      a = f(a, v[i], i, A);
+      a = f(a, c[i], i, A);
     }
     return a;
   };
@@ -57,32 +66,57 @@ class Vector {
   Vector negative() const;
   Vector& add(const float v);
   Vector& add(const float *v);
-  Vector& add(const Vector& v);
+  StatusOr<Vector> add(const Vector& v);
+  Vector& operator +=(const float v);
+  Vector& operator +=(const float *v);
+  Vector& operator +=(const Vector& v);
   Vector sum(const float v) const;
   Vector sum(const float *v) const;
-  Vector sum(const Vector& v) const;
+  StatusOr<Vector> sum(const Vector& v) const;
+  Vector operator +(const float v);
+  Vector operator +(const float *v);
+  Vector operator +(const Vector& v);
   Vector& subtract(const float v);
   Vector& subtract(const float *v);
-  Vector& subtract(const Vector& v);
+  StatusOr<Vector> subtract(const Vector& v);
+  Vector& operator -=(const float v);
+  Vector& operator -=(const float *v);
+  Vector& operator -=(const Vector& v);
   Vector difference(const float v) const;
   Vector difference(const float *v) const;
-  Vector difference(const Vector& v) const;
+  StatusOr<Vector> difference(const Vector& v) const;
+  Vector operator -(const float v);
+  Vector operator -(const float *v);
+  Vector operator -(const Vector& v);
   Vector& multiply(const float v);
   Vector& multiply(const float *v);
-  Vector& multiply(const Vector& v);
+  StatusOr<Vector> multiply(const Vector& v);
+  Vector& operator *=(const float v);
+  Vector& operator *=(const float *v);
+  Vector& operator *=(const Vector& v);
   Vector product(const float v) const;
   Vector product(const float *v) const;
-  Vector product(const Vector& v) const;
+  StatusOr<Vector> product(const Vector& v) const;
+  Vector operator *(const float v);
+  Vector operator *(const float *v);
+  Vector operator *(const Vector& v);
   Vector& divide(const float v);
   Vector& divide(const float *v);
-  Vector& divide(const Vector& v);
+  StatusOr<Vector> divide(const Vector& v);
+  Vector& operator /=(const float v);
+  Vector& operator /=(const float *v);
+  Vector& operator /=(const Vector& v);
   Vector quotient(const float v) const;
   Vector quotient(const float *v) const;
-  Vector quotient(const Vector& v) const;
+  StatusOr<Vector> quotient(const Vector& v) const;
+  Vector operator /(const float v);
+  Vector operator /(const float *v);
+  Vector operator /(const Vector& v);
   bool equals(const Vector& v, float tolerance = .0001) const;
-  float dot(const Vector& v) const;
-  Vector& crossEquals(const Vector *vs);
-  Vector cross(const Vector *vs) const;
+  StatusOr<float> dot(const Vector& v) const;
+  StatusOr<Vector> crossEquals(const Vector *vs);
+  StatusOr<Vector> cross(const Vector *vs) const;
+  float length2() const;
   float length() const;
   Vector& normalize();
   Vector unit() const;
@@ -100,4 +134,7 @@ class Vector {
   static Vector randomDirection(const Vector& v, const Vector& w, float factor);
 };
 
-#endif // VECTOR_H
+} // namespace vector
+} // namespace math
+
+#endif // MATH_VECTOR_VECTOR_H
