@@ -19,6 +19,21 @@ class Vector {
   const int d;
   Vector(int _d) : c(new float[_d]), d(_d) {}
   Vector(int _d, float *_c) : c(_c), d(_d) {}
+  Vector(float x, float y) : c(new float[2]), d(2) {
+    c[0] = x;
+    c[1] = y;
+  }
+  Vector(float x, float y, float z) : c(new float[3]), d(3) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+  }
+  Vector(float x, float y, float z, float w) : c(new float[4]), d(4) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+    c[3] = w;
+  }
   float operator [](int i) const {
     return c[i];
   }
@@ -120,6 +135,8 @@ class Vector {
   float length() const;
   Vector& normalize();
   Vector unit() const;
+  StatusOr<Vector> min(const Vector& v) const;
+  StatusOr<Vector> max(const Vector& v) const;
   float min() const;
   float max() const;
   float *toAngles();

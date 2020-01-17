@@ -215,6 +215,12 @@ Vector& Vector::normalize() {
 Vector Vector::unit() const {
   return quotient(length());
 }
+StatusOr<Vector> Vector::min(const Vector& v) const {
+  return map([v](float e, int i, float *A) { return fmin(e, v[i]); });
+}
+StatusOr<Vector> Vector::max(const Vector& v) const {
+  return map([v](float e, int i, float *A) { return fmax(e, v[i]); });
+}
 float Vector::min() const {
   return reduce([](float a, float e, int i, float *A) { return fmin(a, e); }, c[0]);
 }

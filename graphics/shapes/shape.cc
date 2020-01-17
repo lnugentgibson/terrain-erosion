@@ -20,7 +20,7 @@ void ShapeGenerator::Generate(int i, int j, int rows, int cols, PixelSpecifier p
   Vector p(2);
   p[0] = static_cast<float>(j) / cols;
   p[1] = static_cast<float>(i) / rows;
-  *reinterpret_cast<float *>(pixel.pixel) = shape->Inside(p);
+  *reinterpret_cast<float *>(pixel.pixel) = shape->Inside(p) ? 1.0 : 0.0;
 }
   
 class ShapeGeneratorBuilder : public GeneratorBuilder {

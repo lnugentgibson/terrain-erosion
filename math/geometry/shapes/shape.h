@@ -5,29 +5,50 @@
 
 #include <vector>
 
+using math::vector::Vector;
+
 namespace math {
 namespace geometry {
 namespace shapes {
 
 class Shape {
  public:
-  virtual bool Inside(vector::Vector p) = 0;
+  virtual bool Inside(Vector p) = 0;
+  virtual float Intersect(Vector c, Vector s) = 0;
 };
 
 class Rectangle : public Shape {
-  vector::Vector corner;
-  vector::Vector size;
+  Vector corner;
+  Vector size;
  public:
-  vector::Vector min();
-  vector::Vector max();
-  Rectangle(vector::Vector c, vector::Vector s) : corner(c), size(s) {}
-  bool Inside(vector::Vector p);
+  Rectangle(Vector c, Vector s);
+  bool Inside(Vector p) override;
+  float Intersect(Vector c, Vector s) override;
+};
+
+class Circle : public Shape {
+  Vector center;
+  float radius;
+ public:
+  Circle(Vector c, float r) : center(c), radius(r) {}
+  bool Inside(Vector p) override;
+  float Intersect(Vector c, Vector s) override;
+};
+
+class CircleField : public Shape {
+  std::vector<Vector> centers;
+  float radius;
+ public:
+  CircleField(float r) : radius(r) {}
+  void Push(Vector center);
+  bool Inside(Vector p) override;
+  float Intersect(Vector c, Vector s) override;
 };
 
 class Polygon : public Shape {
-  std::vector<vector::Vector> points;
+  std::vector<Vector> points;
  public:
-  bool Inside(vector::Vector p);
+  bool Inside(Vector p);
 };
 
 } // namespace shapes

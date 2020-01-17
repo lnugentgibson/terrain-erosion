@@ -4,9 +4,20 @@ cc_library(
     name = "shape",
     hdrs = ["shape.h"],
     srcs = ["shape.cc"],
+    alwayslink = 1,
     deps = [
         "//graphics/image/binary:binimg",
         "//graphics/image/binary:binimg_registration",
         "//math/geometry/shapes:shape",
+    ],
+)
+
+cc_binary(
+    name = "rect",
+    srcs = ["rect.cc"],
+    deps = [
+        ":shape",
+        "//cxxopts:cxxopts",
+        "//graphics/image/binary:binimg",
     ],
 )
