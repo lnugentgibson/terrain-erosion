@@ -1,9 +1,7 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-http_archive(
-    name = "gtest",
-    url = "https://github.com/google/googletest/archive/release-1.10.0.zip",
-    sha256 = "94c634d499558a76fa649edb13721dce6e98fb1e7018dfaeba3cd7a083945e91",
-    build_file = "gtest.BUILD",
-    strip_prefix = "googletest-release-1.10.0",
+git_repository(
+    name = "googletest",
+    remote = "https://github.com/google/googletest",
+    commit = "bc2d0935b74917be0821bfd834472ed9cc4a3b5b",
 )

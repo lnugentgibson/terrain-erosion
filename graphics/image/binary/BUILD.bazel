@@ -12,7 +12,7 @@ cc_test(
     srcs = ["binimg_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        "@gtest//:main",
+        "@googletest//:gtest_main",
         ":binimg",
     ],
 )
