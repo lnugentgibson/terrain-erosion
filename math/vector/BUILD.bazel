@@ -1,6 +1,26 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "vector_helper",
+    hdrs = ["vector_helper.h"],
+    deps = [
+        "//math:common",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "vector_helper_test",
+    srcs = ["vector_helper_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@googletest//:gtest_main",
+        ":vector_helper",
+    ],
+)
+
+cc_library(
     name = "vector",
     hdrs = ["vector.h"],
     srcs = ["vector.cc"],
@@ -8,6 +28,16 @@ cc_library(
         "//math:common",
         "//util:status",
         "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "vector_test",
+    srcs = ["vector_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@googletest//:gtest_main",
+        ":vector",
     ],
 )
 
