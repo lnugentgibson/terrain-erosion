@@ -12,7 +12,6 @@ using graphics::image::binary::Neighborhood;
 class NeighborhoodTest;
 
 class NeighborhoodProxy : public Neighborhood {
-  friend NeighborhoodTest;
  public:
   NeighborhoodProxy(int _span, int _cols, DataSpecifier _in_spec) : Neighborhood(_span, _cols, _in_spec) {}
   void SetCenter(int i, int j) {
@@ -27,21 +26,7 @@ class NeighborhoodProxy : public Neighborhood {
   }
 };
 
-class NeighborhoodTest : public testing::Test {
- protected:
-  void SetCenter(NeighborhoodProxy n, int i, int j) {
-    n.center_i = i;
-    n.center_j = j;
-  }
-  void PushBack(NeighborhoodProxy n, int cols) {
-    n.buffer.push_back(new char[cols]);
-  }
-  void Set(NeighborhoodProxy n, int i, int j, char v) {
-    n.buffer[i][j] = v;
-  }
-};
-
-TEST_F(NeighborhoodTest, RangeOnCornerNN) {
+TEST(NeighborhoodTest, RangeOnCornerNN) {
   int span = 2, cols = 16;
   NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(0, 0);
@@ -67,7 +52,7 @@ TEST_F(NeighborhoodTest, RangeOnCornerNN) {
   }
 }
 
-TEST_F(NeighborhoodTest, RangeNearCornerNN) {
+TEST(NeighborhoodTest, RangeNearCornerNN) {
   int span = 2, cols = 16;
   NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span / 2, span / 2);
@@ -93,7 +78,7 @@ TEST_F(NeighborhoodTest, RangeNearCornerNN) {
   }
 }
 
-TEST_F(NeighborhoodTest, RangeMiddle) {
+TEST(NeighborhoodTest, RangeMiddle) {
   int span = 2, cols = 16;
   NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols / 2);
@@ -119,7 +104,7 @@ TEST_F(NeighborhoodTest, RangeMiddle) {
   }
 }
 
-TEST_F(NeighborhoodTest, RangeNearCornerPP) {
+TEST(NeighborhoodTest, RangeNearCornerPP) {
   int span = 2, cols = 16;
   NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols - span / 2 - 1);
@@ -145,7 +130,7 @@ TEST_F(NeighborhoodTest, RangeNearCornerPP) {
   }
 }
 
-TEST_F(NeighborhoodTest, RangeOnCornerPP) {
+TEST(NeighborhoodTest, RangeOnCornerPP) {
   int span = 2, cols = 16;
   NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols - 1);
