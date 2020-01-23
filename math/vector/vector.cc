@@ -175,11 +175,14 @@ Vector Vector::operator /(const Vector& v) {
   // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal");
   return map([v](float e, int i, float *A) { return e / v[i]; });
 }
+bool Vector::operator ==(const Vector& v) const {
+  return equals(v);
+}
 bool Vector::equals(const Vector& v, float tolerance) const {
   return reduce([v, tolerance](bool a, float e, int i, float *A) { return a && floatEquals(e, v[i], tolerance); }, true);
 }
 StatusOr<float> Vector::dot(const Vector& v) const {
-  return reduce([v](float a, float e, int i, float *A) { return a + e * v[i]; }, 0);
+  return reduce([v](float a, float e, int i, float *A) -> float { return a + e * v[i]; }, 0.0);
 }
 /*
 StatusOr<Vector> Vector::crossEquals(const Vector *vs) {

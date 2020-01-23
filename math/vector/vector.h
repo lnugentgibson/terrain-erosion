@@ -127,6 +127,7 @@ class Vector {
   Vector operator /(const float v);
   Vector operator /(const float *v);
   Vector operator /(const Vector& v);
+  bool operator ==(const Vector& v) const;
   bool equals(const Vector& v, float tolerance = .0001) const;
   StatusOr<float> dot(const Vector& v) const;
   StatusOr<Vector> crossEquals(const Vector *vs);
