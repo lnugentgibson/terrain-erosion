@@ -11,7 +11,7 @@
 using graphics::image::binary::Generate;
 using graphics::image::binary::GeneratorFactory;
 using graphics::image::binary::OutputSpecifier;
-using math::geometry::shapes::Rectangle;
+using math::geometry::shapes::CircleField;
 using math::geometry::shapes::Shape;
 using math::vector::Vector;
 
@@ -33,7 +33,12 @@ int main(int argc, char *argv[]) {
   std::string filename = fs.str();
   std::ofstream ofs(filename, std::ios::out | std::ios::binary);
   auto builder = GeneratorFactory::get().Create("ShapeGenerator");
-  builder->SetPtrParam("shape", new Rectangle(Vector(0.25, 0.25), Vector(0.5, 0.5)));
+  CircleField field(0.05);
+  field.Push(Vector(0.4, 0.4));
+  field.Push(Vector(0.7, 0.3));
+  field.Push(Vector(0.2, 0.1));
+  field.Push(Vector(0.8, 0.7));
+  builder->SetPtrParam("shape", &field);
   auto generator = (*builder)();
   Generate(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get());
   ofs.close();
