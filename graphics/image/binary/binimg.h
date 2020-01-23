@@ -23,38 +23,38 @@ struct DataSpecifier {
   size_t PixelSize() const {
     return dim * element_size;
   }
-  void readDim(std::istream& is) {
-    is.read((char *) &dim, sizeof(int));
+  void readDim(std::istream *is) {
+    is->read((char *) &dim, sizeof(int));
   }
-  void writeDim(std::ostream& os) {
-    os.write((char *) &dim, sizeof(int));
+  void writeDim(std::ostream *os) {
+    os->write((char *) &dim, sizeof(int));
   }
 };
 
 struct InputSpecifier {
   DataSpecifier data;
-  std::istream& is;
-  InputSpecifier(std::istream& _is, size_t element_size, int dim = 1) : data(element_size, dim), is(_is) {}
+  std::istream *is;
+  InputSpecifier(std::istream *_is, size_t element_size, int dim = 1) : data(element_size, dim), is(_is) {}
   void readDim() {
     data.readDim(is);
   }
   void read(int *rows, int *cols) {
-    is.read((char *) rows, sizeof(int));
-    is.read((char *) cols, sizeof(int));
+    is->read((char *) rows, sizeof(int));
+    is->read((char *) cols, sizeof(int));
     data.readDim(is);
   }
 };
 
 struct OutputSpecifier {
   DataSpecifier data;
-  std::ostream& os;
-  OutputSpecifier(std::ostream& _os, size_t element_size, int dim = 1) : data(element_size, dim), os(_os) {}
+  std::ostream *os;
+  OutputSpecifier(std::ostream *_os, size_t element_size, int dim = 1) : data(element_size, dim), os(_os) {}
   void writeDim() {
     data.writeDim(os);
   }
   void write(int *rows, int *cols) {
-    os.write((char *) rows, sizeof(int));
-    os.write((char *) cols, sizeof(int));
+    os->write((char *) rows, sizeof(int));
+    os->write((char *) cols, sizeof(int));
     data.writeDim(os);
   }
 };
@@ -75,35 +75,21 @@ struct PixelSpecifier {
   void deallocate() {
     delete[] pixel;
   }
-  void read(std::istream& is) {
-    is.read(pixel, data.PixelSize());
+  void read(std::istream *is) {
+    is->read(pixel, data.PixelSize());
   }
   void read(InputSpecifier in_spec) {
-    in_spec.is.read(pixel, data.PixelSize());
+    in_spec.is->read(pixel, data.PixelSize());
   }
-  void write(std::ostream& os) {
-    os.write(pixel, data.PixelSize());
+  void write(std::ostream *os) {
+    os->write(pixel, data.PixelSize());
   }
   void write(OutputSpecifier out_spec) {
-    out_spec.os.write(pixel, data.PixelSize());
+    out_spec.os->write(pixel, data.PixelSize());
   }
 };
 
-class Neighborhood {
-  std::deque<char *>& buffer;
- public:
-  const int span;
-  const int cols;
-  PixelSpecifier pixel;
- private:
-  int center_i, center_j;
- public:
-  Neighborhood(std::deque<char *>& _buffer, int _span, int _cols, DataSpecifier _in_spec, int _center_i, int _center_j);
-  ~Neighborhood();
-
-  std::array<int, 4> range();
-  const PixelSpecifier get(int i, int j);
-};
+class Neighborhood;
 
 class Generator {
  public:
@@ -148,7 +134,7 @@ class Transformer {
   
   virtual void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood&& neighborhood,
+    Neighborhood& neighborhood,
     PixelSpecifier out_pixel) = 0;
 };
 
@@ -158,20 +144,15 @@ class StatelessTransformer : public Transformer {
     int i, int j, int rows, int cols,
     const PixelSpecifier in_pixel,
     PixelSpecifier out_pixel,
-    void *state) override {
-      Transform(i, j, rows, cols, in_pixel, out_pixel);
-    }
+    void *state) override;
 };
 
 class PixelTransformer : public Transformer {
  public:
   virtual void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood&& neighborhood,
-    PixelSpecifier out_pixel) override {
-      const PixelSpecifier in_pixel = neighborhood.get(0, 0);
-      Transform(i, j, rows, cols, in_pixel, out_pixel);
-    };
+    Neighborhood& neighborhood,
+    PixelSpecifier out_pixel) override;
 };
 
 class SimpleTransformer : public Transformer {
@@ -180,17 +161,12 @@ class SimpleTransformer : public Transformer {
     int i, int j, int rows, int cols,
     const PixelSpecifier in_pixel,
     PixelSpecifier out_pixel,
-    void *state) override {
-      Transform(i, j, rows, cols, in_pixel, out_pixel);
-    }
+    void *state) override;
   
   void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood&& neighborhood,
-    PixelSpecifier out_pixel) override {
-      const PixelSpecifier in_pixel = neighborhood.get(0, 0);
-      Transform(i, j, rows, cols, in_pixel, out_pixel);
-    };
+    Neighborhood& neighborhood,
+    PixelSpecifier out_pixel) override;
 };
 
 class Accumulator {
@@ -396,6 +372,25 @@ void Combine(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier o
 void *CombineStateful(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSpecifier out_spec, Combiner *combiner);
 
 void ToPPM(InputSpecifier in_spec, std::ostream& os, Colorizer *component);
+
+class Neighborhood {
+ protected:
+  std::deque<char *> buffer;
+ public:
+  const int span;
+  const int cols;
+  PixelSpecifier pixel;
+ protected:
+  int center_i, center_j;
+ public:
+  Neighborhood(int _span, int _cols, DataSpecifier _in_spec);
+  ~Neighborhood();
+
+  std::array<int, 4> range();
+  const PixelSpecifier get(int i, int j);
+  
+  friend void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span, Transformer *map);
+};
 
 } // namespace binary
 } // namespace image

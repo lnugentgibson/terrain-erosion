@@ -35,7 +35,7 @@ class Differentiator : public Transformer {
   
   virtual void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood&& neighborhood,
+    Neighborhood& neighborhood,
     PixelSpecifier out_pixel) override;
 };
   
@@ -50,7 +50,7 @@ class DifferentiatorBuilder : public TransformerBuilder {
 
 void Differentiator::TransformNeighborhood(
   int i, int j, int rows, int cols,
-  image::binary::Neighborhood&& neighborhood,
+  image::binary::Neighborhood& neighborhood,
   PixelSpecifier out_pixel) {
   auto r = neighborhood.range();
   Differential *diff = reinterpret_cast<Differential*>(out_pixel.pixel);
@@ -66,6 +66,7 @@ void Differentiator::TransformNeighborhood(
   diff->normal[0] = -diff->x_slope / (f * _g);
   diff->normal[1] = -diff->y_slope / (f * _g);
   diff->normal[2] = 1.0 / _g;
+  diff->x_slope = *reinterpret_cast<float *>(neighborhood.get(0, 0).pixel);
 }
 
 bool DifferentiatorBuilder::SetFloatParam(const std::string& param, float value) {
