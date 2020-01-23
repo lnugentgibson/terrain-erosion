@@ -56,7 +56,7 @@ Neighborhood::~Neighborhood() {
 
 std::array<int, 4> Neighborhood::range() {
   if(buffer.empty()) return {0, 0, 0, 0};
-  return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span)});
+  return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span + 1)});
 }
 
 const PixelSpecifier Neighborhood::get(int i, int j) {
@@ -247,7 +247,7 @@ void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span,
   n.center_j = 0;
   for(int i = 0; i < span; i++) {
     char *row = new char[in_spec.data.PixelSize() * cols];
-    in_spec.is.read((char *) row, in_spec.data.PixelSize());
+    in_spec.is->read((char *) row, in_spec.data.PixelSize());
     n.buffer.push_back(row);
   }
   for(int i = 0; i < rows; i++)
@@ -259,7 +259,7 @@ void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span,
       }
       if(rows - i > span) {
         if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
-        in_spec.is.read((char *) row, in_spec.data.PixelSize());
+        in_spec.is->read((char *) row, in_spec.data.PixelSize());
         n.buffer.push_back(row);
       } else if(row != 0) {
         delete[] row;
