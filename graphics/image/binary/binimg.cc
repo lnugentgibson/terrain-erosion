@@ -23,7 +23,7 @@ void StatelessTransformer::TransformStateful(
 
 void PixelTransformer::TransformNeighborhood(
   int i, int j, int rows, int cols,
-  Neighborhood& neighborhood,
+  const Neighborhood& neighborhood,
   PixelSpecifier out_pixel) {
     const PixelSpecifier in_pixel = neighborhood.get(0, 0);
     Transform(i, j, rows, cols, in_pixel, out_pixel);
@@ -39,7 +39,7 @@ void SimpleTransformer::TransformStateful(
 
 void SimpleTransformer::TransformNeighborhood(
   int i, int j, int rows, int cols,
-  Neighborhood& neighborhood,
+  const Neighborhood& neighborhood,
   PixelSpecifier out_pixel) {
     const PixelSpecifier in_pixel = neighborhood.get(0, 0);
     Transform(i, j, rows, cols, in_pixel, out_pixel);
@@ -54,12 +54,12 @@ Neighborhood::~Neighborhood() {
   pixel.deallocate();
 }
 
-std::array<int, 4> Neighborhood::range() {
+std::array<int, 4> Neighborhood::range() const {
   if(buffer.empty()) return {0, 0, 0, 0};
   return std::array<int, 4>({-center_i, (int) buffer.size() - center_i, -std::min(center_j, span), std::min(cols - center_j, span + 1)});
 }
 
-const PixelSpecifier Neighborhood::get(int i, int j) {
+const PixelSpecifier Neighborhood::get(int i, int j) const {
   i += center_i;
   j += center_j;
   /*
@@ -243,36 +243,35 @@ void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span,
   PixelSpecifier out_pixel(out_spec);
   out_pixel.allocate();
   Neighborhood n(span, cols, in_spec.data);
-  n.center_i = 0;
-  n.center_j = 0;
+  n.SetCenter(0, 0);
   for(int i = 0; i < span; i++) {
     char *row = new char[in_spec.data.PixelSize() * cols];
-    in_spec.is->read((char *) row, in_spec.data.PixelSize());
-    n.buffer.push_back(row);
+    in_spec.is->read((char *) row, in_spec.data.PixelSize() * cols);
+    n.Push(row);
   }
-  for(int i = 0; i < rows; i++)
+  for(int i = 0; i < rows; i++) {
+    char *row = 0;
+    if(i > span) {
+      row = n.Front();
+      n.Pop();
+    }
+    if(rows - i > span) {
+      if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
+      in_spec.is->read((char *) row, in_spec.data.PixelSize() * cols);
+      n.Push(row);
+    } else if(row != 0) {
+      delete[] row;
+    }
     for(int j = 0; j < cols; j++) {
-      char *row = 0;
-      if(i > span) {
-        row = n.buffer.front();
-        n.buffer.pop_front();
-      }
-      if(rows - i > span) {
-        if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
-        in_spec.is->read((char *) row, in_spec.data.PixelSize());
-        n.buffer.push_back(row);
-      } else if(row != 0) {
-        delete[] row;
-      }
-      n.center_i = std::min(i, span);
-      n.center_j = j;
+      n.SetCenter(std::min(i, span), j);
       map->TransformNeighborhood(i, j, rows, cols, n, out_pixel);
       out_pixel.write(out_spec);
     }
+  }
   out_pixel.deallocate();
-  while(!n.buffer.empty()) {
-    char *row = n.buffer.front();
-    n.buffer.pop_front();
+  while(!n.Empty()) {
+    char *row = n.Front();
+    n.Pop();
     delete[] row;
   }
 }

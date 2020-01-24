@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   builder->SetFloatParam("tn", tn);
   builder->SetFloatParam("tx", tx);
   auto transformer = (*builder)();
-  Map(InputSpecifier(ifs, sizeof(float)), OutputSpecifier(ofs, sizeof(float)), transformer.get());
+  Map(InputSpecifier(&ifs, sizeof(float)), OutputSpecifier(&ofs, sizeof(float)), transformer.get());
   ifs.close();
   ofs.close();
   return 0;

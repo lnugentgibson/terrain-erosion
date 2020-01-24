@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   std::ofstream ofs(result["o"].as<std::string>().c_str(), std::ios::out | std::ios::binary);
   auto builder = ColorizerFactory::get().Create("ColorColorizer");
   auto colorizer = (*builder)();
-  ToPPM(InputSpecifier(ifs, sizeof(float)), ofs, colorizer.get());
+  ToPPM(InputSpecifier(&ifs, sizeof(float)), ofs, colorizer.get());
   ifs.close();
   ofs.close();
   return 0;

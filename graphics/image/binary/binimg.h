@@ -35,6 +35,7 @@ struct InputSpecifier {
   DataSpecifier data;
   std::istream *is;
   InputSpecifier(std::istream *_is, size_t element_size, int dim = 1) : data(element_size, dim), is(_is) {}
+  InputSpecifier(std::istream *_is, DataSpecifier spec) : data(spec), is(_is) {}
   void readDim() {
     data.readDim(is);
   }
@@ -49,6 +50,7 @@ struct OutputSpecifier {
   DataSpecifier data;
   std::ostream *os;
   OutputSpecifier(std::ostream *_os, size_t element_size, int dim = 1) : data(element_size, dim), os(_os) {}
+  OutputSpecifier(std::ostream *_os, DataSpecifier spec) : data(spec), os(_os) {}
   void writeDim() {
     data.writeDim(os);
   }
@@ -134,7 +136,7 @@ class Transformer {
   
   virtual void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood& neighborhood,
+    const Neighborhood& neighborhood,
     PixelSpecifier out_pixel) = 0;
 };
 
@@ -151,7 +153,7 @@ class PixelTransformer : public Transformer {
  public:
   virtual void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood& neighborhood,
+    const Neighborhood& neighborhood,
     PixelSpecifier out_pixel) override;
 };
 
@@ -165,7 +167,7 @@ class SimpleTransformer : public Transformer {
   
   void TransformNeighborhood(
     int i, int j, int rows, int cols,
-    Neighborhood& neighborhood,
+    const Neighborhood& neighborhood,
     PixelSpecifier out_pixel) override;
 };
 
@@ -374,22 +376,53 @@ void *CombineStateful(InputSpecifier in_spec1, InputSpecifier in_spec2, OutputSp
 void ToPPM(InputSpecifier in_spec, std::ostream& os, Colorizer *component);
 
 class Neighborhood {
- protected:
   std::deque<char *> buffer;
+  int center_i, center_j;
  public:
   const int span;
   const int cols;
   PixelSpecifier pixel;
- protected:
-  int center_i, center_j;
  public:
   Neighborhood(int _span, int _cols, DataSpecifier _in_spec);
   ~Neighborhood();
 
-  std::array<int, 4> range();
-  const PixelSpecifier get(int i, int j);
+  std::array<int, 4> range() const;
+  const PixelSpecifier get(int i, int j) const;
   
-  friend void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span, Transformer *map);
+  int GetCenterI() {
+    return center_i;
+  }
+  int GetCenterJ() {
+    return center_j;
+  }
+  void SetCenterI(int i) {
+    center_i = i;
+  }
+  void SetCenterJ(int j) {
+    center_j = j;
+  }
+  void SetCenter(int i, int j) {
+    center_i = i;
+    center_j = j;
+  }
+  void Push() {
+    buffer.push_back(new char[cols]);
+  }
+  void Push(char *row) {
+    buffer.push_back(row);
+  }
+  void Pop() {
+    buffer.pop_front();
+  }
+  char *Front() {
+    return buffer.front();
+  }
+  bool Empty() {
+    return buffer.empty();
+  }
+  void Set(int i, int j, char v) {
+    buffer[i][j] = v;
+  }
 };
 
 } // namespace binary

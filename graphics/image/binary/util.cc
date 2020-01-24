@@ -229,15 +229,15 @@ void ColorColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
 void VectorColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
   auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v;
-  rgb[1] = pixel.data.dim > 0 ? *v : 0.0;
-  rgb[2] = pixel.data.dim > 1 ? *v : 0.0;
+  rgb[1] = pixel.data.dim > 0 ? v[1] : 0.0;
+  rgb[2] = pixel.data.dim > 1 ? v[2] : 0.0;
 }
 
 void DirectionColorizer::ToRGB(const PixelSpecifier pixel, float *rgb) {
   auto *v = reinterpret_cast<const float*>(pixel.pixel);
   rgb[0] = *v * 0.5 + 0.5;
-  rgb[1] = pixel.data.dim > 0 ? *v * 0.5 + 0.5 : 0.5;
-  rgb[2] = pixel.data.dim > 1 ? *v * 0.5 + 0.5 : 0.5;
+  rgb[1] = pixel.data.dim > 0 ? v[1] * 0.5 + 0.5 : 0.5;
+  rgb[2] = pixel.data.dim > 1 ? v[2] * 0.5 + 0.5 : 0.5;
 }
 
 namespace ColorizerRegistrations {

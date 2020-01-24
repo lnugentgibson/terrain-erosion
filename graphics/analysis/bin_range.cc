@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   std::pair<float, float> minmax;
   auto builder = AccumulatorFactory::get().Create("MinMaxAccumulator");
   auto reducer = (*builder)();
-  Reduce(InputSpecifier(ifs, sizeof(float)), reducer.get(), &minmax);
+  Reduce(InputSpecifier(&ifs, sizeof(float)), reducer.get(), &minmax);
   ifs.close();
   std::cout << "--from-min=" << minmax.first << " --from-max=" << minmax.second << std::endl;
   return 0;

@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
     auto builder = GeneratorFactory::get().Create("RandomDirectionGenerator");
     auto generator = (*builder)();
-    Generate(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get());
+    Generate(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get());
     ofs.close();
   }
   return 0;
