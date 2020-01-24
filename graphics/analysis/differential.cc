@@ -66,7 +66,6 @@ void Differentiator::TransformNeighborhood(
   diff->normal[0] = -diff->x_slope / (f * _g);
   diff->normal[1] = -diff->y_slope / (f * _g);
   diff->normal[2] = 1.0 / _g;
-  diff->x_slope = *reinterpret_cast<float *>(neighborhood.get(0, 0).pixel);
 }
 
 bool DifferentiatorBuilder::SetFloatParam(const std::string& param, float value) {
@@ -154,7 +153,7 @@ namespace binary {
 namespace TransformerRegistrations {
 	TransformerFactoryRegistration<analysis::DifferentiatorBuilder> _DifferentiatorBuilder("Differentiator");
 	TransformerFactoryRegistration<analysis::DifferentialDXExtractorBuilder> _DifferentialDXExtractorBuilder("DifferentialDXExtractor");
-	TransformerFactoryRegistration<analysis::DifferentialDYExtractorBuilder> _DifferentialDYExtractorBuilder("DifferentialDXExtractor");
+	TransformerFactoryRegistration<analysis::DifferentialDYExtractorBuilder> _DifferentialDYExtractorBuilder("DifferentialDYExtractor");
 	TransformerFactoryRegistration<analysis::DifferentialNormalExtractorBuilder> _DifferentialNormalExtractorBuilder("DifferentialNormalExtractor");
 }
 } // namespace binary
