@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     auto g_builder = GeneratorFactory::get().Create("PerlinValueGenerator");
     g_builder->SetIntParam("cell_size", cell_size);
     auto generator = (*g_builder)();
-    GenerateStateful(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get(), &init);
+    GenerateStateful(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get(), &init);
     ofs.close();
     std::stringstream fsc;
     fsc << result["o"].as<std::string>();
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     t_builder->SetFloatParam("tn", -1.0);
     t_builder->SetFloatParam("tx", 1.0);
     auto transformer = (*t_builder)();
-    Map(InputSpecifier(ifsc, sizeof(float)), OutputSpecifier(ofsc, sizeof(float)), transformer.get());
+    Map(InputSpecifier(&ifsc, sizeof(float)), OutputSpecifier(&ofsc, sizeof(float)), transformer.get());
     ifsc.close();
     ofsc.close();
   }

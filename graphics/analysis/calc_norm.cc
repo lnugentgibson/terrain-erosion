@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   auto builder = TransformerFactory::get().Create("Differentiator");
   builder->SetFloatParam("d", d);
   auto transformer = (*builder)();
-  MapNeighborhood(InputSpecifier(ifs, sizeof(float)), OutputSpecifier(ofsd, sizeof(Differential)), smoothing, transformer.get());
+  MapNeighborhood(InputSpecifier(&ifs, sizeof(float)), OutputSpecifier(&ofsd, sizeof(Differential)), smoothing, transformer.get());
   ifs.close();
   ofsd.close();
   
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   std::ofstream ofsx(filenamex.c_str(), std::ios::out | std::ios::binary);
   builder = TransformerFactory::get().Create("DifferentialDXExtractor");
   transformer = (*builder)();
-  Map(InputSpecifier(ifsd, sizeof(Differential)), OutputSpecifier(ofsx, sizeof(float)), transformer.get());
+  Map(InputSpecifier(&ifsd, sizeof(Differential)), OutputSpecifier(&ofsx, sizeof(float)), transformer.get());
   ofsx.close();
   
   /*

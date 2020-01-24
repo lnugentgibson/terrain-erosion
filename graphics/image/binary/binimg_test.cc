@@ -9,29 +9,12 @@ using graphics::image::binary::DataSpecifier;
 using graphics::image::binary::InputSpecifier;
 using graphics::image::binary::Neighborhood;
 
-class NeighborhoodTest;
-
-class NeighborhoodProxy : public Neighborhood {
- public:
-  NeighborhoodProxy(int _span, int _cols, DataSpecifier _in_spec) : Neighborhood(_span, _cols, _in_spec) {}
-  void SetCenter(int i, int j) {
-    center_i = i;
-    center_j = j;
-  }
-  void PushBack() {
-    buffer.push_back(new char[cols]);
-  }
-  void Set(int i, int j, char v) {
-    buffer[i][j] = v;
-  }
-};
-
 TEST(NeighborhoodTest, RangeOnCornerNN) {
   int span = 2, cols = 16;
-  NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
+  Neighborhood n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(0, 0);
   for(int i = 0; i <= span; i++) {
-    n.PushBack();
+    n.Push();
     for(int j = 0; j < cols; j++) {
       n.Set(i, j, i * cols + j);
     }
@@ -54,10 +37,10 @@ TEST(NeighborhoodTest, RangeOnCornerNN) {
 
 TEST(NeighborhoodTest, RangeNearCornerNN) {
   int span = 2, cols = 16;
-  NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
+  Neighborhood n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span / 2, span / 2);
   for(int i = -span / 2; i <= span; i++) {
-    n.PushBack();
+    n.Push();
     for(int j = 0; j < cols; j++) {
       n.Set(i + span / 2, j, (i + span / 2) * cols + j);
     }
@@ -80,10 +63,10 @@ TEST(NeighborhoodTest, RangeNearCornerNN) {
 
 TEST(NeighborhoodTest, RangeMiddle) {
   int span = 2, cols = 16;
-  NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
+  Neighborhood n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols / 2);
   for(int i = -span; i <= span; i++) {
-    n.PushBack();
+    n.Push();
     for(int j = 0; j < cols; j++) {
       n.Set(i + span, j, (i + span) * cols + j);
     }
@@ -106,10 +89,10 @@ TEST(NeighborhoodTest, RangeMiddle) {
 
 TEST(NeighborhoodTest, RangeNearCornerPP) {
   int span = 2, cols = 16;
-  NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
+  Neighborhood n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols - span / 2 - 1);
   for(int i = -span; i <= span / 2; i++) {
-    n.PushBack();
+    n.Push();
     for(int j = 0; j < cols; j++) {
       n.Set(i + span, j, (i + span) * cols + j);
     }
@@ -132,10 +115,10 @@ TEST(NeighborhoodTest, RangeNearCornerPP) {
 
 TEST(NeighborhoodTest, RangeOnCornerPP) {
   int span = 2, cols = 16;
-  NeighborhoodProxy n(span, cols, DataSpecifier(sizeof(char)));
+  Neighborhood n(span, cols, DataSpecifier(sizeof(char)));
   n.SetCenter(span, cols - 1);
   for(int i = -span; i <= 0; i++) {
-    n.PushBack();
+    n.Push();
     for(int j = 0; j < cols; j++) {
       n.Set(i + span, j, (i + span) * cols + j);
     }

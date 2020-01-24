@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   builder->SetFloatParam("wa", result["m"].as<float>());
   builder->SetFloatParam("wb", result["n"].as<float>());
   auto combiner = (*builder)();
-  Combine(InputSpecifier(ifs1, sizeof(float)), InputSpecifier(ifs2, sizeof(float)), OutputSpecifier(ofs, sizeof(float)), combiner.get());
+  Combine(InputSpecifier(&ifs1, sizeof(float)), InputSpecifier(&ifs2, sizeof(float)), OutputSpecifier(&ofs, sizeof(float)), combiner.get());
   ifs1.close();
   ifs2.close();
   ofs.close();
