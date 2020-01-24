@@ -246,27 +246,28 @@ void MapNeighborhood(InputSpecifier in_spec, OutputSpecifier out_spec, int span,
   n.SetCenter(0, 0);
   for(int i = 0; i < span; i++) {
     char *row = new char[in_spec.data.PixelSize() * cols];
-    in_spec.is->read((char *) row, in_spec.data.PixelSize());
+    in_spec.is->read((char *) row, in_spec.data.PixelSize() * cols);
     n.Push(row);
   }
-  for(int i = 0; i < rows; i++)
+  for(int i = 0; i < rows; i++) {
+    char *row = 0;
+    if(i > span) {
+      row = n.Front();
+      n.Pop();
+    }
+    if(rows - i > span) {
+      if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
+      in_spec.is->read((char *) row, in_spec.data.PixelSize() * cols);
+      n.Push(row);
+    } else if(row != 0) {
+      delete[] row;
+    }
     for(int j = 0; j < cols; j++) {
-      char *row = 0;
-      if(i > span) {
-        row = n.Front();
-        n.Pop();
-      }
-      if(rows - i > span) {
-        if(row == 0) row = new char[in_spec.data.PixelSize() * cols];
-        in_spec.is->read((char *) row, in_spec.data.PixelSize());
-        n.Push(row);
-      } else if(row != 0) {
-        delete[] row;
-      }
       n.SetCenter(std::min(i, span), j);
       map->TransformNeighborhood(i, j, rows, cols, n, out_pixel);
       out_pixel.write(out_spec);
     }
+  }
   out_pixel.deallocate();
   while(!n.Empty()) {
     char *row = n.Front();

@@ -35,6 +35,7 @@ struct InputSpecifier {
   DataSpecifier data;
   std::istream *is;
   InputSpecifier(std::istream *_is, size_t element_size, int dim = 1) : data(element_size, dim), is(_is) {}
+  InputSpecifier(std::istream *_is, DataSpecifier spec) : data(spec), is(_is) {}
   void readDim() {
     data.readDim(is);
   }
@@ -49,6 +50,7 @@ struct OutputSpecifier {
   DataSpecifier data;
   std::ostream *os;
   OutputSpecifier(std::ostream *_os, size_t element_size, int dim = 1) : data(element_size, dim), os(_os) {}
+  OutputSpecifier(std::ostream *_os, DataSpecifier spec) : data(spec), os(_os) {}
   void writeDim() {
     data.writeDim(os);
   }
