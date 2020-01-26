@@ -18,12 +18,13 @@ int main(int argc, char *argv[]) {
   options.add_options()
     ("i,input", "first binary image file path", cxxopts::value<std::string>())
     ("d,depth", "from min", cxxopts::value<float>())
+    ("s,smoothing", "from min", cxxopts::value<int>())
     ("o,output", "ppm image file path", cxxopts::value<std::string>())
     ;
   auto result = options.parse(argc, argv);
   
   float d = result["d"].as<float>();
-  int smoothing = 4;
+  int smoothing = result["s"].as<int>();
   std::ifstream ifs(result["i"].as<std::string>().c_str(), std::ios::in | std::ios::binary);
   std::stringstream fsd;
   fsd << result["o"].as<std::string>() << "_diff.bin";
