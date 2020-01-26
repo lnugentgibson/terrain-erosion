@@ -14,6 +14,7 @@ git_repository(
 
 git_repository(
     name = "stb",
-    remote = "https://github.com/nothings/stb.git",
+    init_submodules = True,
     branch = "master",
+    remote = "https://github.com/nitronoid/rules_stb"
 )

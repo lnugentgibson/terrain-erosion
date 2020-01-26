@@ -47,12 +47,34 @@ cc_binary(
 )
 
 cc_binary(
+    name = "bin2png_gray",
+    srcs = ["bin2png_gray.cc"],
+    deps = [
+        ":binimg",
+        ":util",
+        "//cxxopts:cxxopts",
+        "@stb//:image_write",
+    ],
+)
+
+cc_binary(
     name = "bin2ppm_sign",
     srcs = ["bin2ppm_sign.cc"],
     deps = [
         ":binimg",
         ":util",
         "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2png_sign",
+    srcs = ["bin2png_sign.cc"],
+    deps = [
+        ":binimg",
+        ":util",
+        "//cxxopts:cxxopts",
+        "@stb//:image_write",
     ],
 )
 
