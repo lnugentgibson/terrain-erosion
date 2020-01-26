@@ -1,15 +1,14 @@
-#include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::OutputSpecifier;
 using graphics::image::binary::Generate;
 using graphics::image::binary::GeneratorFactory;
-using graphics::image::binary::OutputSpecifier;
 
 int main(int argc, char *argv[]) {
   cxxopts::Options options(argv[0], "converts a color image from binary to ppm");

@@ -1,8 +1,7 @@
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
@@ -10,11 +9,11 @@
 #include "graphics/noise/random.h"
 #include "graphics/noise/noise.h"
 
+using graphics::image::InputSpecifier;
+using graphics::image::OutputSpecifier;
 using graphics::image::binary::GeneratorFactory;
 using graphics::image::binary::GenerateStateful;
-using graphics::image::binary::InputSpecifier;
 using graphics::image::binary::Map;
-using graphics::image::binary::OutputSpecifier;
 using graphics::image::binary::TransformerFactory;
 
 int main(int argc, char *argv[]) {

@@ -2,11 +2,11 @@
 #include "graphics/image/binary/binimg_registration.h"
 #include "math/geometry/shapes/shape.h"
 
+using graphics::image::PixelSpecifier;
 using math::geometry::shapes::Shape;
 using math::vector::Vector;
 using graphics::image::binary::Generator;
 using graphics::image::binary::GeneratorBuilder;
-using graphics::image::binary::PixelSpecifier;
 using graphics::image::binary::SimpleTransformer;
 using graphics::image::binary::StatelessGenerator;
 using graphics::image::binary::Transformer;
