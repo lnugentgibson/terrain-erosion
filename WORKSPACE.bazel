@@ -11,3 +11,9 @@ git_repository(
     remote = "https://github.com/abseil/abseil-cpp.git",
     commit = "aa844899c937bde5d2b24f276b59997e5b668bde",
 )
+
+git_repository(
+    name = "stb",
+    remote = "https://github.com/nothings/stb.git",
+    branch = "master",
+)
