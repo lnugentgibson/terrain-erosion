@@ -7,10 +7,6 @@
 
 #include "graphics/image/binary/binimg.h"
 
-using graphics::image::binary::DataSpecifier;
-using graphics::image::binary::InputSpecifier;
-using graphics::image::binary::Neighborhood;
-
 namespace graphics {
 namespace image {
 namespace binary {

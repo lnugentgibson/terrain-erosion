@@ -5,6 +5,9 @@ cc_library(
     hdrs = ["binimg.h"],
     srcs = ["binimg.cc"],
     alwayslink = 1,
+    deps = [
+        "//graphics/image:pixel",
+    ],
 )
 
 cc_test(

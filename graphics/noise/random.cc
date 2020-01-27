@@ -5,9 +5,9 @@
 #include "graphics/image/binary/binimg.h"
 #include "graphics/image/binary/binimg_registration.h"
 
+using graphics::image::PixelSpecifier;
 using graphics::image::binary::Generator;
 using graphics::image::binary::GeneratorBuilder;
-using graphics::image::binary::PixelSpecifier;
 using graphics::image::binary::StatelessGenerator;
 
 class RandomGrayscaleGenerator : public StatelessGenerator {

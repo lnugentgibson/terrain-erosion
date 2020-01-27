@@ -1,6 +1,5 @@
-#include <cstdlib>
 #include <cstring>
-#include <iostream>
+#include <fstream>
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
@@ -9,10 +8,10 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
+using graphics::image::InputSpecifier;
+using graphics::image::PixelSpecifier;
 using graphics::image::binary::Colorizer;
 using graphics::image::binary::ColorizerFactory;
-using graphics::image::binary::InputSpecifier;
-using graphics::image::binary::PixelSpecifier;
 using graphics::image::binary::StatelessFunctor;
 using graphics::image::binary::ToPPM;
 

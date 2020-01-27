@@ -1,16 +1,15 @@
-#include <cstdlib>
 #include <cstring>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/analysis/differential.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::InputSpecifier;
+using graphics::image::OutputSpecifier;
 using graphics::analysis::Differential;
-using graphics::image::binary::InputSpecifier;
 using graphics::image::binary::MapNeighborhood;
-using graphics::image::binary::OutputSpecifier;
 using graphics::image::binary::TransformerFactory;
 
 int main(int argc, char *argv[]) {

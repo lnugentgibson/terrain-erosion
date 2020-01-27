@@ -1,13 +1,7 @@
 #include "binimg.h"
 
 #include <algorithm>
-#include <array>
-#include <deque>
-#include <fstream>
-#include <iostream>
 #include <iterator>
-#include <memory>
-#include <optional>
 
 namespace graphics {
 namespace image {

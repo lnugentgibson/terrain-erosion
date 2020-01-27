@@ -1,12 +1,11 @@
-#include <cstdlib>
 #include <cstring>
-#include <iostream>
+#include <fstream>
 
 #include "cxxopts/cxxopts.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::InputSpecifier;
 using graphics::image::binary::ColorizerFactory;
-using graphics::image::binary::InputSpecifier;
 using graphics::image::binary::ToPPM;
 
 int main(int argc, char *argv[]) {

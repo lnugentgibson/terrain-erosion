@@ -6,9 +6,9 @@
 #include "graphics/image/binary/binimg_registration.h"
 #include "graphics/noise/random.h"
 
+using graphics::image::PixelSpecifier;
 using graphics::image::binary::Generator;
 using graphics::image::binary::GeneratorBuilder;
-using graphics::image::binary::PixelSpecifier;
 
 float curve1(float x) {
   return x;

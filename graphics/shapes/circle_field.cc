@@ -1,16 +1,15 @@
-#include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
 #include "math/geometry/shapes/shape.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::OutputSpecifier;
 using graphics::image::binary::Generate;
 using graphics::image::binary::GeneratorFactory;
-using graphics::image::binary::OutputSpecifier;
 using math::geometry::shapes::CircleField;
 using math::geometry::shapes::Shape;
 using math::vector::Vector;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
   field.Push(Vector(0.8, 0.7));
   builder->SetPtrParam("shape", &field);
   auto generator = (*builder)();
-  Generate(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get());
+  Generate(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get());
   ofs.close();
   return 0;
 }

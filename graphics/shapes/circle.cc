@@ -1,16 +1,15 @@
-#include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
 #include "math/geometry/shapes/shape.h"
 #include "graphics/image/binary/binimg.h"
 
+using graphics::image::OutputSpecifier;
 using graphics::image::binary::Generate;
 using graphics::image::binary::GeneratorFactory;
-using graphics::image::binary::OutputSpecifier;
 using math::geometry::shapes::Circle;
 using math::geometry::shapes::Shape;
 using math::vector::Vector;
@@ -35,7 +34,7 @@ int main(int argc, char *argv[]) {
   auto builder = GeneratorFactory::get().Create("ShapeGenerator");
   builder->SetPtrParam("shape", new Circle(Vector(0.4, 0.4), 0.3));
   auto generator = (*builder)();
-  Generate(rows, cols, OutputSpecifier(ofs, sizeof(float)), generator.get());
+  Generate(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get());
   ofs.close();
   return 0;
 }

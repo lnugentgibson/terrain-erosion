@@ -8,8 +8,8 @@
 namespace graphics {
 namespace analysis {
   
+using image::PixelSpecifier;
 using image::binary::Neighborhood;
-using image::binary::PixelSpecifier;
 using image::binary::SimpleTransformer;
 using image::binary::Transformer;
 using image::binary::TransformerBuilder;
