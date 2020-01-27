@@ -18,3 +18,9 @@ git_repository(
     branch = "master",
     remote = "https://github.com/nitronoid/rules_stb"
 )
+
+git_repository(
+    name = "protobuf",
+    remote = "https://github.com/protocolbuffers/protobuf.git",
+    commit = "fe1790ca0df67173702f70d5646b82f48f412b99",
+)
