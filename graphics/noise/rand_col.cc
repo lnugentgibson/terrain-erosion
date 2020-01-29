@@ -1,6 +1,6 @@
 #include <cstring>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
@@ -11,24 +11,23 @@ using graphics::image::binary::Generate;
 using graphics::image::binary::GeneratorFactory;
 
 int main(int argc, char *argv[]) {
-  cxxopts::Options options(argv[0], "converts a color image from binary to ppm");
-  options.add_options()
-    ("w,width", "Width of image", cxxopts::value<int>())
-    ("h,height", "Height of image", cxxopts::value<int>())
-    ("s,seed", "random seed", cxxopts::value<int>())
-    ("c,count", "number of image", cxxopts::value<int>())
-    ("o,output", "image filename prototype", cxxopts::value<std::string>())
-    ;
+  cxxopts::Options options(argv[0],
+                           "converts a color image from binary to ppm");
+  options.add_options()("w,width", "Width of image", cxxopts::value<int>())(
+      "h,height", "Height of image",
+      cxxopts::value<int>())("s,seed", "random seed", cxxopts::value<int>())(
+      "c,count", "number of image", cxxopts::value<int>())(
+      "o,output", "image filename prototype", cxxopts::value<std::string>());
   auto result = options.parse(argc, argv);
   int cols = result["w"].as<int>();
   int rows = result["h"].as<int>();
   int seed = result["s"].as<int>();
-  if(seed < 0) {
+  if (seed < 0) {
     seed = time(NULL);
   }
   srand(seed);
   int count = result["c"].as<int>();
-  for(int i = 0; i < count; i++) {
+  for (int i = 0; i < count; i++) {
     std::stringstream fs;
     fs << result["o"].as<std::string>();
     fs << "_" << std::setfill('0') << std::setw(4) << rows;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
     std::ofstream ofs(filename, std::ios::out | std::ios::binary);
     auto builder = GeneratorFactory::get().Create("RandomColorGenerator");
     auto generator = (*builder)();
-    Generate(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get());
+    Generate(OutputSpecifier(&ofs, rows, cols, sizeof(float)), generator.get());
     ofs.close();
   }
   return 0;

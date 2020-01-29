@@ -6,7 +6,8 @@
 
 class Matrix {
   float *c;
- public:
+
+public:
   const int m, n;
   Matrix(int _m, int _n) : c(new float[_m * _n]), m(_m), n(_n) {}
   Matrix(int _m, int _n, float *_c) : c(_c), m(_m), n(_n) {}
@@ -55,33 +56,33 @@ class Matrix {
     return a;
   };
   //*/
-  Matrix& negate();
+  Matrix &negate();
   Matrix negative() const;
-  Matrix& add(const float v);
-  Matrix& add(const float *v);
-  Matrix& add(const Matrix& v);
+  Matrix &add(const float v);
+  Matrix &add(const float *v);
+  Matrix &add(const Matrix &v);
   Matrix sum(const float v) const;
   Matrix sum(const float *v) const;
-  Matrix sum(const Matrix& v) const;
-  Matrix& subtract(const float v);
-  Matrix& subtract(const float *v);
-  Matrix& subtract(const Matrix& v);
+  Matrix sum(const Matrix &v) const;
+  Matrix &subtract(const float v);
+  Matrix &subtract(const float *v);
+  Matrix &subtract(const Matrix &v);
   Matrix difference(const float v) const;
   Matrix difference(const float *v) const;
-  Matrix difference(const Matrix& v) const;
-  Matrix& multiply(const float v);
-  Matrix& multiply(const float *v);
-  Matrix& multiply(const Matrix& v);
+  Matrix difference(const Matrix &v) const;
+  Matrix &multiply(const float v);
+  Matrix &multiply(const float *v);
+  Matrix &multiply(const Matrix &v);
   Matrix product(const float v) const;
   Matrix product(const float *v) const;
-  Matrix product(const Matrix& v) const;
-  Matrix& divide(const float v);
-  Matrix& divide(const float *v);
-  Matrix& divide(const Matrix& v);
+  Matrix product(const Matrix &v) const;
+  Matrix &divide(const float v);
+  Matrix &divide(const float *v);
+  Matrix &divide(const Matrix &v);
   Matrix quotient(const float v) const;
   Matrix quotient(const float *v) const;
-  Matrix quotient(const Matrix& v) const;
-  bool equals(const Matrix& v, float tolerance = .0001) const;
+  Matrix quotient(const Matrix &v) const;
+  bool equals(const Matrix &v, float tolerance = .0001) const;
   float min() const;
   float max() const;
   float *toArray() const;

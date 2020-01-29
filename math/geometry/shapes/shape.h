@@ -12,7 +12,7 @@ namespace geometry {
 namespace shapes {
 
 class Shape {
- public:
+public:
   virtual bool Inside(Vector p) = 0;
   virtual float Intersect(Vector c, Vector s) = 0;
 };
@@ -20,7 +20,8 @@ class Shape {
 class Rectangle : public Shape {
   Vector corner;
   Vector size;
- public:
+
+public:
   Rectangle(Vector c, Vector s);
   bool Inside(Vector p) override;
   float Intersect(Vector c, Vector s) override;
@@ -29,7 +30,8 @@ class Rectangle : public Shape {
 class Circle : public Shape {
   Vector center;
   float radius;
- public:
+
+public:
   Circle(Vector c, float r) : center(c), radius(r) {}
   bool Inside(Vector p) override;
   float Intersect(Vector c, Vector s) override;
@@ -38,7 +40,8 @@ class Circle : public Shape {
 class CircleField : public Shape {
   std::vector<Vector> centers;
   float radius;
- public:
+
+public:
   CircleField(float r) : radius(r) {}
   void Push(Vector center);
   bool Inside(Vector p) override;
@@ -47,7 +50,8 @@ class CircleField : public Shape {
 
 class Polygon : public Shape {
   std::vector<Vector> points;
- public:
+
+public:
   bool Inside(Vector p);
 };
 

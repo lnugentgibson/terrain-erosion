@@ -1,11 +1,11 @@
 #include <cstring>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 
 #include "cxxopts/cxxopts.h"
-#include "math/geometry/shapes/shape.h"
 #include "graphics/image/binary/binimg.h"
+#include "math/geometry/shapes/shape.h"
 
 using graphics::image::OutputSpecifier;
 using graphics::image::binary::Generate;
@@ -15,12 +15,11 @@ using math::geometry::shapes::Shape;
 using math::vector::Vector;
 
 int main(int argc, char *argv[]) {
-  cxxopts::Options options(argv[0], "converts a color image from binary to ppm");
-  options.add_options()
-    ("w,width", "Width of image", cxxopts::value<int>())
-    ("h,height", "Height of image", cxxopts::value<int>())
-    ("o,output", "ppm image file path", cxxopts::value<std::string>())
-    ;
+  cxxopts::Options options(argv[0],
+                           "converts a color image from binary to ppm");
+  options.add_options()("w,width", "Width of image", cxxopts::value<int>())(
+      "h,height", "Height of image", cxxopts::value<int>())(
+      "o,output", "ppm image file path", cxxopts::value<std::string>());
   auto result = options.parse(argc, argv);
   int cols = result["w"].as<int>();
   int rows = result["h"].as<int>();
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
   auto builder = GeneratorFactory::get().Create("ShapeGenerator");
   builder->SetPtrParam("shape", new Circle(Vector(0.4, 0.4), 0.3));
   auto generator = (*builder)();
-  Generate(rows, cols, OutputSpecifier(&ofs, sizeof(float)), generator.get());
+  Generate(OutputSpecifier(&ofs, rows, cols, sizeof(float)), generator.get());
   ofs.close();
   return 0;
 }
