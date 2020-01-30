@@ -92,6 +92,17 @@ cc_binary(
 )
 
 cc_binary(
+    name = "bin2png_col",
+    srcs = ["bin2png_col.cc"],
+    deps = [
+        ":binimg",
+        ":util",
+        "//cxxopts:cxxopts",
+        "@stb//:image_write",
+    ],
+)
+
+cc_binary(
     name = "bin2ppm_vec",
     srcs = ["bin2ppm_vec.cc"],
     deps = [
@@ -102,12 +113,34 @@ cc_binary(
 )
 
 cc_binary(
+    name = "bin2png_vec",
+    srcs = ["bin2png_vec.cc"],
+    deps = [
+        ":binimg",
+        ":util",
+        "//cxxopts:cxxopts",
+        "@stb//:image_write",
+    ],
+)
+
+cc_binary(
     name = "bin2ppm_dir",
     srcs = ["bin2ppm_dir.cc"],
     deps = [
         ":binimg",
         ":util",
         "//cxxopts:cxxopts",
+    ],
+)
+
+cc_binary(
+    name = "bin2png_dir",
+    srcs = ["bin2png_dir.cc"],
+    deps = [
+        ":binimg",
+        ":util",
+        "//cxxopts:cxxopts",
+        "@stb//:image_write",
     ],
 )
 
