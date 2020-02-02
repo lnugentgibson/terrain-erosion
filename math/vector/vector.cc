@@ -9,181 +9,178 @@
 namespace math {
 namespace vector {
 
+#define VECTOR_BINARY_OP_S_SCALAR(f, op) \
+Vector &Vector::f(const float v) { \
+  return transform([v](float e, int i, float *A) { return e op v; }); \
+}
+#define VECTOR_BINARY_OP_S_ARR(f, op) \
+Vector &Vector::f(const float *v) { \
+  return transform([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+#define VECTOR_BINARY_OP_S_VEC(f, op) \
+StatusOr<Vector> Vector::f(const Vector &v) { \
+  if (v.d != d) \
+    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+  return transform([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+#define VECTOR_BINARY_OP_SO_SCALAR(f, op) \
+Vector &Vector::operator f(const float v) { \
+  return transform([v](float e, int i, float *A) { return e op v; }); \
+}
+#define VECTOR_BINARY_OP_SO_ARR(f, op) \
+Vector &Vector::operator f(const float *v) { \
+  return transform([v](float e, int i, float *A) { return e + v[i]; }); \
+}
+#define VECTOR_BINARY_OP_SO_VEC(f, op) \
+Vector &Vector::operator f(const Vector &v) { \
+  return transform([v](float e, int i, float *A) { return e + v[i]; }); \
+}
+#define VECTOR_BINARY_OP_O_SCALAR(f, op) \
+Vector Vector::f(const float v) const { \
+  return map([v](float e, int i, float *A) { return e op v; }); \
+}
+#define VECTOR_BINARY_OP_O_ARR(f, op) \
+Vector Vector::f(const float *v) const { \
+  return map([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+#define VECTOR_BINARY_OP_O_VEC(f, op) \
+StatusOr<Vector> Vector::f(const Vector &v) const { \
+  if (v.d != d) \
+    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+  return map([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+#define VECTOR_BINARY_OP_OO_SCALAR(op) \
+Vector Vector::operator op(const float v) const { \
+  return map([v](float e, int i, float *A) { return e op v; }); \
+}
+#define VECTOR_BINARY_OP_OO_ARR(op) \
+Vector Vector::operator op(const float *v) const { \
+  return map([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+#define VECTOR_BINARY_OP_OO_VEC(op) \
+Vector Vector::operator op(const Vector &v) const { \
+  return map([v](float e, int i, float *A) { return e op v[i]; }); \
+}
+
+#define VECTOR_BINARY_OP_S(f, op) \
+VECTOR_BINARY_OP_S_SCALAR(f, op) \
+VECTOR_BINARY_OP_S_ARR(f, op) \
+VECTOR_BINARY_OP_S_VEC(f, op)
+
+#define VECTOR_BINARY_OP_SO(f, op) \
+VECTOR_BINARY_OP_SO_SCALAR(f, op) \
+VECTOR_BINARY_OP_SO_ARR(f, op) \
+VECTOR_BINARY_OP_SO_VEC(f, op)
+
+#define VECTOR_BINARY_OP_O(f, op) \
+VECTOR_BINARY_OP_O_SCALAR(f, op) \
+VECTOR_BINARY_OP_O_ARR(f, op) \
+VECTOR_BINARY_OP_O_VEC(f, op)
+
+#define VECTOR_BINARY_OP_OO(op) \
+VECTOR_BINARY_OP_OO_SCALAR(op) \
+VECTOR_BINARY_OP_OO_ARR(op) \
+VECTOR_BINARY_OP_OO_VEC(op)
+
+#define VECTOR_BINARY_OP(fs, fso, fo, op) \
+VECTOR_BINARY_OP_S(fs, op) \
+VECTOR_BINARY_OP_SO(fso, op) \
+VECTOR_BINARY_OP_O(fo, op) \
+VECTOR_BINARY_OP_OO(op)
+
+#define VECTOR_BINARY_FN_S_SCALAR(f, fn) \
+Vector &Vector::f(const float v) { \
+  return transform([v](float e, int i, float *A) { return fn(e, v); }); \
+}
+#define VECTOR_BINARY_FN_S_ARR(f, fn) \
+Vector &Vector::f(const float *v) { \
+  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_S_VEC(f, fn) \
+StatusOr<Vector> Vector::f(const Vector &v) { \
+  if (v.d != d) \
+    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_SO_SCALAR(f, fn) \
+Vector &Vector::operator f(const float v) { \
+  return transform([v](float e, int i, float *A) { return fn(e, v); }); \
+}
+#define VECTOR_BINARY_FN_SO_ARR(f, fn) \
+Vector &Vector::operator f(const float *v) { \
+  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_SO_VEC(f, fn) \
+Vector &Vector::operator f(const Vector &v) { \
+  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_O_SCALAR(f, fn) \
+Vector Vector::f(const float v) const { \
+  return map([v](float e, int i, float *A) { return fn(e, v); }); \
+}
+#define VECTOR_BINARY_FN_O_ARR(f, fn) \
+Vector Vector::f(const float *v) const { \
+  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_O_VEC(f, fn) \
+StatusOr<Vector> Vector::f(const Vector &v) const { \
+  if (v.d != d) \
+    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_OO_SCALAR(op, fn) \
+Vector Vector::operator op(const float v) const { \
+  return map([v](float e, int i, float *A) { return fn(e, v); }); \
+}
+#define VECTOR_BINARY_FN_OO_ARR(op, fn) \
+Vector Vector::operator op(const float *v) const { \
+  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+#define VECTOR_BINARY_FN_OO_VEC(op, fn) \
+Vector Vector::operator op(const Vector &v) const { \
+  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
+}
+
+#define VECTOR_BINARY_FN_S(f, fn) \
+VECTOR_BINARY_FN_S_SCALAR(f, fn) \
+VECTOR_BINARY_FN_S_ARR(f, fn) \
+VECTOR_BINARY_FN_S_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_SO(f, fn) \
+VECTOR_BINARY_FN_SO_SCALAR(f, fn) \
+VECTOR_BINARY_FN_SO_ARR(f, fn) \
+VECTOR_BINARY_FN_SO_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_O(f, fn) \
+VECTOR_BINARY_FN_O_SCALAR(f, fn) \
+VECTOR_BINARY_FN_O_ARR(f, fn) \
+VECTOR_BINARY_FN_O_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_OO(op, fn) \
+VECTOR_BINARY_FN_OO_SCALAR(op, fn) \
+VECTOR_BINARY_FN_OO_ARR(op, fn) \
+VECTOR_BINARY_FN_OO_VEC(op, fn)
+
+#define VECTOR_BINARY_FN(fs, fso, fo, op, fn) \
+VECTOR_BINARY_FN_S(fs, fn) \
+VECTOR_BINARY_FN_SO(fso, fn) \
+VECTOR_BINARY_FN_O(fo, fn) \
+VECTOR_BINARY_FN_OO(op, fn)
+
 Vector &Vector::negate() {
   return transform([](float e, int i, float *A) { return -e; });
 }
 Vector Vector::negative() const {
   return map([](float e, int i, float *A) { return -e; });
 }
-Vector &Vector::add(const float v) {
-  return transform([v](float e, int i, float *A) { return e + v; });
-}
-Vector &Vector::add(const float *v) {
-  return transform([v](float e, int i, float *A) { return e + v[i]; });
-}
-StatusOr<Vector> Vector::add(const Vector &v) {
-  if (v.d != d)
-    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal");
-  return transform([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector &Vector::operator+=(const float v) {
-  return transform([v](float e, int i, float *A) { return e + v; });
-}
-Vector &Vector::operator+=(const float *v) {
-  return transform([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector &Vector::operator+=(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return transform([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector Vector::sum(const float v) const {
-  return map([v](float e, int i, float *A) { return e + v; });
-}
-Vector Vector::sum(const float *v) const {
-  return map([v](float e, int i, float *A) { return e + v[i]; });
-}
-StatusOr<Vector> Vector::sum(const Vector &v) const {
-  // if (v.d != d) return;
-  return map([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector Vector::operator+(const float v) {
-  return map([v](float e, int i, float *A) { return e + v; });
-}
-Vector Vector::operator+(const float *v) {
-  return map([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector Vector::operator+(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return map([v](float e, int i, float *A) { return e + v[i]; });
-}
-Vector &Vector::subtract(const float v) {
-  return transform([v](float e, int i, float *A) { return e - v; });
-}
-Vector &Vector::subtract(const float *v) {
-  return transform([v](float e, int i, float *A) { return e - v[i]; });
-}
-StatusOr<Vector> Vector::subtract(const Vector &v) {
-  // if (v.d != d) return;
-  return transform([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector &Vector::operator-=(const float v) {
-  return transform([v](float e, int i, float *A) { return e - v; });
-}
-Vector &Vector::operator-=(const float *v) {
-  return transform([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector &Vector::operator-=(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return transform([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector Vector::difference(const float v) const {
-  return map([v](float e, int i, float *A) { return e - v; });
-}
-Vector Vector::difference(const float *v) const {
-  return map([v](float e, int i, float *A) { return e - v[i]; });
-}
-StatusOr<Vector> Vector::difference(const Vector &v) const {
-  // if (v.d != d) return;
-  return map([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector Vector::operator-(const float v) {
-  return map([v](float e, int i, float *A) { return e - v; });
-}
-Vector Vector::operator-(const float *v) {
-  return map([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector Vector::operator-(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return map([v](float e, int i, float *A) { return e - v[i]; });
-}
-Vector &Vector::multiply(const float v) {
-  return transform([v](float e, int i, float *A) { return e * v; });
-}
-Vector &Vector::multiply(const float *v) {
-  return transform([v](float e, int i, float *A) { return e * v[i]; });
-}
-StatusOr<Vector> Vector::multiply(const Vector &v) {
-  // if (v.d != d) return;
-  return transform([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector &Vector::operator*=(const float v) {
-  return transform([v](float e, int i, float *A) { return e * v; });
-}
-Vector &Vector::operator*=(const float *v) {
-  return transform([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector &Vector::operator*=(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return transform([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector Vector::product(const float v) const {
-  return map([v](float e, int i, float *A) { return e * v; });
-}
-Vector Vector::product(const float *v) const {
-  return map([v](float e, int i, float *A) { return e * v[i]; });
-}
-StatusOr<Vector> Vector::product(const Vector &v) const {
-  // if (v.d != d) return;
-  return map([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector Vector::operator*(const float v) {
-  return map([v](float e, int i, float *A) { return e * v; });
-}
-Vector Vector::operator*(const float *v) {
-  return map([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector Vector::operator*(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return map([v](float e, int i, float *A) { return e * v[i]; });
-}
-Vector &Vector::divide(const float v) {
-  return transform([v](float e, int i, float *A) { return e / v; });
-}
-Vector &Vector::divide(const float *v) {
-  return transform([v](float e, int i, float *A) { return e / v[i]; });
-}
-StatusOr<Vector> Vector::divide(const Vector &v) {
-  // if (v.d != d) return;
-  return transform([v](float e, int i, float *A) { return e / v[i]; });
-}
-Vector &Vector::operator/=(const float v) {
-  return transform([v](float e, int i, float *A) { return e / v; });
-}
-Vector &Vector::operator/=(const float *v) {
-  return transform([v](float e, int i, float *A) { return e / v[i]; });
-}
-Vector &Vector::operator/=(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return transform([v](float e, int i, float *A) { return e / v[i]; });
-}
-Vector Vector::quotient(const float v) const {
-  return map([v](float e, int i, float *A) { return e / v; });
-}
-Vector Vector::quotient(const float *v) const {
-  return map([v](float e, int i, float *A) { return e / v[i]; });
-}
-StatusOr<Vector> Vector::quotient(const Vector &v) const {
-  // if (v.d != d) return;
-  return map([v](float e, int i, float *A) { return e / v[i]; });
-}
-Vector Vector::operator/(const float v) {
-  return map([v](float e, int i, float *A) { return e / v; });
-}
-Vector Vector::operator/(const float *v) {
-  return map([v](float e, int i, float *A) { return e / v[i]; });
-}
-Vector Vector::operator/(const Vector &v) {
-  // if (v.d != d) return util::Status(util::INVALID_ARGUMENT, "dimensions must
-  // be equal");
-  return map([v](float e, int i, float *A) { return e / v[i]; });
-}
+
+VECTOR_BINARY_OP(add, +=, sum, +)
+VECTOR_BINARY_OP(subtract, -=, difference, -)
+VECTOR_BINARY_OP(multiply, *=, product, *)
+VECTOR_BINARY_OP(divide, /=, quotient, /)
+
+VECTOR_BINARY_FN(mod, %=, modulus, %, fmod)
+
 bool Vector::operator==(const Vector &v) const { return equals(v); }
 bool Vector::equals(const Vector &v, float tolerance) const {
   return reduce(

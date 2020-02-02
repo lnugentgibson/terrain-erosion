@@ -32,44 +32,52 @@ protected:
 
 TEST_P(VectorTest, AddScalar) {
   auto c = vals.a.add(vals.scalar);
+  EXPECT_EQ(vals.a, vals.ssum);
   EXPECT_EQ(c, vals.ssum);
 }
 
 TEST_P(VectorTest, SubtractScalar) {
   auto c = vals.a.subtract(vals.scalar);
+  EXPECT_EQ(vals.a, vals.sdif);
   EXPECT_EQ(c, vals.sdif);
 }
 
 TEST_P(VectorTest, MultiplyScalar) {
   auto c = vals.a.multiply(vals.scalar);
+  EXPECT_EQ(vals.a, vals.sprd);
   EXPECT_EQ(c, vals.sprd);
 }
 
 TEST_P(VectorTest, DivideScalar) {
   auto c = vals.a.divide(vals.scalar);
+  EXPECT_EQ(vals.a, vals.squo);
   EXPECT_EQ(c, vals.squo);
 }
 
 TEST_P(VectorTest, AddVector) {
   auto c = vals.a.add(vals.b);
+  EXPECT_EQ(vals.a, vals.vsum);
   EXPECT_TRUE(c.HasValue());
   EXPECT_EQ(*c, vals.vsum);
 }
 
 TEST_P(VectorTest, SubtractVector) {
   auto c = vals.a.subtract(vals.b);
+  EXPECT_EQ(vals.a, vals.vdif);
   EXPECT_TRUE(c.HasValue());
   EXPECT_EQ(*c, vals.vdif);
 }
 
 TEST_P(VectorTest, MultiplyVector) {
   auto c = vals.a.multiply(vals.b);
+  EXPECT_EQ(vals.a, vals.vprd);
   EXPECT_TRUE(c.HasValue());
   EXPECT_EQ(*c, vals.vprd);
 }
 
 TEST_P(VectorTest, DivideVector) {
   auto c = vals.a.divide(vals.b);
+  EXPECT_EQ(vals.a, vals.vquo);
   EXPECT_TRUE(c.HasValue());
   EXPECT_EQ(*c, vals.vquo);
 }

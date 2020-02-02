@@ -4,12 +4,116 @@
 #include <algorithm>
 #include <string>
 
+#include "util/status.h"
 #include "util/statusor.h"
 
+using util::Status;
 using util::StatusOr;
 
 namespace math {
 namespace vector {
+  
+#define VECTOR_BINARY_OP_S_SCALAR_SIG(f) \
+Vector &f(const float v);
+#define VECTOR_BINARY_OP_S_ARR_SIG(f) \
+Vector &f(const float *v);
+#define VECTOR_BINARY_OP_S_VEC_SIG(f) \
+StatusOr<Vector> f(const Vector &v) ;
+#define VECTOR_BINARY_OP_SO_SCALAR_SIG(f) \
+Vector &operator f(const float v);
+#define VECTOR_BINARY_OP_SO_ARR_SIG(f) \
+Vector &operator f(const float *v);
+#define VECTOR_BINARY_OP_SO_VEC_SIG(f) \
+Vector &operator f(const Vector &v);
+#define VECTOR_BINARY_OP_O_SCALAR_SIG(f) \
+Vector f(const float v) const;
+#define VECTOR_BINARY_OP_O_ARR_SIG(f) \
+Vector f(const float *v) const;
+#define VECTOR_BINARY_OP_O_VEC_SIG(f) \
+StatusOr<Vector> f(const Vector &v) const;
+#define VECTOR_BINARY_OP_OO_SCALAR_SIG(op) \
+Vector operator op(const float v) const;
+#define VECTOR_BINARY_OP_OO_ARR_SIG(op) \
+Vector operator op(const float *v) const;
+#define VECTOR_BINARY_OP_OO_VEC_SIG(op) \
+Vector operator op(const Vector &v) const;
+
+#define VECTOR_BINARY_OP_S_SIG(f) \
+VECTOR_BINARY_OP_S_SCALAR_SIG(f) \
+VECTOR_BINARY_OP_S_ARR_SIG(f) \
+VECTOR_BINARY_OP_S_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_SO_SIG(f) \
+VECTOR_BINARY_OP_SO_SCALAR_SIG(f) \
+VECTOR_BINARY_OP_SO_ARR_SIG(f) \
+VECTOR_BINARY_OP_SO_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_O_SIG(f) \
+VECTOR_BINARY_OP_O_SCALAR_SIG(f) \
+VECTOR_BINARY_OP_O_ARR_SIG(f) \
+VECTOR_BINARY_OP_O_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_OO_SIG(op) \
+VECTOR_BINARY_OP_OO_SCALAR_SIG(op) \
+VECTOR_BINARY_OP_OO_ARR_SIG(op) \
+VECTOR_BINARY_OP_OO_VEC_SIG(op)
+
+#define VECTOR_BINARY_OP_SIG(fs, fso, fo, op) \
+VECTOR_BINARY_OP_S_SIG(fs) \
+VECTOR_BINARY_OP_SO_SIG(fso) \
+VECTOR_BINARY_OP_O_SIG(fo) \
+VECTOR_BINARY_OP_OO_SIG(op)
+
+#define VECTOR_BINARY_FN_S_SCALAR_SIG(f) \
+Vector &f(const float v);
+#define VECTOR_BINARY_FN_S_ARR_SIG(f) \
+Vector &f(const float *v);
+#define VECTOR_BINARY_FN_S_VEC_SIG(f) \
+StatusOr<Vector> f(const Vector &v);
+#define VECTOR_BINARY_FN_SO_SCALAR_SIG(f) \
+Vector &operator f(const float v);
+#define VECTOR_BINARY_FN_SO_ARR_SIG(f) \
+Vector &operator f(const float *v);
+#define VECTOR_BINARY_FN_SO_VEC_SIG(f) \
+Vector &operator f(const Vector &v);
+#define VECTOR_BINARY_FN_O_SCALAR_SIG(f) \
+Vector f(const float v) const;
+#define VECTOR_BINARY_FN_O_ARR_SIG(f) \
+Vector f(const float *v) const;
+#define VECTOR_BINARY_FN_O_VEC_SIG(f) \
+StatusOr<Vector> f(const Vector &v) const;
+#define VECTOR_BINARY_FN_OO_SCALAR_SIG(op) \
+Vector operator op(const float v) const;
+#define VECTOR_BINARY_FN_OO_ARR_SIG(op) \
+Vector operator op(const float *v) const;
+#define VECTOR_BINARY_FN_OO_VEC_SIG(op) \
+Vector operator op(const Vector &v) const;
+
+#define VECTOR_BINARY_FN_S_SIG(f) \
+VECTOR_BINARY_FN_S_SCALAR_SIG(f) \
+VECTOR_BINARY_FN_S_ARR_SIG(f) \
+VECTOR_BINARY_FN_S_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_SO_SIG(f) \
+VECTOR_BINARY_FN_SO_SCALAR_SIG(f) \
+VECTOR_BINARY_FN_SO_ARR_SIG(f) \
+VECTOR_BINARY_FN_SO_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_O_SIG(f) \
+VECTOR_BINARY_FN_O_SCALAR_SIG(f) \
+VECTOR_BINARY_FN_O_ARR_SIG(f) \
+VECTOR_BINARY_FN_O_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_OO_SIG(op) \
+VECTOR_BINARY_FN_OO_SCALAR_SIG(op) \
+VECTOR_BINARY_FN_OO_ARR_SIG(op) \
+VECTOR_BINARY_FN_OO_VEC_SIG(op)
+
+#define VECTOR_BINARY_FN_SIG(fs, fso, fo, op) \
+VECTOR_BINARY_FN_S_SIG(fs) \
+VECTOR_BINARY_FN_SO_SIG(fso) \
+VECTOR_BINARY_FN_O_SIG(fo) \
+VECTOR_BINARY_FN_OO_SIG(op)
 
 class Matrix;
 
@@ -72,54 +176,11 @@ public:
   };
   Vector &negate();
   Vector negative() const;
-  Vector &add(const float v);
-  Vector &add(const float *v);
-  StatusOr<Vector> add(const Vector &v);
-  Vector &operator+=(const float v);
-  Vector &operator+=(const float *v);
-  Vector &operator+=(const Vector &v);
-  Vector sum(const float v) const;
-  Vector sum(const float *v) const;
-  StatusOr<Vector> sum(const Vector &v) const;
-  Vector operator+(const float v);
-  Vector operator+(const float *v);
-  Vector operator+(const Vector &v);
-  Vector &subtract(const float v);
-  Vector &subtract(const float *v);
-  StatusOr<Vector> subtract(const Vector &v);
-  Vector &operator-=(const float v);
-  Vector &operator-=(const float *v);
-  Vector &operator-=(const Vector &v);
-  Vector difference(const float v) const;
-  Vector difference(const float *v) const;
-  StatusOr<Vector> difference(const Vector &v) const;
-  Vector operator-(const float v);
-  Vector operator-(const float *v);
-  Vector operator-(const Vector &v);
-  Vector &multiply(const float v);
-  Vector &multiply(const float *v);
-  StatusOr<Vector> multiply(const Vector &v);
-  Vector &operator*=(const float v);
-  Vector &operator*=(const float *v);
-  Vector &operator*=(const Vector &v);
-  Vector product(const float v) const;
-  Vector product(const float *v) const;
-  StatusOr<Vector> product(const Vector &v) const;
-  Vector operator*(const float v);
-  Vector operator*(const float *v);
-  Vector operator*(const Vector &v);
-  Vector &divide(const float v);
-  Vector &divide(const float *v);
-  StatusOr<Vector> divide(const Vector &v);
-  Vector &operator/=(const float v);
-  Vector &operator/=(const float *v);
-  Vector &operator/=(const Vector &v);
-  Vector quotient(const float v) const;
-  Vector quotient(const float *v) const;
-  StatusOr<Vector> quotient(const Vector &v) const;
-  Vector operator/(const float v);
-  Vector operator/(const float *v);
-  Vector operator/(const Vector &v);
+  VECTOR_BINARY_OP_SIG(add, +=, sum, +)
+  VECTOR_BINARY_OP_SIG(subtract, -=, difference, -)
+  VECTOR_BINARY_OP_SIG(multiply, *=, product, *)
+  VECTOR_BINARY_OP_SIG(divide, /=, quotient, /)
+  VECTOR_BINARY_FN_SIG(mod, %=, modulus, %)
   bool operator==(const Vector &v) const;
   bool equals(const Vector &v, float tolerance = .0001) const;
   StatusOr<float> dot(const Vector &v) const;
@@ -144,6 +205,10 @@ public:
   static Vector randomDirection();
   static Vector randomDirection(const Vector &v, const Vector &w, float factor);
 };
+
+void floor(Vector *v);
+Vector floor(const Vector &v);
+Vector &floor(const Vector &v, Vector *w);
 
 } // namespace vector
 } // namespace math
