@@ -1,11 +1,11 @@
-#include "gtest/gtest.h"
+#include "graphics/image/binary/binimg.h"
 
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
 
-#include "graphics/image/binary/binimg.h"
+#include "gtest/gtest.h"
 
 namespace graphics {
 namespace image {

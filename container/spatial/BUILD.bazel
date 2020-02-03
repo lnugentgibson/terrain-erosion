@@ -3,4 +3,18 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "grid",
     hdrs = ["grid.h"],
+    deps = [
+        "//util:status",
+    ],
+)
+
+cc_test(
+    name = "grid_test",
+    srcs = ["grid_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@googletest//:gtest_main",
+        ":grid",
+        "//math/vector:vector",
+    ],
 )
