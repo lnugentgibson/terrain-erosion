@@ -12,110 +12,64 @@ using util::StatusOr;
 
 namespace math {
 namespace vector {
-  
-#define VECTOR_BINARY_OP_S_SCALAR_SIG(f) \
-Vector &f(const float v);
-#define VECTOR_BINARY_OP_S_ARR_SIG(f) \
-Vector &f(const float *v);
-#define VECTOR_BINARY_OP_S_VEC_SIG(f) \
-StatusOr<Vector> f(const Vector &v) ;
-#define VECTOR_BINARY_OP_SO_SCALAR_SIG(f) \
-Vector &operator f(const float v);
-#define VECTOR_BINARY_OP_SO_ARR_SIG(f) \
-Vector &operator f(const float *v);
-#define VECTOR_BINARY_OP_SO_VEC_SIG(f) \
-Vector &operator f(const Vector &v);
-#define VECTOR_BINARY_OP_O_SCALAR_SIG(f) \
-Vector f(const float v) const;
-#define VECTOR_BINARY_OP_O_ARR_SIG(f) \
-Vector f(const float *v) const;
-#define VECTOR_BINARY_OP_O_VEC_SIG(f) \
-StatusOr<Vector> f(const Vector &v) const;
-#define VECTOR_BINARY_OP_OO_SCALAR_SIG(op) \
-Vector operator op(const float v) const;
-#define VECTOR_BINARY_OP_OO_ARR_SIG(op) \
-Vector operator op(const float *v) const;
-#define VECTOR_BINARY_OP_OO_VEC_SIG(op) \
-Vector operator op(const Vector &v) const;
-
-#define VECTOR_BINARY_OP_S_SIG(f) \
-VECTOR_BINARY_OP_S_SCALAR_SIG(f) \
-VECTOR_BINARY_OP_S_ARR_SIG(f) \
-VECTOR_BINARY_OP_S_VEC_SIG(f)
-
-#define VECTOR_BINARY_OP_SO_SIG(f) \
-VECTOR_BINARY_OP_SO_SCALAR_SIG(f) \
-VECTOR_BINARY_OP_SO_ARR_SIG(f) \
-VECTOR_BINARY_OP_SO_VEC_SIG(f)
-
-#define VECTOR_BINARY_OP_O_SIG(f) \
-VECTOR_BINARY_OP_O_SCALAR_SIG(f) \
-VECTOR_BINARY_OP_O_ARR_SIG(f) \
-VECTOR_BINARY_OP_O_VEC_SIG(f)
-
-#define VECTOR_BINARY_OP_OO_SIG(op) \
-VECTOR_BINARY_OP_OO_SCALAR_SIG(op) \
-VECTOR_BINARY_OP_OO_ARR_SIG(op) \
-VECTOR_BINARY_OP_OO_VEC_SIG(op)
-
-#define VECTOR_BINARY_OP_SIG(fs, fso, fo, op) \
-VECTOR_BINARY_OP_S_SIG(fs) \
-VECTOR_BINARY_OP_SO_SIG(fso) \
-VECTOR_BINARY_OP_O_SIG(fo) \
-VECTOR_BINARY_OP_OO_SIG(op)
-
-#define VECTOR_BINARY_FN_S_SCALAR_SIG(f) \
-Vector &f(const float v);
-#define VECTOR_BINARY_FN_S_ARR_SIG(f) \
-Vector &f(const float *v);
-#define VECTOR_BINARY_FN_S_VEC_SIG(f) \
-StatusOr<Vector> f(const Vector &v);
-#define VECTOR_BINARY_FN_SO_SCALAR_SIG(f) \
-Vector &operator f(const float v);
-#define VECTOR_BINARY_FN_SO_ARR_SIG(f) \
-Vector &operator f(const float *v);
-#define VECTOR_BINARY_FN_SO_VEC_SIG(f) \
-Vector &operator f(const Vector &v);
-#define VECTOR_BINARY_FN_O_SCALAR_SIG(f) \
-Vector f(const float v) const;
-#define VECTOR_BINARY_FN_O_ARR_SIG(f) \
-Vector f(const float *v) const;
-#define VECTOR_BINARY_FN_O_VEC_SIG(f) \
-StatusOr<Vector> f(const Vector &v) const;
-#define VECTOR_BINARY_FN_OO_SCALAR_SIG(op) \
-Vector operator op(const float v) const;
-#define VECTOR_BINARY_FN_OO_ARR_SIG(op) \
-Vector operator op(const float *v) const;
-#define VECTOR_BINARY_FN_OO_VEC_SIG(op) \
-Vector operator op(const Vector &v) const;
-
-#define VECTOR_BINARY_FN_S_SIG(f) \
-VECTOR_BINARY_FN_S_SCALAR_SIG(f) \
-VECTOR_BINARY_FN_S_ARR_SIG(f) \
-VECTOR_BINARY_FN_S_VEC_SIG(f)
-
-#define VECTOR_BINARY_FN_SO_SIG(f) \
-VECTOR_BINARY_FN_SO_SCALAR_SIG(f) \
-VECTOR_BINARY_FN_SO_ARR_SIG(f) \
-VECTOR_BINARY_FN_SO_VEC_SIG(f)
-
-#define VECTOR_BINARY_FN_O_SIG(f) \
-VECTOR_BINARY_FN_O_SCALAR_SIG(f) \
-VECTOR_BINARY_FN_O_ARR_SIG(f) \
-VECTOR_BINARY_FN_O_VEC_SIG(f)
-
-#define VECTOR_BINARY_FN_OO_SIG(op) \
-VECTOR_BINARY_FN_OO_SCALAR_SIG(op) \
-VECTOR_BINARY_FN_OO_ARR_SIG(op) \
-VECTOR_BINARY_FN_OO_VEC_SIG(op)
-
-#define VECTOR_BINARY_FN_SIG(fs, fso, fo, op) \
-VECTOR_BINARY_FN_S_SIG(fs) \
-VECTOR_BINARY_FN_SO_SIG(fso) \
-VECTOR_BINARY_FN_O_SIG(fo) \
-VECTOR_BINARY_FN_OO_SIG(op)
 
 class Matrix;
+class BVector;
+class IVector;
+class Vector;
+
+class BVector {
+  bool *c;
+
+public:
+  const int d;
+  BVector(int _d) : c(new bool[_d]), d(_d) {}
+  BVector(int _d, bool *_c) : c(_c), d(_d) {}
+  BVector(bool x, bool y) : c(new bool[2]), d(2) {
+    c[0] = x;
+    c[1] = y;
+  }
+  BVector(bool x, bool y, bool z) : c(new bool[3]), d(3) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+  }
+  BVector(bool x, bool y, bool z, bool w) : c(new bool[4]), d(4) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+    c[3] = w;
+  }
+  bool operator[](int i) const { return c[i]; }
+  bool &operator[](int i) { return c[i]; }
+};
+
+class IVector {
+  int *c;
+
+public:
+  const int d;
+  IVector(int _d) : c(new int[_d]), d(_d) {}
+  IVector(int _d, int *_c) : c(_c), d(_d) {}
+  IVector(int x, int y) : c(new int[2]), d(2) {
+    c[0] = x;
+    c[1] = y;
+  }
+  IVector(int x, int y, int z) : c(new int[3]), d(3) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+  }
+  IVector(int x, int y, int z, int w) : c(new int[4]), d(4) {
+    c[0] = x;
+    c[1] = y;
+    c[2] = z;
+    c[3] = w;
+  }
+  IVector(const Vector &v);
+  int operator[](int i) const { return c[i]; }
+  int &operator[](int i) { return c[i]; }
+};
 
 class Vector {
   float *c;
@@ -139,6 +93,7 @@ public:
     c[2] = z;
     c[3] = w;
   }
+  Vector(const IVector &v);
   float operator[](int i) const { return c[i]; }
   float &operator[](int i) { return c[i]; }
   template <typename F> void forEach(F f) const {
@@ -174,13 +129,141 @@ public:
     }
     return a;
   };
+  template <typename F> bool VectorEvery(F f) const {
+    float *A = new float[d];
+    std::copy(c, c + d, A);
+    for (int i = 0; i < d; i++) {
+      if (!f(c[i], i, A))
+        return false;
+    }
+    return true;
+  };
+  template <typename F> bool VectorSome(F f) const {
+    float *A = new float[d];
+    std::copy(c, c + d, A);
+    for (int i = 0; i < d; i++) {
+      if (f(c[i], i, A))
+        return true;
+    }
+    return false;
+  };
+
   Vector &negate();
   Vector negative() const;
+
+#define VECTOR_UNARY_FN_S_SIG(f) Vector &f();
+#define VECTOR_UNARY_FN_O_SIG(f, r) r f() const;
+
+#define VECTOR_UNARY_FN_SIG(f, r)                                              \
+  VECTOR_UNARY_FN_S_SIG(f)                                                     \
+  VECTOR_UNARY_FN_O_SIG(f, r)
+
+  VECTOR_UNARY_FN_SIG(cos, Vector)
+  VECTOR_UNARY_FN_SIG(sin, Vector)
+  VECTOR_UNARY_FN_SIG(tan, Vector)
+  VECTOR_UNARY_FN_SIG(acos, Vector)
+  VECTOR_UNARY_FN_SIG(asin, Vector)
+  VECTOR_UNARY_FN_SIG(atan, Vector)
+  VECTOR_UNARY_FN_SIG(cosh, Vector)
+  VECTOR_UNARY_FN_SIG(sinh, Vector)
+  VECTOR_UNARY_FN_SIG(tanh, Vector)
+  VECTOR_UNARY_FN_SIG(acosh, Vector)
+  VECTOR_UNARY_FN_SIG(asinh, Vector)
+  VECTOR_UNARY_FN_SIG(atanh, Vector)
+  VECTOR_UNARY_FN_SIG(floor, IVector)
+  VECTOR_UNARY_FN_SIG(ceil, IVector)
+
+#define VECTOR_BINARY_OP_S_SCALAR_SIG(f) Vector &f(const float v);
+#define VECTOR_BINARY_OP_S_ARR_SIG(f) Vector &f(const float *v);
+#define VECTOR_BINARY_OP_S_VEC_SIG(f) StatusOr<Vector> f(const Vector &v);
+#define VECTOR_BINARY_OP_SO_SCALAR_SIG(f) Vector &operator f(const float v);
+#define VECTOR_BINARY_OP_SO_ARR_SIG(f) Vector &operator f(const float *v);
+#define VECTOR_BINARY_OP_SO_VEC_SIG(f) Vector &operator f(const Vector &v);
+#define VECTOR_BINARY_OP_O_SCALAR_SIG(f) Vector f(const float v) const;
+#define VECTOR_BINARY_OP_O_ARR_SIG(f) Vector f(const float *v) const;
+#define VECTOR_BINARY_OP_O_VEC_SIG(f) StatusOr<Vector> f(const Vector &v) const;
+#define VECTOR_BINARY_OP_OO_SCALAR_SIG(op)                                     \
+  Vector operator op(const float v) const;
+#define VECTOR_BINARY_OP_OO_ARR_SIG(op)                                        \
+  Vector operator op(const float *v) const;
+#define VECTOR_BINARY_OP_OO_VEC_SIG(op)                                        \
+  Vector operator op(const Vector &v) const;
+
+#define VECTOR_BINARY_OP_S_SIG(f)                                              \
+  VECTOR_BINARY_OP_S_SCALAR_SIG(f)                                             \
+  VECTOR_BINARY_OP_S_ARR_SIG(f)                                                \
+  VECTOR_BINARY_OP_S_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_SO_SIG(f)                                             \
+  VECTOR_BINARY_OP_SO_SCALAR_SIG(f)                                            \
+  VECTOR_BINARY_OP_SO_ARR_SIG(f)                                               \
+  VECTOR_BINARY_OP_SO_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_O_SIG(f)                                              \
+  VECTOR_BINARY_OP_O_SCALAR_SIG(f)                                             \
+  VECTOR_BINARY_OP_O_ARR_SIG(f)                                                \
+  VECTOR_BINARY_OP_O_VEC_SIG(f)
+
+#define VECTOR_BINARY_OP_OO_SIG(op)                                            \
+  VECTOR_BINARY_OP_OO_SCALAR_SIG(op)                                           \
+  VECTOR_BINARY_OP_OO_ARR_SIG(op)                                              \
+  VECTOR_BINARY_OP_OO_VEC_SIG(op)
+
+#define VECTOR_BINARY_OP_SIG(fs, fso, fo, op)                                  \
+  VECTOR_BINARY_OP_S_SIG(fs)                                                   \
+  VECTOR_BINARY_OP_SO_SIG(fso)                                                 \
+  VECTOR_BINARY_OP_O_SIG(fo)                                                   \
+  VECTOR_BINARY_OP_OO_SIG(op)
+
   VECTOR_BINARY_OP_SIG(add, +=, sum, +)
   VECTOR_BINARY_OP_SIG(subtract, -=, difference, -)
   VECTOR_BINARY_OP_SIG(multiply, *=, product, *)
   VECTOR_BINARY_OP_SIG(divide, /=, quotient, /)
+
+#define VECTOR_BINARY_FN_S_SCALAR_SIG(f) Vector &f(const float v);
+#define VECTOR_BINARY_FN_S_ARR_SIG(f) Vector &f(const float *v);
+#define VECTOR_BINARY_FN_S_VEC_SIG(f) StatusOr<Vector> f(const Vector &v);
+#define VECTOR_BINARY_FN_SO_SCALAR_SIG(f) Vector &operator f(const float v);
+#define VECTOR_BINARY_FN_SO_ARR_SIG(f) Vector &operator f(const float *v);
+#define VECTOR_BINARY_FN_SO_VEC_SIG(f) Vector &operator f(const Vector &v);
+#define VECTOR_BINARY_FN_O_SCALAR_SIG(f) Vector f(const float v) const;
+#define VECTOR_BINARY_FN_O_ARR_SIG(f) Vector f(const float *v) const;
+#define VECTOR_BINARY_FN_O_VEC_SIG(f) StatusOr<Vector> f(const Vector &v) const;
+#define VECTOR_BINARY_FN_OO_SCALAR_SIG(op)                                     \
+  Vector operator op(const float v) const;
+#define VECTOR_BINARY_FN_OO_ARR_SIG(op)                                        \
+  Vector operator op(const float *v) const;
+#define VECTOR_BINARY_FN_OO_VEC_SIG(op)                                        \
+  Vector operator op(const Vector &v) const;
+
+#define VECTOR_BINARY_FN_S_SIG(f)                                              \
+  VECTOR_BINARY_FN_S_SCALAR_SIG(f)                                             \
+  VECTOR_BINARY_FN_S_ARR_SIG(f)                                                \
+  VECTOR_BINARY_FN_S_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_SO_SIG(f)                                             \
+  VECTOR_BINARY_FN_SO_SCALAR_SIG(f)                                            \
+  VECTOR_BINARY_FN_SO_ARR_SIG(f)                                               \
+  VECTOR_BINARY_FN_SO_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_O_SIG(f)                                              \
+  VECTOR_BINARY_FN_O_SCALAR_SIG(f)                                             \
+  VECTOR_BINARY_FN_O_ARR_SIG(f)                                                \
+  VECTOR_BINARY_FN_O_VEC_SIG(f)
+
+#define VECTOR_BINARY_FN_OO_SIG(op)                                            \
+  VECTOR_BINARY_FN_OO_SCALAR_SIG(op)                                           \
+  VECTOR_BINARY_FN_OO_ARR_SIG(op)                                              \
+  VECTOR_BINARY_FN_OO_VEC_SIG(op)
+
+#define VECTOR_BINARY_FN_SIG(fs, fso, fo, op)                                  \
+  VECTOR_BINARY_FN_S_SIG(fs)                                                   \
+  VECTOR_BINARY_FN_SO_SIG(fso)                                                 \
+  VECTOR_BINARY_FN_O_SIG(fo)                                                   \
+  VECTOR_BINARY_FN_OO_SIG(op)
+
   VECTOR_BINARY_FN_SIG(mod, %=, modulus, %)
+
   bool operator==(const Vector &v) const;
   bool equals(const Vector &v, float tolerance = .0001) const;
   StatusOr<float> dot(const Vector &v) const;

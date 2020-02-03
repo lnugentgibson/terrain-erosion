@@ -9,163 +9,17 @@
 namespace math {
 namespace vector {
 
-#define VECTOR_BINARY_OP_S_SCALAR(f, op) \
-Vector &Vector::f(const float v) { \
-  return transform([v](float e, int i, float *A) { return e op v; }); \
-}
-#define VECTOR_BINARY_OP_S_ARR(f, op) \
-Vector &Vector::f(const float *v) { \
-  return transform([v](float e, int i, float *A) { return e op v[i]; }); \
-}
-#define VECTOR_BINARY_OP_S_VEC(f, op) \
-StatusOr<Vector> Vector::f(const Vector &v) { \
-  if (v.d != d) \
-    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
-  return transform([v](float e, int i, float *A) { return e op v[i]; }); \
-}
-#define VECTOR_BINARY_OP_SO_SCALAR(f, op) \
-Vector &Vector::operator f(const float v) { \
-  return transform([v](float e, int i, float *A) { return e op v; }); \
-}
-#define VECTOR_BINARY_OP_SO_ARR(f, op) \
-Vector &Vector::operator f(const float *v) { \
-  return transform([v](float e, int i, float *A) { return e + v[i]; }); \
-}
-#define VECTOR_BINARY_OP_SO_VEC(f, op) \
-Vector &Vector::operator f(const Vector &v) { \
-  return transform([v](float e, int i, float *A) { return e + v[i]; }); \
-}
-#define VECTOR_BINARY_OP_O_SCALAR(f, op) \
-Vector Vector::f(const float v) const { \
-  return map([v](float e, int i, float *A) { return e op v; }); \
-}
-#define VECTOR_BINARY_OP_O_ARR(f, op) \
-Vector Vector::f(const float *v) const { \
-  return map([v](float e, int i, float *A) { return e op v[i]; }); \
-}
-#define VECTOR_BINARY_OP_O_VEC(f, op) \
-StatusOr<Vector> Vector::f(const Vector &v) const { \
-  if (v.d != d) \
-    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
-  return map([v](float e, int i, float *A) { return e op v[i]; }); \
-}
-#define VECTOR_BINARY_OP_OO_SCALAR(op) \
-Vector Vector::operator op(const float v) const { \
-  return map([v](float e, int i, float *A) { return e op v; }); \
-}
-#define VECTOR_BINARY_OP_OO_ARR(op) \
-Vector Vector::operator op(const float *v) const { \
-  return map([v](float e, int i, float *A) { return e op v[i]; }); \
-}
-#define VECTOR_BINARY_OP_OO_VEC(op) \
-Vector Vector::operator op(const Vector &v) const { \
-  return map([v](float e, int i, float *A) { return e op v[i]; }); \
+IVector::IVector(const Vector &v) : c(new int[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = (int)v[d];
+  }
 }
 
-#define VECTOR_BINARY_OP_S(f, op) \
-VECTOR_BINARY_OP_S_SCALAR(f, op) \
-VECTOR_BINARY_OP_S_ARR(f, op) \
-VECTOR_BINARY_OP_S_VEC(f, op)
-
-#define VECTOR_BINARY_OP_SO(f, op) \
-VECTOR_BINARY_OP_SO_SCALAR(f, op) \
-VECTOR_BINARY_OP_SO_ARR(f, op) \
-VECTOR_BINARY_OP_SO_VEC(f, op)
-
-#define VECTOR_BINARY_OP_O(f, op) \
-VECTOR_BINARY_OP_O_SCALAR(f, op) \
-VECTOR_BINARY_OP_O_ARR(f, op) \
-VECTOR_BINARY_OP_O_VEC(f, op)
-
-#define VECTOR_BINARY_OP_OO(op) \
-VECTOR_BINARY_OP_OO_SCALAR(op) \
-VECTOR_BINARY_OP_OO_ARR(op) \
-VECTOR_BINARY_OP_OO_VEC(op)
-
-#define VECTOR_BINARY_OP(fs, fso, fo, op) \
-VECTOR_BINARY_OP_S(fs, op) \
-VECTOR_BINARY_OP_SO(fso, op) \
-VECTOR_BINARY_OP_O(fo, op) \
-VECTOR_BINARY_OP_OO(op)
-
-#define VECTOR_BINARY_FN_S_SCALAR(f, fn) \
-Vector &Vector::f(const float v) { \
-  return transform([v](float e, int i, float *A) { return fn(e, v); }); \
+Vector::Vector(const IVector &v) : c(new float[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = (float)v[d];
+  }
 }
-#define VECTOR_BINARY_FN_S_ARR(f, fn) \
-Vector &Vector::f(const float *v) { \
-  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_S_VEC(f, fn) \
-StatusOr<Vector> Vector::f(const Vector &v) { \
-  if (v.d != d) \
-    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
-  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_SO_SCALAR(f, fn) \
-Vector &Vector::operator f(const float v) { \
-  return transform([v](float e, int i, float *A) { return fn(e, v); }); \
-}
-#define VECTOR_BINARY_FN_SO_ARR(f, fn) \
-Vector &Vector::operator f(const float *v) { \
-  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_SO_VEC(f, fn) \
-Vector &Vector::operator f(const Vector &v) { \
-  return transform([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_O_SCALAR(f, fn) \
-Vector Vector::f(const float v) const { \
-  return map([v](float e, int i, float *A) { return fn(e, v); }); \
-}
-#define VECTOR_BINARY_FN_O_ARR(f, fn) \
-Vector Vector::f(const float *v) const { \
-  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_O_VEC(f, fn) \
-StatusOr<Vector> Vector::f(const Vector &v) const { \
-  if (v.d != d) \
-    return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
-  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_OO_SCALAR(op, fn) \
-Vector Vector::operator op(const float v) const { \
-  return map([v](float e, int i, float *A) { return fn(e, v); }); \
-}
-#define VECTOR_BINARY_FN_OO_ARR(op, fn) \
-Vector Vector::operator op(const float *v) const { \
-  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-#define VECTOR_BINARY_FN_OO_VEC(op, fn) \
-Vector Vector::operator op(const Vector &v) const { \
-  return map([v](float e, int i, float *A) { return fn(e, v[i]); }); \
-}
-
-#define VECTOR_BINARY_FN_S(f, fn) \
-VECTOR_BINARY_FN_S_SCALAR(f, fn) \
-VECTOR_BINARY_FN_S_ARR(f, fn) \
-VECTOR_BINARY_FN_S_VEC(f, fn)
-
-#define VECTOR_BINARY_FN_SO(f, fn) \
-VECTOR_BINARY_FN_SO_SCALAR(f, fn) \
-VECTOR_BINARY_FN_SO_ARR(f, fn) \
-VECTOR_BINARY_FN_SO_VEC(f, fn)
-
-#define VECTOR_BINARY_FN_O(f, fn) \
-VECTOR_BINARY_FN_O_SCALAR(f, fn) \
-VECTOR_BINARY_FN_O_ARR(f, fn) \
-VECTOR_BINARY_FN_O_VEC(f, fn)
-
-#define VECTOR_BINARY_FN_OO(op, fn) \
-VECTOR_BINARY_FN_OO_SCALAR(op, fn) \
-VECTOR_BINARY_FN_OO_ARR(op, fn) \
-VECTOR_BINARY_FN_OO_VEC(op, fn)
-
-#define VECTOR_BINARY_FN(fs, fso, fo, op, fn) \
-VECTOR_BINARY_FN_S(fs, fn) \
-VECTOR_BINARY_FN_SO(fso, fn) \
-VECTOR_BINARY_FN_O(fo, fn) \
-VECTOR_BINARY_FN_OO(op, fn)
 
 Vector &Vector::negate() {
   return transform([](float e, int i, float *A) { return -e; });
@@ -174,10 +28,196 @@ Vector Vector::negative() const {
   return map([](float e, int i, float *A) { return -e; });
 }
 
+#define VECTOR_UNARY_FN_S(f, fn)                                               \
+  Vector &Vector::f() {                                                        \
+    return transform([](float e, int i, float *A) { return fn(e); });          \
+  }
+#define VECTOR_UNARY_FN_O(f, r, fn)                                            \
+  r Vector::f() const {                                                        \
+    return map([](float e, int i, float *A) { return fn(e); });                \
+  }
+
+#define VECTOR_UNARY_FN(fs, fo, r, fn)                                         \
+  VECTOR_UNARY_FN_S(fs, fn)                                                    \
+  VECTOR_UNARY_FN_O(fo, r, fn)
+
+VECTOR_UNARY_FN(cos, cos, Vector, ::cos)
+VECTOR_UNARY_FN(sin, sin, Vector, ::sin)
+VECTOR_UNARY_FN(tan, tan, Vector, ::tan)
+VECTOR_UNARY_FN(acos, acos, Vector, ::acos)
+VECTOR_UNARY_FN(asin, asin, Vector, ::asin)
+VECTOR_UNARY_FN(atan, atan, Vector, ::atan)
+VECTOR_UNARY_FN(cosh, cosh, Vector, ::cosh)
+VECTOR_UNARY_FN(sinh, sinh, Vector, ::sinh)
+VECTOR_UNARY_FN(tanh, tanh, Vector, ::tanh)
+VECTOR_UNARY_FN(acosh, acosh, Vector, ::acosh)
+VECTOR_UNARY_FN(asinh, asinh, Vector, ::asinh)
+VECTOR_UNARY_FN(atanh, atanh, Vector, ::atanh)
+VECTOR_UNARY_FN(floor, floor, IVector, ::floor)
+VECTOR_UNARY_FN(ceil, ceil, IVector, ::ceil)
+
+#define VECTOR_BINARY_OP_S_SCALAR(f, op)                                       \
+  Vector &Vector::f(const float v) {                                           \
+    return transform([v](float e, int i, float *A) { return e op v; });        \
+  }
+#define VECTOR_BINARY_OP_S_ARR(f, op)                                          \
+  Vector &Vector::f(const float *v) {                                          \
+    return transform([v](float e, int i, float *A) { return e op v[i]; });     \
+  }
+#define VECTOR_BINARY_OP_S_VEC(f, op)                                          \
+  StatusOr<Vector> Vector::f(const Vector &v) {                                \
+    if (v.d != d)                                                              \
+      return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+    return transform([v](float e, int i, float *A) { return e op v[i]; });     \
+  }
+#define VECTOR_BINARY_OP_SO_SCALAR(f, op)                                      \
+  Vector &Vector::operator f(const float v) {                                  \
+    return transform([v](float e, int i, float *A) { return e op v; });        \
+  }
+#define VECTOR_BINARY_OP_SO_ARR(f, op)                                         \
+  Vector &Vector::operator f(const float *v) {                                 \
+    return transform([v](float e, int i, float *A) { return e + v[i]; });      \
+  }
+#define VECTOR_BINARY_OP_SO_VEC(f, op)                                         \
+  Vector &Vector::operator f(const Vector &v) {                                \
+    return transform([v](float e, int i, float *A) { return e + v[i]; });      \
+  }
+#define VECTOR_BINARY_OP_O_SCALAR(f, op)                                       \
+  Vector Vector::f(const float v) const {                                      \
+    return map([v](float e, int i, float *A) { return e op v; });              \
+  }
+#define VECTOR_BINARY_OP_O_ARR(f, op)                                          \
+  Vector Vector::f(const float *v) const {                                     \
+    return map([v](float e, int i, float *A) { return e op v[i]; });           \
+  }
+#define VECTOR_BINARY_OP_O_VEC(f, op)                                          \
+  StatusOr<Vector> Vector::f(const Vector &v) const {                          \
+    if (v.d != d)                                                              \
+      return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+    return map([v](float e, int i, float *A) { return e op v[i]; });           \
+  }
+#define VECTOR_BINARY_OP_OO_SCALAR(op)                                         \
+  Vector Vector::operator op(const float v) const {                            \
+    return map([v](float e, int i, float *A) { return e op v; });              \
+  }
+#define VECTOR_BINARY_OP_OO_ARR(op)                                            \
+  Vector Vector::operator op(const float *v) const {                           \
+    return map([v](float e, int i, float *A) { return e op v[i]; });           \
+  }
+#define VECTOR_BINARY_OP_OO_VEC(op)                                            \
+  Vector Vector::operator op(const Vector &v) const {                          \
+    return map([v](float e, int i, float *A) { return e op v[i]; });           \
+  }
+
+#define VECTOR_BINARY_OP_S(f, op)                                              \
+  VECTOR_BINARY_OP_S_SCALAR(f, op)                                             \
+  VECTOR_BINARY_OP_S_ARR(f, op)                                                \
+  VECTOR_BINARY_OP_S_VEC(f, op)
+
+#define VECTOR_BINARY_OP_SO(f, op)                                             \
+  VECTOR_BINARY_OP_SO_SCALAR(f, op)                                            \
+  VECTOR_BINARY_OP_SO_ARR(f, op)                                               \
+  VECTOR_BINARY_OP_SO_VEC(f, op)
+
+#define VECTOR_BINARY_OP_O(f, op)                                              \
+  VECTOR_BINARY_OP_O_SCALAR(f, op)                                             \
+  VECTOR_BINARY_OP_O_ARR(f, op)                                                \
+  VECTOR_BINARY_OP_O_VEC(f, op)
+
+#define VECTOR_BINARY_OP_OO(op)                                                \
+  VECTOR_BINARY_OP_OO_SCALAR(op)                                               \
+  VECTOR_BINARY_OP_OO_ARR(op)                                                  \
+  VECTOR_BINARY_OP_OO_VEC(op)
+
+#define VECTOR_BINARY_OP(fs, fso, fo, op)                                      \
+  VECTOR_BINARY_OP_S(fs, op)                                                   \
+  VECTOR_BINARY_OP_SO(fso, op)                                                 \
+  VECTOR_BINARY_OP_O(fo, op)                                                   \
+  VECTOR_BINARY_OP_OO(op)
+
 VECTOR_BINARY_OP(add, +=, sum, +)
 VECTOR_BINARY_OP(subtract, -=, difference, -)
 VECTOR_BINARY_OP(multiply, *=, product, *)
 VECTOR_BINARY_OP(divide, /=, quotient, /)
+
+#define VECTOR_BINARY_FN_S_SCALAR(f, fn)                                       \
+  Vector &Vector::f(const float v) {                                           \
+    return transform([v](float e, int i, float *A) { return fn(e, v); });      \
+  }
+#define VECTOR_BINARY_FN_S_ARR(f, fn)                                          \
+  Vector &Vector::f(const float *v) {                                          \
+    return transform([v](float e, int i, float *A) { return fn(e, v[i]); });   \
+  }
+#define VECTOR_BINARY_FN_S_VEC(f, fn)                                          \
+  StatusOr<Vector> Vector::f(const Vector &v) {                                \
+    if (v.d != d)                                                              \
+      return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+    return transform([v](float e, int i, float *A) { return fn(e, v[i]); });   \
+  }
+#define VECTOR_BINARY_FN_SO_SCALAR(f, fn)                                      \
+  Vector &Vector::operator f(const float v) {                                  \
+    return transform([v](float e, int i, float *A) { return fn(e, v); });      \
+  }
+#define VECTOR_BINARY_FN_SO_ARR(f, fn)                                         \
+  Vector &Vector::operator f(const float *v) {                                 \
+    return transform([v](float e, int i, float *A) { return fn(e, v[i]); });   \
+  }
+#define VECTOR_BINARY_FN_SO_VEC(f, fn)                                         \
+  Vector &Vector::operator f(const Vector &v) {                                \
+    return transform([v](float e, int i, float *A) { return fn(e, v[i]); });   \
+  }
+#define VECTOR_BINARY_FN_O_SCALAR(f, fn)                                       \
+  Vector Vector::f(const float v) const {                                      \
+    return map([v](float e, int i, float *A) { return fn(e, v); });            \
+  }
+#define VECTOR_BINARY_FN_O_ARR(f, fn)                                          \
+  Vector Vector::f(const float *v) const {                                     \
+    return map([v](float e, int i, float *A) { return fn(e, v[i]); });         \
+  }
+#define VECTOR_BINARY_FN_O_VEC(f, fn)                                          \
+  StatusOr<Vector> Vector::f(const Vector &v) const {                          \
+    if (v.d != d)                                                              \
+      return util::Status(util::INVALID_ARGUMENT, "dimensions must be equal"); \
+    return map([v](float e, int i, float *A) { return fn(e, v[i]); });         \
+  }
+#define VECTOR_BINARY_FN_OO_SCALAR(op, fn)                                     \
+  Vector Vector::operator op(const float v) const {                            \
+    return map([v](float e, int i, float *A) { return fn(e, v); });            \
+  }
+#define VECTOR_BINARY_FN_OO_ARR(op, fn)                                        \
+  Vector Vector::operator op(const float *v) const {                           \
+    return map([v](float e, int i, float *A) { return fn(e, v[i]); });         \
+  }
+#define VECTOR_BINARY_FN_OO_VEC(op, fn)                                        \
+  Vector Vector::operator op(const Vector &v) const {                          \
+    return map([v](float e, int i, float *A) { return fn(e, v[i]); });         \
+  }
+
+#define VECTOR_BINARY_FN_S(f, fn)                                              \
+  VECTOR_BINARY_FN_S_SCALAR(f, fn)                                             \
+  VECTOR_BINARY_FN_S_ARR(f, fn)                                                \
+  VECTOR_BINARY_FN_S_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_SO(f, fn)                                             \
+  VECTOR_BINARY_FN_SO_SCALAR(f, fn)                                            \
+  VECTOR_BINARY_FN_SO_ARR(f, fn)                                               \
+  VECTOR_BINARY_FN_SO_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_O(f, fn)                                              \
+  VECTOR_BINARY_FN_O_SCALAR(f, fn)                                             \
+  VECTOR_BINARY_FN_O_ARR(f, fn)                                                \
+  VECTOR_BINARY_FN_O_VEC(f, fn)
+
+#define VECTOR_BINARY_FN_OO(op, fn)                                            \
+  VECTOR_BINARY_FN_OO_SCALAR(op, fn)                                           \
+  VECTOR_BINARY_FN_OO_ARR(op, fn)                                              \
+  VECTOR_BINARY_FN_OO_VEC(op, fn)
+
+#define VECTOR_BINARY_FN(fs, fso, fo, op, fn)                                  \
+  VECTOR_BINARY_FN_S(fs, fn)                                                   \
+  VECTOR_BINARY_FN_SO(fso, fn)                                                 \
+  VECTOR_BINARY_FN_O(fo, fn)                                                   \
+  VECTOR_BINARY_FN_OO(op, fn)
 
 VECTOR_BINARY_FN(mod, %=, modulus, %, fmod)
 
@@ -244,7 +284,7 @@ float *Vector::toAngles() {
 }
 //*/
 float Vector::angleTo(const Vector &a) const {
-  return acos(*dot(a) / (length() * a.length()));
+  return ::acos(*dot(a) / (length() * a.length()));
 }
 float *Vector::toArray() const {
   float *A = new float[d];
