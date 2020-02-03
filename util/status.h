@@ -5,16 +5,13 @@
 
 namespace util {
 
-enum StatusCode {
-  UNKNOWN,
-  OK,
-  INVALID_ARGUMENT
-};
+enum StatusCode { UNKNOWN, OK, INVALID_ARGUMENT };
 
 class Status {
   StatusCode code;
   std::string msg;
- public:
+
+public:
   Status(StatusCode c) : code(c) {}
   Status(StatusCode c, std::string m) : code(c), msg(m) {}
   inline StatusCode Code() const { return code; }
