@@ -115,12 +115,12 @@ public:
     c[3] = w;
   }
   Vector(const IVector &v);
-  //Vector(IVector &&v);
+  // Vector(IVector &&v);
   Vector(const Vector &v);
   Vector(Vector &&v);
   Vector(const Vector &&v);
   Vector &operator=(const IVector &v);
-  //Vector &operator=(IVector &&v);
+  // Vector &operator=(IVector &&v);
   Vector &operator=(const Vector &v);
   Vector &operator=(Vector &&v);
   Vector &operator=(const Vector &&v);

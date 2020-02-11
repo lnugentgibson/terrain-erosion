@@ -122,7 +122,8 @@ Vector &Vector::operator=(const Vector &v) {
 }
 Vector &Vector::operator=(Vector &&v) {
   if (v.d == d) {
-    if(c != 0) delete[] c;
+    if (c != 0)
+      delete[] c;
     c = v.c;
     v.c = 0;
   }
