@@ -1,6 +1,8 @@
 #ifndef CONTAINER_SPATIAL_GRID_H
 #define CONTAINER_SPATIAL_GRID_H
 
+#include <cassert>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <optional>
@@ -15,69 +17,74 @@ using math::vector::Vector;
 namespace container {
 namespace spatial {
 
-class Grid;
-
-class GridCell {
-  friend Grid;
-
-public:
-  void Insert(Vector p, int64_t id) {
-  }
-  bool InsertIfNotPresent(Vector p, int64_t id) {
-    return true;
-  }
-
-private:
-  std::map<Vector, int64_t> contents;
+struct GridElement {
+  IVector cell;
+  Vector offset;
+  GridElement() : cell(2), offset(2) {}
+  GridElement(int d) : cell(d), offset(d) {}
+  GridElement(IVector i, Vector v) : cell(i), offset(v) {}
 };
 
 class Grid {
 public:
   Grid(int d, int sizes[], Vector b, Vector r, Vector c)
       : base(b), range(r), cell_size(c) {
-    int s = 1;
-    size.reserve(d);
+    divisions.reserve(d);
     for (int i = 0; i < d; i++) {
-      size.push_back(sizes[i]);
-      s *= sizes[i];
-    }
-    grid.reserve(s);
-    for (int i = 0; i < s; i++) {
-      grid.emplace_back();
+      divisions.push_back(sizes[i]);
     }
   }
 
-  int64_t Insert(Vector p) {
-    Vector q = p / cell_size;
-    IVector c = q.floor();
-    Vector r = p - (Vector(c) * cell_size);
-    grid[GetIndex(c)].Insert(r / cell_size, next_id);
-    return next_id++;
-  }
-  std::optional<int64_t> InsertIfNotPresent(Vector p) {
-    Vector q = p / cell_size;
-    IVector c = q.floor();
-    Vector r = p - (Vector(c) * cell_size);
-    if(grid[GetIndex(c)].InsertIfNotPresent(r / cell_size, next_id)) {
-      return next_id++;
+  bool empty() { return cells.empty(); }
+  size_t size() { return cells.size(); }
+
+  void clear() { cells.clear(); }
+  size_t insert(const Vector &p) {
+    size_t index = 0;
+    Vector quotient = (p - base) / cell_size;
+    IVector cell = quotient.floor();
+    Vector offset = (p - (Vector(cell) * cell_size)) / cell_size;
+    if (free_indices.empty()) {
+      index = elements.size();
+      elements.emplace_back(cell, offset);
+    } else {
+      index = free_indices.front();
+      elements[index] = GridElement(cell, offset);
+      free_indices.pop_front();
     }
-    return std::nullopt;
+    size_t cell_index = GetIndex(cell);
+    cells.insert({cell_index, index});
+    return index;
   }
+  void erase(size_t id);
+  void erase(Vector p);
+  void set(size_t id, const Vector &p);
 
 private:
-  int GetIndex(IVector c) const {
-    int p = 0, f = 1;
-    for (int i = size.size() - 1; i >= 0; i--) {
+  size_t GetIndex(const IVector &c) const {
+    assert(c.valid());
+    size_t p = 0;
+    int f = 1;
+    for (int i = divisions.size() - 1; i >= 0; i--) {
       p += f * c[i];
-      f *= size[i];
+      f *= divisions[i];
     }
     return p;
   }
+  IVector GetPosition(int p) const {
+    IVector c(divisions.size());
+    for (size_t i = 0; i < divisions.size(); i++) {
+      c[i] = p % divisions[i];
+      p /= divisions[i];
+    }
+    return c;
+  }
 
-  std::vector<int> size;
-  std::vector<GridCell> grid;
+  std::vector<int> divisions;
+  std::vector<GridElement> elements;
+  std::multimap<size_t, size_t> cells;
+  std::deque<size_t> free_indices;
   Vector base, range, cell_size;
-  int64_t next_id;
 };
 
 } // namespace spatial

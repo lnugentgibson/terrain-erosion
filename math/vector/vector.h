@@ -44,6 +44,13 @@ public:
   bool &operator[](int i) { return c[i]; }
 };
 
+#define VECTOR_UNARY_FN_S_SIG(f, r) r &f();
+#define VECTOR_UNARY_FN_O_SIG(f, r) r f() const;
+
+#define VECTOR_UNARY_FN_SIG(v, f, r)                                           \
+  VECTOR_UNARY_FN_S_SIG(f, v)                                                  \
+  VECTOR_UNARY_FN_O_SIG(f, r)
+
 class IVector {
   int *c;
 
@@ -66,9 +73,23 @@ public:
     c[2] = z;
     c[3] = w;
   }
+  IVector(const IVector &v);
+  IVector(IVector &&v);
   IVector(const Vector &v);
-  int operator[](int i) const { return c[i]; }
-  int &operator[](int i) { return c[i]; }
+  IVector(Vector &&v);
+  IVector &operator=(const IVector &v);
+  IVector &operator=(IVector &&v);
+  IVector &operator=(const Vector &v);
+  IVector &operator=(Vector &&v);
+  ~IVector() {
+    if (c)
+      delete[] c;
+  }
+  inline bool valid() const { return c != 0; }
+  inline int operator[](size_t i) const { return c[i]; }
+  inline int &operator[](size_t i) { return c[i]; }
+
+  friend Vector;
 };
 
 class Vector {
@@ -94,8 +115,24 @@ public:
     c[3] = w;
   }
   Vector(const IVector &v);
-  float operator[](int i) const { return c[i]; }
-  float &operator[](int i) { return c[i]; }
+  //Vector(IVector &&v);
+  Vector(const Vector &v);
+  Vector(Vector &&v);
+  Vector(const Vector &&v);
+  Vector &operator=(const IVector &v);
+  //Vector &operator=(IVector &&v);
+  Vector &operator=(const Vector &v);
+  Vector &operator=(Vector &&v);
+  Vector &operator=(const Vector &&v);
+  ~Vector() {
+    if (c)
+      delete[] c;
+  }
+  inline bool valid() const { return c != 0; }
+  inline float operator[](int i) const { return c[i]; }
+  // inline float operator[](size_t i) const { return c[i]; }
+  inline float &operator[](int i) { return c[i]; }
+  // inline float &operator[](size_t i) { return c[i]; }
   template <typename F> void forEach(F f) const {
     float *A = new float[d];
     std::copy(c, c + d, A);
@@ -151,27 +188,20 @@ public:
   Vector &negate();
   Vector negative() const;
 
-#define VECTOR_UNARY_FN_S_SIG(f) Vector &f();
-#define VECTOR_UNARY_FN_O_SIG(f, r) r f() const;
-
-#define VECTOR_UNARY_FN_SIG(f, r)                                              \
-  VECTOR_UNARY_FN_S_SIG(f)                                                     \
-  VECTOR_UNARY_FN_O_SIG(f, r)
-
-  VECTOR_UNARY_FN_SIG(cos, Vector)
-  VECTOR_UNARY_FN_SIG(sin, Vector)
-  VECTOR_UNARY_FN_SIG(tan, Vector)
-  VECTOR_UNARY_FN_SIG(acos, Vector)
-  VECTOR_UNARY_FN_SIG(asin, Vector)
-  VECTOR_UNARY_FN_SIG(atan, Vector)
-  VECTOR_UNARY_FN_SIG(cosh, Vector)
-  VECTOR_UNARY_FN_SIG(sinh, Vector)
-  VECTOR_UNARY_FN_SIG(tanh, Vector)
-  VECTOR_UNARY_FN_SIG(acosh, Vector)
-  VECTOR_UNARY_FN_SIG(asinh, Vector)
-  VECTOR_UNARY_FN_SIG(atanh, Vector)
-  VECTOR_UNARY_FN_SIG(floor, IVector)
-  VECTOR_UNARY_FN_SIG(ceil, IVector)
+  VECTOR_UNARY_FN_SIG(Vector, cos, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, sin, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, tan, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, acos, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, asin, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, atan, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, cosh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, sinh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, tanh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, acosh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, asinh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, atanh, Vector)
+  VECTOR_UNARY_FN_SIG(Vector, floor, IVector)
+  VECTOR_UNARY_FN_SIG(Vector, ceil, IVector)
 
 #define VECTOR_BINARY_OP_S_SCALAR_SIG(f) Vector &f(const float v);
 #define VECTOR_BINARY_OP_S_ARR_SIG(f) Vector &f(const float *v);
@@ -287,6 +317,8 @@ public:
   static Vector fromAngles(float *as);
   static Vector randomDirection();
   static Vector randomDirection(const Vector &v, const Vector &w, float factor);
+
+  friend IVector;
 };
 
 void floor(Vector *v);

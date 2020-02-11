@@ -9,16 +9,132 @@
 namespace math {
 namespace vector {
 
+IVector::IVector(const IVector &v) : c(new int[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = v[d];
+  }
+}
+IVector::IVector(IVector &&v) : c(v.c), d(v.d) { v.c = 0; }
+
 IVector::IVector(const Vector &v) : c(new int[v.d]), d(v.d) {
   for (int i = 0; i < d; i++) {
     c[i] = (int)v[d];
   }
 }
+IVector::IVector(Vector &&v) : c(new int[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = (int)v[d];
+  }
+  delete[] v.c;
+  v.c = 0;
+}
+
+IVector &IVector::operator=(const IVector &v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = v[d];
+    }
+  }
+  return *this;
+}
+IVector &IVector::operator=(IVector &&v) {
+  if (v.d == d) {
+    delete[] c;
+    c = v.c;
+    v.c = 0;
+  }
+  return *this;
+}
+IVector &IVector::operator=(const Vector &v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = (int)v[d];
+    }
+  }
+  return *this;
+}
+IVector &IVector::operator=(Vector &&v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = (int)v[d];
+    }
+    delete[] v.c;
+    v.c = 0;
+  }
+  return *this;
+}
 
 Vector::Vector(const IVector &v) : c(new float[v.d]), d(v.d) {
   for (int i = 0; i < d; i++) {
-    c[i] = (float)v[d];
+    c[i] = (float)v[i];
   }
+}
+/*
+Vector::Vector(IVector &&v) : c(new float[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = (float)v[i];
+  }
+  delete[] v.c;
+  v.c = 0;
+}
+*/
+
+Vector::Vector(const Vector &v) : c(new float[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = v[i];
+  }
+}
+
+Vector::Vector(Vector &&v) : c(v.c), d(v.d) { v.c = 0; }
+Vector::Vector(const Vector &&v) : c(new float[v.d]), d(v.d) {
+  for (int i = 0; i < d; i++) {
+    c[i] = v[i];
+  }
+}
+
+Vector &Vector::operator=(const IVector &v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = (float)v[i];
+    }
+  }
+  return *this;
+}
+/*
+Vector &Vector::operator=(IVector &&v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = (float)v[i];
+    }
+    delete[] v.c;
+    v.c = 0;
+  }
+  return *this;
+}
+*/
+Vector &Vector::operator=(const Vector &v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = v[d];
+    }
+  }
+  return *this;
+}
+Vector &Vector::operator=(Vector &&v) {
+  if (v.d == d) {
+    if(c != 0) delete[] c;
+    c = v.c;
+    v.c = 0;
+  }
+  return *this;
+}
+Vector &Vector::operator=(const Vector &&v) {
+  if (v.d == d) {
+    for (int i = 0; i < d; i++) {
+      c[i] = v[d];
+    }
+  }
+  return *this;
 }
 
 Vector &Vector::negate() {

@@ -3,7 +3,8 @@
 
 class Color {
   float r_, g_, b_;
- public:
+
+public:
   Color();
   Color(float r, float g, float b);
   float r() const;
