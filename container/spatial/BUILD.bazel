@@ -1,6 +1,17 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "spatial_container",
+    hdrs = ["spatial_container.h"],
+    srcs = ["spatial_container.cc"],
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "//math/vector:vector",
+    ],
+)
+
+cc_library(
     name = "grid",
     hdrs = ["grid.h"],
     deps = [

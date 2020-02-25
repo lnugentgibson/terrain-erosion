@@ -122,7 +122,8 @@ Vector &Vector::operator=(const Vector &v) {
 }
 Vector &Vector::operator=(Vector &&v) {
   if (v.d == d) {
-    if(c != 0) delete[] c;
+    if (c != 0)
+      delete[] c;
     c = v.c;
     v.c = 0;
   }
@@ -373,8 +374,8 @@ vs)).toArray() : _.times(d, () => 0)); return map((e, i) => cofactor(rows, 0,
 i));
 }
 //*/
-float Vector::length2() const { return *dot(*this); }
-float Vector::length() const { return sqrt(*dot(*this)); }
+float Vector::length2() const { return dot(*this).ValueOrDie(); }
+float Vector::length() const { return sqrt(dot(*this).ValueOrDie()); }
 Vector &Vector::normalize() { return divide(length()); }
 Vector Vector::unit() const { return quotient(length()); }
 StatusOr<Vector> Vector::min(const Vector &v) const {
@@ -400,7 +401,7 @@ float *Vector::toAngles() {
 }
 //*/
 float Vector::angleTo(const Vector &a) const {
-  return ::acos(*dot(a) / (length() * a.length()));
+  return ::acos(dot(a).ValueOrDie() / (length() * a.length()));
 }
 float *Vector::toArray() const {
   float *A = new float[d];

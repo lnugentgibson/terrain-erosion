@@ -16,6 +16,8 @@ public:
   Status(StatusCode c, std::string m) : code(c), msg(m) {}
   inline StatusCode Code() const { return code; }
   inline std::string Message() const { return msg; }
+  
+  bool ok() const;
 };
 
 } // namespace util
