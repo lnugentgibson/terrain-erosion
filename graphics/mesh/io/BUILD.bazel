@@ -1,0 +1,10 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "stl",
+    hdrs = ["stl.h"],
+    srcs = ["stl.cc"],
+    deps = [
+        "//math/vector:vector",
+    ],
+)
