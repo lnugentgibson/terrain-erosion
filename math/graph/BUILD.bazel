@@ -1,0 +1,29 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "graph",
+    hdrs = ["graph.h"],
+    deps = [
+        "//third_party/absl/status",
+        "//util/task:statusor",
+    ],
+)
+
+cc_library(
+    name = "default_simple_graph",
+    srcs = ["default_simple_graph.cc"],
+    hdrs = ["default_simple_graph.h"],
+    deps = [
+        ":graph",
+        "//third_party/absl/status",
+    ],
+)
+
+cc_test(
+    name = "default_simple_graph_test",
+    srcs = ["default_simple_graph_test.cc"],
+    deps = [
+        ":default_simple_graph",
+        "//testing/base/public:gunit_main",
+    ],
+)
