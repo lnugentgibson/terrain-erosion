@@ -10,7 +10,9 @@ size_t SimpleSpatialContainer::size() const { return 0; }
 size_t SimpleSpatialContainer::add(Vector p) { return 0; }
 // std::vector<size_t> SimpleSpatialContainer::add_all(std::vector<Vector> ps);
 Status SimpleSpatialContainer::remove(size_t id) { return util::OK; }
-Status SimpleSpatialContainer::remove_all(std::vector<size_t> ids) { return util::OK; }
+Status SimpleSpatialContainer::remove_all(std::vector<size_t> ids) {
+  return util::OK;
+}
 Status SimpleSpatialContainer::clear() { return util::OK; }
 
 // Vector SimpleSpatialContainer::get(size_t id) const;

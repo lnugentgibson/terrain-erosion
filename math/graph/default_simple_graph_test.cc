@@ -8,7 +8,7 @@
 namespace {
 
 class DefaultSimpleGraphTest : public testing::Test {
- protected:
+protected:
   DefaultSimpleGraphTest() : graph_(new DefaultSimpleGraph()) {}
   std::unique_ptr<SimpleGraph> graph_;
 };
@@ -75,4 +75,4 @@ TEST_F(DefaultSimpleGraphTest, ReusesNodeIndices) {
   EXPECT_FALSE(graph_->IsEmpty());
 }
 
-}  // namespace
+} // namespace

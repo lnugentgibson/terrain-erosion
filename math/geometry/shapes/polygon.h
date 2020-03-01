@@ -16,6 +16,7 @@ class Polygon : public Shape {
 public:
   bool Inside(Vector p) override;
   float Intersect(Vector c, Vector s) override;
+
 private:
   std::vector<Vector> points;
 };

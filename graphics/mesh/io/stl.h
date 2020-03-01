@@ -23,14 +23,15 @@ struct Triangle {
 };
 
 class STLData {
- public:
+public:
   void Read(std::istream *is);
- private:
+
+private:
   void ReadTriangle(std::istream *is);
   char header[80];
   std::vector<Triangle> triangles;
 };
-  
+
 } // namespace stl
 } // namespace io
 } // namespace mesh

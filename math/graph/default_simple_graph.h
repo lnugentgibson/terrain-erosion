@@ -8,7 +8,7 @@
 #include "third_party/absl/status/status.h"
 
 class DefaultSimpleGraph : public SimpleGraph {
- public:
+public:
   // The number of nodes.
   size_t Order() override { return nodes_.size() - free_node_indices_.size(); }
 
@@ -55,8 +55,8 @@ class DefaultSimpleGraph : public SimpleGraph {
   util::StatusOr<Edge> GetEdge(Node a, Node b) override;
 
   // The edges and nodes connected to this node.
-  absl::Status GetNeighbors(
-      Node id, std::vector<std::pair<Edge, Node>>* neighbors) override;
+  absl::Status
+  GetNeighbors(Node id, std::vector<std::pair<Edge, Node>> *neighbors) override;
 
   util::StatusOr<std::pair<Node, Node>> GetEndpoints(Edge id) override;
 
@@ -102,11 +102,11 @@ class DefaultSimpleGraph : public SimpleGraph {
     return absl::Status(absl::StatusCode::kUnimplemented, "");
   }
 
- private:
+private:
   std::vector<std::pair<Node, std::map<Edge, Node>>> nodes_;
   std::set<size_t> free_node_indices_;
   std::vector<std::pair<Edge, std::pair<Node, Node>>> edges_;
   std::set<size_t> free_edge_indices_;
 };
 
-#endif  // EXPERIMENTAL_USERS_NUGENTGIBSON_GRAPH_DEFAULT_SIMPLE_GRAPH_H_
+#endif // EXPERIMENTAL_USERS_NUGENTGIBSON_GRAPH_DEFAULT_SIMPLE_GRAPH_H_

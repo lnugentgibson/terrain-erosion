@@ -10,10 +10,10 @@
 
 namespace container {
 namespace spatial {
-  
-  using util::Status;
-  using util::StatusOr;
-  using math::vector::Vector;
+
+using math::vector::Vector;
+using util::Status;
+using util::StatusOr;
 
 class SpatialContainer {
 public:

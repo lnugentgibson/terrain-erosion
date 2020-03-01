@@ -9,11 +9,9 @@ namespace graphics {
 namespace mesh {
 namespace io {
 namespace stl {
-  
-struct Triangle {
-  
-};
-  
+
+struct Triangle {};
+
 } // namespace stl
 } // namespace io
 } // namespace mesh

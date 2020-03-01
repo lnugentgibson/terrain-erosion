@@ -110,7 +110,7 @@ util::StatusOr<bool> DefaultSimpleGraph::Adjacent(Node a, Node b) {
   }
   auto [a_node, a_neighbors] = nodes_[a.Id()];
   auto it = std::find_if(a_neighbors.begin(), a_neighbors.end(),
-                         [b](const std::pair<Edge, Node>& neighbor) {
+                         [b](const std::pair<Edge, Node> &neighbor) {
                            return neighbor.second == b;
                          });
   return it != a_neighbors.end();
@@ -141,7 +141,7 @@ util::StatusOr<Edge> DefaultSimpleGraph::GetEdge(Node a, Node b) {
   }
   auto [a_node, a_neighbors] = nodes_[a.Id()];
   auto it = std::find_if(a_neighbors.begin(), a_neighbors.end(),
-                         [b](const std::pair<Edge, Node>& neighbor) {
+                         [b](const std::pair<Edge, Node> &neighbor) {
                            return neighbor.second == b;
                          });
   if (it != a_neighbors.end()) {
@@ -151,7 +151,7 @@ util::StatusOr<Edge> DefaultSimpleGraph::GetEdge(Node a, Node b) {
 }
 
 absl::Status DefaultSimpleGraph::GetNeighbors(
-    Node id, std::vector<std::pair<Edge, Node>>* neighbors) {
+    Node id, std::vector<std::pair<Edge, Node>> *neighbors) {
   if (!HasNode(id)) {
     return absl::Status(absl::StatusCode::kNotFound, "Node not found");
   }
@@ -162,8 +162,8 @@ absl::Status DefaultSimpleGraph::GetNeighbors(
   return absl::OkStatus();
 }
 
-util::StatusOr<std::pair<Node, Node>> DefaultSimpleGraph::GetEndpoints(
-    Edge id) {
+util::StatusOr<std::pair<Node, Node>>
+DefaultSimpleGraph::GetEndpoints(Edge id) {
   if (!HasEdge(id)) {
     return absl::Status(absl::StatusCode::kNotFound, "");
   }

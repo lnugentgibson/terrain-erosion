@@ -8,73 +8,73 @@
 #include "util/task/statusor.h"
 
 class Node {
- public:
+public:
   explicit Node() : id_(SIZE_MAX) {}
   explicit Node(size_t id) : id_(id) {}
-  Node& operator=(const Node& node) {
+  Node &operator=(const Node &node) {
     id_ = node.id_;
     return *this;
   }
-  Node& operator=(size_t id) {
+  Node &operator=(size_t id) {
     id_ = id;
     return *this;
   }
 
   explicit operator size_t() { return id_; }
-  bool operator<(const Node& id) const { return id_ < id.id_; }
+  bool operator<(const Node &id) const { return id_ < id.id_; }
   bool operator<(size_t id) const { return id_ < id; }
-  bool operator<=(const Node& id) const { return id_ <= id.id_; }
+  bool operator<=(const Node &id) const { return id_ <= id.id_; }
   bool operator<=(size_t id) const { return id_ <= id; }
-  bool operator==(const Node& id) const { return id_ == id.id_; }
+  bool operator==(const Node &id) const { return id_ == id.id_; }
   bool operator==(size_t id) const { return id_ == id; }
-  bool operator!=(const Node& id) const { return id_ != id.id_; }
+  bool operator!=(const Node &id) const { return id_ != id.id_; }
   bool operator!=(size_t id) const { return id_ != id; }
-  bool operator>=(const Node& id) const { return id_ >= id.id_; }
+  bool operator>=(const Node &id) const { return id_ >= id.id_; }
   bool operator>=(size_t id) const { return id_ >= id; }
-  bool operator>(const Node& id) const { return id_ > id.id_; }
+  bool operator>(const Node &id) const { return id_ > id.id_; }
   bool operator>(size_t id) const { return id_ > id; }
 
   inline size_t Id() { return id_; }
 
- private:
+private:
   size_t id_;
 };
 
 class Edge {
- public:
+public:
   explicit Edge() : id_(SIZE_MAX) {}
   explicit Edge(size_t id) : id_(id) {}
-  Edge& operator=(const Edge& node) {
+  Edge &operator=(const Edge &node) {
     id_ = node.id_;
     return *this;
   }
-  Edge& operator=(size_t id) {
+  Edge &operator=(size_t id) {
     id_ = id;
     return *this;
   }
 
   explicit operator size_t() const { return id_; }
-  bool operator<(const Edge& id) const { return id_ < id.id_; }
+  bool operator<(const Edge &id) const { return id_ < id.id_; }
   bool operator<(size_t id) const { return id_ < id; }
-  bool operator<=(const Edge& id) const { return id_ <= id.id_; }
+  bool operator<=(const Edge &id) const { return id_ <= id.id_; }
   bool operator<=(size_t id) const { return id_ <= id; }
-  bool operator==(const Edge& id) const { return id_ == id.id_; }
+  bool operator==(const Edge &id) const { return id_ == id.id_; }
   bool operator==(size_t id) const { return id_ == id; }
-  bool operator!=(const Edge& id) const { return id_ != id.id_; }
+  bool operator!=(const Edge &id) const { return id_ != id.id_; }
   bool operator!=(size_t id) const { return id_ != id; }
-  bool operator>=(const Edge& id) const { return id_ >= id.id_; }
+  bool operator>=(const Edge &id) const { return id_ >= id.id_; }
   bool operator>=(size_t id) const { return id_ >= id; }
-  bool operator>(const Edge& id) const { return id_ > id.id_; }
+  bool operator>(const Edge &id) const { return id_ > id.id_; }
   bool operator>(size_t id) const { return id_ > id; }
 
   inline size_t Id() { return id_; }
 
- private:
+private:
   size_t id_;
 };
 
 class Graph {
- public:
+public:
   virtual ~Graph() {}
 
   // The number of nodes.
@@ -102,10 +102,10 @@ class Graph {
   virtual util::StatusOr<bool> Incident(Node node, Edge edge) = 0;
 
   virtual absl::Status GetEdges(Node a, Node b,
-                                std::vector<Edge>* neighbors) = 0;
+                                std::vector<Edge> *neighbors) = 0;
 
-  virtual absl::Status GetNeighbors(
-      Node id, std::vector<std::pair<Edge, Node>>* neighbors) = 0;
+  virtual absl::Status
+  GetNeighbors(Node id, std::vector<std::pair<Edge, Node>> *neighbors) = 0;
 
   virtual util::StatusOr<std::pair<Node, Node>> GetEndpoints(Edge id) = 0;
 
@@ -141,10 +141,10 @@ class Graph {
 };
 
 class SimpleGraph : public Graph {
- public:
+public:
   virtual util::StatusOr<Edge> GetEdge(Node a, Node b) = 0;
 
-  absl::Status GetEdges(Node a, Node b, std::vector<Edge>* neighbors) override {
+  absl::Status GetEdges(Node a, Node b, std::vector<Edge> *neighbors) override {
     auto edge = GetEdge(a, b);
     if (edge.ok()) {
       neighbors->push_back(edge.ValueOrDie());
@@ -155,4 +155,4 @@ class SimpleGraph : public Graph {
   }
 };
 
-#endif  // EXPERIMENTAL_USERS_NUGENTGIBSON_GRAPH_GRAPH_H_
+#endif // EXPERIMENTAL_USERS_NUGENTGIBSON_GRAPH_GRAPH_H_
