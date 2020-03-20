@@ -7,13 +7,29 @@
 
 namespace util {
 
-template <typename T> class StatusOr {
-  // T value;
-  std::optional<T> value_;
-  Status status_;
-
+class Helper {
 public:
-  explicit StatusOr() : StatusOr(Status(StatusCode::UNKNOWN, ""));
+  // Move type-agnostic error handling to the .cc.
+  static void HandleInvalidStatusCtorArg(Status *);
+  static void Crash(const Status &status);
+};
+
+// Construct an instance of T in `p` through placement new, passing Args... to
+// the constructor.
+// This abstraction is here mostly for the gcc performance fix.
+template <typename T, typename... Args>
+void PlacementNew(void *p, Args &&... args) {
+#if defined(__GNUC__) && !defined(__clang__)
+  // Teach gcc that 'p' cannot be null, fixing code size issues.
+  if (p == nullptr)
+    __builtin_unreachable();
+#endif
+  new (p) T(std::forward<Args>(args)...);
+}
+
+template <typename T> class StatusOr {
+public:
+  explicit StatusOr() : StatusOr(Status(StatusCode::UNKNOWN, "")) {}
   StatusOr(const StatusOr &other) {
     if (other.ok()) {
       MakeValue(other.data_);
@@ -66,7 +82,7 @@ public:
   }
   template <typename U> StatusOr &operator=(const StatusOr<U> &other);
   template <typename U> StatusOr &operator=(StatusOr<U> &&other);
-  StatusOr(const T &v) : data_(value) { MakeStatus(); }
+  StatusOr(const T &value) : data_(value) { MakeStatus(); }
   StatusOr(const Status &status) : status_(status) { EnsureNotOk(); }
   StatusOr &operator=(const Status &status);
   StatusOr(T &&value) : data_(std::move(value)) { MakeStatus(); }
@@ -136,28 +152,48 @@ private:
   };
 
   void Clear() {
-    if (ok()) data_.~T();
+    if (ok())
+      data_.~T();
   }
 
   void EnsureOk() const {
-    if (!ok()) Helper::Crash(status_);
+    if (!ok())
+      ; // Helper::Crash(status_);
   }
 
   void EnsureNotOk() {
-    if (ok()) Helper::HandleInvalidStatusCtorArg(&status_);
+    if (ok())
+      ; // Helper::HandleInvalidStatusCtorArg(&status_);
   }
 
-  template <typename Arg>
-  void MakeValue(Arg&& arg) {
-    internal_statusor::PlacementNew<T>(&dummy_, std::forward<Arg>(arg));
+  template <typename Arg> void MakeValue(Arg &&arg) {
+    PlacementNew<T>(&dummy_, std::forward<Arg>(arg));
   }
 
-  template <typename... Args>
-  void MakeStatus(Args&&... args) {
-    internal_statusor::PlacementNew<Status>(&status_,
-                                            std::forward<Args>(args)...);
+  template <typename... Args> void MakeStatus(Args &&... args) {
+    PlacementNew<Status>(&status_, std::forward<Args>(args)...);
   }
 };
+
+template <typename T> const T &StatusOr<T>::ValueOrDie() const & {
+  this->EnsureOk();
+  return this->data_;
+}
+
+template <typename T> T &StatusOr<T>::ValueOrDie() & {
+  this->EnsureOk();
+  return this->data_;
+}
+
+template <typename T> const T &&StatusOr<T>::ValueOrDie() const && {
+  this->EnsureOk();
+  return std::move(this->data_);
+}
+
+template <typename T> T &&StatusOr<T>::ValueOrDie() && {
+  this->EnsureOk();
+  return std::move(this->data_);
+}
 
 } // namespace util
 
