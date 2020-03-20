@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace math {
 namespace vector {
@@ -24,7 +24,7 @@ MATCHER_P(VectorEq, v, "") {
 }
 
 class FVectorTest : public testing::TestWithParam<int> {
- protected:
+protected:
   const int dimension_;
   FVectorTest() : dimension_(GetParam()) {}
 };
@@ -168,17 +168,17 @@ struct Quadruplet {
     l[1] = sqrt(x * x + y * y + z * z);
     l[2] = sqrt(x * x + y * y + z * z + w * w);
   }
-  Quadruplet(const Quadruplet<VectorType, DataType, FloatType>& t) = default;
+  Quadruplet(const Quadruplet<VectorType, DataType, FloatType> &t) = default;
   VectorType vec(int d = 3) const {
     switch (d) {
-      case 2:
-        return VectorType(x, y);
-      case 3:
-        return VectorType(x, y, z);
-      case 4:
-        return VectorType(x, y, z, w);
-      default:
-        return VectorType(d);
+    case 2:
+      return VectorType(x, y);
+    case 3:
+      return VectorType(x, y, z);
+    case 4:
+      return VectorType(x, y, z, w);
+    default:
+      return VectorType(d);
     }
   }
 };
@@ -189,13 +189,12 @@ struct QuadrupletUnaryArith {
   Quadruplet<VectorType, DataType, FloatType> neg, sum, dif, prd, quo;
 
   QuadrupletUnaryArith(DataType s,
-                       const Quadruplet<VectorType, DataType, FloatType>& v)
-      : neg(-v.x, -v.y, -v.z, -v.w),
-        sum(v.x + s, v.y + s, v.z + s, v.w + s),
+                       const Quadruplet<VectorType, DataType, FloatType> &v)
+      : neg(-v.x, -v.y, -v.z, -v.w), sum(v.x + s, v.y + s, v.z + s, v.w + s),
         dif(v.x - s, v.y - s, v.z - s, v.w - s),
         prd(v.x * s, v.y * s, v.z * s, v.w * s),
         quo(v.x / s, v.y / s, v.z / s, v.w / s) {}
-  QuadrupletUnaryArith(const QuadrupletUnaryArith& o) = default;
+  QuadrupletUnaryArith(const QuadrupletUnaryArith &o) = default;
 };
 
 template <typename VectorType = FVector, typename IntVectorType = IVector,
@@ -206,12 +205,12 @@ struct QuadrupletUnaryFC {
   Quadruplet<IntVectorType, IntType, FloatType> floor, ceil;
 
   explicit QuadrupletUnaryFC(
-      const Quadruplet<VectorType, DataType, FloatType>& v)
+      const Quadruplet<VectorType, DataType, FloatType> &v)
       : floor_i(::floor(v.x), ::floor(v.y), ::floor(v.z), ::floor(v.w)),
         ceil_i(::ceil(v.x), ::ceil(v.y), ::ceil(v.z), ::ceil(v.w)),
         floor(::floor(v.x), ::floor(v.y), ::floor(v.z), ::floor(v.w)),
         ceil(::ceil(v.x), ::ceil(v.y), ::ceil(v.z), ::ceil(v.w)) {}
-  QuadrupletUnaryFC(const QuadrupletUnaryFC& o) = default;
+  QuadrupletUnaryFC(const QuadrupletUnaryFC &o) = default;
 };
 
 template <typename VectorType = FVector, typename DataType = float,
@@ -220,8 +219,8 @@ struct QuadrupletBinary {
   Quadruplet<VectorType, DataType, FloatType> sum, dif, prd, quo;
 
   float d[3];
-  QuadrupletBinary(const Quadruplet<VectorType, DataType, FloatType>& a,
-                   const Quadruplet<VectorType, DataType, FloatType>& b)
+  QuadrupletBinary(const Quadruplet<VectorType, DataType, FloatType> &a,
+                   const Quadruplet<VectorType, DataType, FloatType> &b)
       : sum(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w),
         dif(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w),
         prd(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w),
@@ -230,7 +229,7 @@ struct QuadrupletBinary {
     d[1] = a.x * b.x + a.y * b.y + a.z * b.z;
     d[2] = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
   }
-  QuadrupletBinary(const QuadrupletBinary& o) = default;
+  QuadrupletBinary(const QuadrupletBinary &o) = default;
 };
 
 template <typename VectorType = FVector, typename DataType = float,
@@ -241,8 +240,8 @@ struct VectorParamsTypeArith {
   const QuadrupletBinary<VectorType, DataType, FloatType> ab;
   std::vector<VectorType> a, b;
   const float scalar;
-  VectorParamsTypeArith(const Quadruplet<VectorType, DataType, FloatType>& _a,
-                        const Quadruplet<VectorType, DataType, FloatType>& _b,
+  VectorParamsTypeArith(const Quadruplet<VectorType, DataType, FloatType> &_a,
+                        const Quadruplet<VectorType, DataType, FloatType> &_b,
                         float _s)
       : as(_a), bs(_b), au(_s, _a), bu(_s, _b), ab(_a, _b), scalar(_s) {
     a.emplace_back(as.x, as.y);
@@ -256,14 +255,14 @@ struct VectorParamsTypeArith {
 
 class IVectorArithmeticTest : public testing::TestWithParam<
                                   VectorParamsTypeArith<IVector, int, float>> {
- protected:
+protected:
   VectorParamsTypeArith<IVector, int, float> vals_;
   IVectorArithmeticTest() : vals_(GetParam()) {}
 };
 
 class FVectorArithmeticTest
     : public testing::TestWithParam<VectorParamsTypeArith<>> {
- protected:
+protected:
   VectorParamsTypeArith<> vals_;
   FVectorArithmeticTest() : vals_(GetParam()) {}
 };
@@ -271,132 +270,132 @@ class FVectorArithmeticTest
 class DVectorArithmeticTest
     : public testing::TestWithParam<
           VectorParamsTypeArith<DVector, double, double>> {
- protected:
+protected:
   VectorParamsTypeArith<DVector, double, double> vals_;
   DVectorArithmeticTest() : vals_(GetParam()) {}
 };
 
-#define VECTOR_UNARY_OP_INPLACE_SCALAR_TEST(Suite, TestName, opName, op, \
-                                            expected)                    \
-  TEST_P(Suite, TestName) {                                              \
-    int i = 0;                                                           \
-    for (int d = 2; d <= 4; d++) {                                       \
-      auto& v = vals_.a[i];                                              \
-      auto& a = v.opName();                                              \
-      auto e = vals_.au.expected.vec(d);                                 \
-      EXPECT_EQ(a.dimension(), e.dimension());                           \
-      EXPECT_THAT(&v, testing::Eq(&a));                                  \
-      EXPECT_THAT(a, VectorEq(e));                                       \
-      v = vals_.b[i];                                                    \
-      a = v.opName();                                                    \
-      e = vals_.bu.expected.vec(d);                                      \
-      EXPECT_EQ(a.dimension(), e.dimension());                           \
-      EXPECT_THAT(&v, testing::Eq(&a));                                  \
-      EXPECT_THAT(a, VectorEq(e));                                       \
-      i++;                                                               \
-    }                                                                    \
+#define VECTOR_UNARY_OP_INPLACE_SCALAR_TEST(Suite, TestName, opName, op,       \
+                                            expected)                          \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto &v = vals_.a[i];                                                    \
+      auto &a = v.opName();                                                    \
+      auto e = vals_.au.expected.vec(d);                                       \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      v = vals_.b[i];                                                          \
+      a = v.opName();                                                          \
+      e = vals_.bu.expected.vec(d);                                            \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
 VECTOR_UNARY_OP_INPLACE_SCALAR_TEST(FVectorArithmeticTest, NegateTest, negate,
                                     -, neg)
 
-#define VECTOR_UNARY_OP_OUTOFPLACE_SCALAR_TEST(Suite, TestName, opName, op, \
-                                               expected)                    \
-  TEST_P(Suite, TestName) {                                                 \
-    int i = 0;                                                              \
-    for (int d = 2; d <= 4; d++) {                                          \
-      auto v = vals_.a[i];                                                  \
-      auto a = v.opName();                                                  \
-      auto e = vals_.au.expected.vec(d);                                    \
-      EXPECT_EQ(v.dimension(), e.dimension());                              \
-      EXPECT_EQ(a.dimension(), e.dimension());                              \
-      EXPECT_THAT(&v, testing::Ne(&a));                                     \
-      EXPECT_THAT(a, VectorEq(e));                                          \
-      i++;                                                                  \
-    }                                                                       \
+#define VECTOR_UNARY_OP_OUTOFPLACE_SCALAR_TEST(Suite, TestName, opName, op,    \
+                                               expected)                       \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto v = vals_.a[i];                                                     \
+      auto a = v.opName();                                                     \
+      auto e = vals_.au.expected.vec(d);                                       \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Ne(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
 VECTOR_UNARY_OP_OUTOFPLACE_SCALAR_TEST(FVectorArithmeticTest, NegationTest,
                                        negation, -, neg)
 
-#define VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, TestName, opName, op, \
-                                             expected)                    \
-  TEST_P(Suite, TestName) {                                               \
-    int i = 0;                                                            \
-    for (int d = 2; d <= 4; d++) {                                        \
-      auto& v = vals_.a[i];                                               \
-      auto& a = v.opName(vals_.scalar);                                   \
-      auto e = vals_.au.expected.vec(d);                                  \
-      EXPECT_EQ(a.dimension(), e.dimension());                            \
-      EXPECT_THAT(&v, testing::Eq(&a));                                   \
-      EXPECT_THAT(a, VectorEq(e));                                        \
-      v = vals_.b[i];                                                     \
-      a = v.opName(vals_.scalar);                                         \
-      e = vals_.bu.expected.vec(d);                                       \
-      EXPECT_EQ(a.dimension(), e.dimension());                            \
-      EXPECT_THAT(&v, testing::Eq(&a));                                   \
-      EXPECT_THAT(a, VectorEq(e));                                        \
-      i++;                                                                \
-    }                                                                     \
+#define VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, TestName, opName, op,      \
+                                             expected)                         \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto &v = vals_.a[i];                                                    \
+      auto &a = v.opName(vals_.scalar);                                        \
+      auto e = vals_.au.expected.vec(d);                                       \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      v = vals_.b[i];                                                          \
+      a = v.opName(vals_.scalar);                                              \
+      e = vals_.bu.expected.vec(d);                                            \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_BINARY_OP_INPLACE_SCALAR_TESTS(Suite)                       \
-  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, AddScalar, add, +, sum)      \
-  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, SubtractScalar, subtract, -, \
-                                       dif)                                \
-  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, MultiplyScalar, multiply, *, \
-                                       prd)                                \
+#define VECTOR_BINARY_OP_INPLACE_SCALAR_TESTS(Suite)                           \
+  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, AddScalar, add, +, sum)          \
+  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, SubtractScalar, subtract, -,     \
+                                       dif)                                    \
+  VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, MultiplyScalar, multiply, *,     \
+                                       prd)                                    \
   VECTOR_BINARY_OP_INPLACE_SCALAR_TEST(Suite, DivideScalar, divide, /, quo)
 
 VECTOR_BINARY_OP_INPLACE_SCALAR_TESTS(IVectorArithmeticTest)
 VECTOR_BINARY_OP_INPLACE_SCALAR_TESTS(FVectorArithmeticTest)
 VECTOR_BINARY_OP_INPLACE_SCALAR_TESTS(DVectorArithmeticTest)
 
-#define VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, TestName, opName, op, \
-                                             expected)                    \
-  TEST_P(Suite, TestName) {                                               \
-    int i = 0;                                                            \
-    for (int d = 2; d <= 4; d++) {                                        \
-      auto v = vals_.a[i];                                                \
-      auto w = vals_.b[i];                                                \
-      auto a_or = v.opName(w);                                            \
-      auto e = vals_.ab.expected.vec(d);                                  \
-      EXPECT_TRUE(a_or.ok());                                                    \
-      auto a = a_or.ValueOrDie();                                         \
-      EXPECT_EQ(v.dimension(), e.dimension());                            \
-      EXPECT_EQ(a.dimension(), e.dimension());                            \
-      /* EXPECT_THAT(&v, testing::Eq(&e)); */                             \
-      EXPECT_THAT(a, VectorEq(e));                                        \
-      i++;                                                                \
-    }                                                                     \
+#define VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, TestName, opName, op,      \
+                                             expected)                         \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto v = vals_.a[i];                                                     \
+      auto w = vals_.b[i];                                                     \
+      auto a_or = v.opName(w);                                                 \
+      auto e = vals_.ab.expected.vec(d);                                       \
+      EXPECT_TRUE(a_or.ok());                                                  \
+      auto a = a_or.ValueOrDie();                                              \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      /* EXPECT_THAT(&v, testing::Eq(&e)); */                                  \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_BINARY_OP_INPLACE_VECTOR_TESTS(Suite)                       \
-  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, AddVector, add, +, sum)      \
-  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, SubtractVector, subtract, -, \
-                                       dif)                                \
-  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, MultiplyVector, multiply, *, \
-                                       prd)                                \
+#define VECTOR_BINARY_OP_INPLACE_VECTOR_TESTS(Suite)                           \
+  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, AddVector, add, +, sum)          \
+  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, SubtractVector, subtract, -,     \
+                                       dif)                                    \
+  VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, MultiplyVector, multiply, *,     \
+                                       prd)                                    \
   VECTOR_BINARY_OP_INPLACE_VECTOR_TEST(Suite, DivideVector, divide, /, quo)
 
 VECTOR_BINARY_OP_INPLACE_VECTOR_TESTS(IVectorArithmeticTest)
 VECTOR_BINARY_OP_INPLACE_VECTOR_TESTS(FVectorArithmeticTest)
 VECTOR_BINARY_OP_INPLACE_VECTOR_TESTS(DVectorArithmeticTest)
 
-#define VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TEST(Suite, TestName, opName, op, \
-                                                expected)                    \
-  TEST_P(Suite, TestName) {                                                  \
-    int i = 0;                                                               \
-    for (int d = 2; d <= 4; d++) {                                           \
-      auto v = vals_.a[i];                                                   \
-      auto a = v.opName(vals_.scalar);                                       \
-      auto e = vals_.au.expected.vec(d);                                     \
-      EXPECT_EQ(v.dimension(), e.dimension());                               \
-      EXPECT_EQ(a.dimension(), e.dimension());                               \
-      EXPECT_THAT(&v, testing::Ne(&a));                                      \
-      EXPECT_THAT(a, VectorEq(e));                                           \
-      i++;                                                                   \
-    }                                                                        \
+#define VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TEST(Suite, TestName, opName, op,   \
+                                                expected)                      \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto v = vals_.a[i];                                                     \
+      auto a = v.opName(vals_.scalar);                                         \
+      auto e = vals_.au.expected.vec(d);                                       \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Ne(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
 #define VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TESTS(Suite)                        \
@@ -412,32 +411,32 @@ VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TESTS(IVectorArithmeticTest)
 VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TESTS(FVectorArithmeticTest)
 VECTOR_BINARY_OP_OUTOFPLACE_SCALAR_TESTS(DVectorArithmeticTest)
 
-#define VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, TestName, opName, op, \
-                                                expected)                    \
-  TEST_P(Suite, TestName) {                                                  \
-    int i = 0;                                                               \
-    for (int d = 2; d <= 4; d++) {                                           \
-      auto v = vals_.a[i];                                                   \
-      auto w = vals_.b[i];                                                   \
-      auto a_or = v.opName(w);                                               \
-      auto e = vals_.ab.expected.vec(d);                                     \
-      EXPECT_TRUE(a_or.ok());                                                       \
-      auto a = a_or.ValueOrDie();                                            \
-      EXPECT_EQ(v.dimension(), e.dimension());                               \
-      EXPECT_EQ(a.dimension(), e.dimension());                               \
-      EXPECT_THAT(&v, testing::Ne(&a));                                      \
-      EXPECT_THAT(a, VectorEq(e));                                           \
-      i++;                                                                   \
-    }                                                                        \
+#define VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, TestName, opName, op,   \
+                                                expected)                      \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto v = vals_.a[i];                                                     \
+      auto w = vals_.b[i];                                                     \
+      auto a_or = v.opName(w);                                                 \
+      auto e = vals_.ab.expected.vec(d);                                       \
+      EXPECT_TRUE(a_or.ok());                                                  \
+      auto a = a_or.ValueOrDie();                                              \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Ne(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TESTS(Suite)                       \
-  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, SumVector, add, +, sum)      \
-  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, DifferenceFVector, subtract, \
-                                          -, dif)                             \
-  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, ProductFVector, multiply, *, \
-                                          prd)                                \
-  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, QuotientFVector, divide, /,  \
+#define VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TESTS(Suite)                        \
+  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, SumVector, add, +, sum)       \
+  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, DifferenceFVector, subtract,  \
+                                          -, dif)                              \
+  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, ProductFVector, multiply, *,  \
+                                          prd)                                 \
+  VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TEST(Suite, QuotientFVector, divide, /,   \
                                           quo)
 
 VECTOR_BINARY_OP_OUTOFPLACE_VECTOR_TESTS(IVectorArithmeticTest)
@@ -564,7 +563,7 @@ struct QuadrupletUnaryTrig {
       atan, cosh, sinh, tanh, acosh, asinh, atanh;
 
   explicit QuadrupletUnaryTrig(
-      const Quadruplet<VectorType, DataType, FloatType>& v)
+      const Quadruplet<VectorType, DataType, FloatType> &v)
       : cos_i(::cos(v.x), ::cos(v.y), ::cos(v.z), ::cos(v.w)),
         sin_i(::sin(v.x), ::sin(v.y), ::sin(v.z), ::sin(v.w)),
         tan_i(::tan(v.x), ::tan(v.y), ::tan(v.z), ::tan(v.w)),
@@ -589,7 +588,7 @@ struct QuadrupletUnaryTrig {
         acosh(::acosh(v.x), ::acosh(v.y), ::acosh(v.z), ::acosh(v.w)),
         asinh(::asinh(v.x), ::asinh(v.y), ::asinh(v.z), ::asinh(v.w)),
         atanh(::atanh(v.x), ::atanh(v.y), ::atanh(v.z), ::atanh(v.w)) {}
-  QuadrupletUnaryTrig(const QuadrupletUnaryTrig& o) = default;
+  QuadrupletUnaryTrig(const QuadrupletUnaryTrig &o) = default;
 };
 
 template <typename VectorType = FVector, typename FloatVectorType = FVector,
@@ -599,7 +598,7 @@ struct VectorParamsTypeTrig {
   const QuadrupletUnaryTrig<VectorType, FloatVectorType, DataType, FloatType> u;
   std::vector<VectorType> v;
   explicit VectorParamsTypeTrig(
-      const Quadruplet<VectorType, DataType, FloatType>& _v)
+      const Quadruplet<VectorType, DataType, FloatType> &_v)
       : vs(_v), u(_v) {
     v.emplace_back(vs.x, vs.y);
     v.emplace_back(vs.x, vs.y, vs.z);
@@ -610,13 +609,13 @@ struct VectorParamsTypeTrig {
 class IVectorTrigTest
     : public testing::TestWithParam<
           VectorParamsTypeTrig<IVector, FVector, int, float>> {
- protected:
+protected:
   VectorParamsTypeTrig<IVector, FVector, int, float> vals_;
   IVectorTrigTest() : vals_(GetParam()) {}
 };
 
 class FVectorTrigTest : public testing::TestWithParam<VectorParamsTypeTrig<>> {
- protected:
+protected:
   VectorParamsTypeTrig<> vals_;
   FVectorTrigTest() : vals_(GetParam()) {}
 };
@@ -624,92 +623,92 @@ class FVectorTrigTest : public testing::TestWithParam<VectorParamsTypeTrig<>> {
 class DVectorTrigTest
     : public testing::TestWithParam<
           VectorParamsTypeTrig<DVector, DVector, double, double>> {
- protected:
+protected:
   VectorParamsTypeTrig<DVector, DVector, double, double> vals_;
   DVectorTrigTest() : vals_(GetParam()) {}
 };
 
-#define VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TestName, fn, \
-                                                 expected)            \
-  TEST_P(Suite, TestName) {                                           \
-    int i = 0;                                                        \
-    for (int d = 2; d <= 4; d++) {                                    \
-      auto& v = vals_.v[i];                                           \
-      auto& a = v.fn();                                               \
-      auto e = vals_.u.expected.vec(d);                               \
-      EXPECT_EQ(a.dimension(), e.dimension());                        \
-      EXPECT_THAT(&v, testing::Eq(&a));                               \
-      EXPECT_THAT(a, VectorEq(e));                                    \
-      i++;                                                            \
-    }                                                                 \
+#define VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TestName, fn,          \
+                                                 expected)                     \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto &v = vals_.v[i];                                                    \
+      auto &a = v.fn();                                                        \
+      auto e = vals_.u.expected.vec(d);                                        \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TESTS(Suite)                      \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, CosInplaceTest, cos, cos_i) \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, SinInplaceTest, sin, sin_i) \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TanInplaceTest, tan, tan_i) \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AcosInplaceTest, acos,      \
-                                           acos_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AsinInplaceTest, asin,      \
-                                           asin_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AtanInplaceTest, atan,      \
-                                           atan_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, CoshInplaceTest, cosh,      \
-                                           cosh_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, SinhInplaceTest, sinh,      \
-                                           sinh_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TanhInplaceTest, tanh,      \
-                                           tanh_i)                            \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AcoshInplaceTest, acosh,    \
-                                           acosh_i)                           \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AsinhInplaceTest, asinh,    \
-                                           asinh_i)                           \
-  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AtanhInplaceTest, atanh,    \
+#define VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TESTS(Suite)                       \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, CosInplaceTest, cos, cos_i)  \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, SinInplaceTest, sin, sin_i)  \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TanInplaceTest, tan, tan_i)  \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AcosInplaceTest, acos,       \
+                                           acos_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AsinInplaceTest, asin,       \
+                                           asin_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AtanInplaceTest, atan,       \
+                                           atan_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, CoshInplaceTest, cosh,       \
+                                           cosh_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, SinhInplaceTest, sinh,       \
+                                           sinh_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, TanhInplaceTest, tanh,       \
+                                           tanh_i)                             \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AcoshInplaceTest, acosh,     \
+                                           acosh_i)                            \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AsinhInplaceTest, asinh,     \
+                                           asinh_i)                            \
+  VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TEST(Suite, AtanhInplaceTest, atanh,     \
                                            atanh_i)
 
 VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TESTS(IVectorTrigTest)
 VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TESTS(FVectorTrigTest)
 VECTOR_UNARY_TRIG_FN_INPLACE_SCALAR_TESTS(DVectorTrigTest)
 
-#define VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TestName, fn,     \
-                                                    expected, vtype, fvtype) \
-  TEST_P(Suite, TestName) {                                                  \
-    int i = 0;                                                               \
-    for (int d = 2; d <= 4; d++) {                                           \
-      vtype v = vals_.v[i];                                                  \
-      fvtype a = v.fn();                                                     \
-      fvtype e = vals_.u.expected.vec(d);                                    \
-      EXPECT_EQ(v.dimension(), e.dimension());                               \
-      EXPECT_EQ(a.dimension(), e.dimension());                               \
-      EXPECT_THAT(a, VectorEq(e));                                           \
-      i++;                                                                   \
-    }                                                                        \
+#define VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TestName, fn,       \
+                                                    expected, vtype, fvtype)   \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      vtype v = vals_.v[i];                                                    \
+      fvtype a = v.fn();                                                       \
+      fvtype e = vals_.u.expected.vec(d);                                      \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TESTS(Suite, vtype, fvtype)    \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, CosOutofplaceTest,       \
-                                              cos_of, cos, vtype, fvtype)     \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, SinOutofplaceTest,       \
-                                              sin_of, sin, vtype, fvtype)     \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TanOutofplaceTest,       \
-                                              tan_of, tan, vtype, fvtype)     \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AcosOutofplaceTest,      \
-                                              acos_of, acos, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AsinOutofplaceTest,      \
-                                              asin_of, asin, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AtanOutofplaceTest,      \
-                                              atan_of, atan, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, CoshOutofplaceTest,      \
-                                              cosh_of, cosh, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, SinhOutofplaceTest,      \
-                                              sinh_of, sinh, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TanhOutofplaceTest,      \
-                                              tanh_of, tanh, vtype, fvtype)   \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AcoshOutofplaceTest,     \
-                                              acosh_of, acosh, vtype, fvtype) \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AsinhOutofplaceTest,     \
-                                              asinh_of, asinh, vtype, fvtype) \
-  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AtanhOutofplaceTest,     \
+#define VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TESTS(Suite, vtype, fvtype)     \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, CosOutofplaceTest,        \
+                                              cos_of, cos, vtype, fvtype)      \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, SinOutofplaceTest,        \
+                                              sin_of, sin, vtype, fvtype)      \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TanOutofplaceTest,        \
+                                              tan_of, tan, vtype, fvtype)      \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AcosOutofplaceTest,       \
+                                              acos_of, acos, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AsinOutofplaceTest,       \
+                                              asin_of, asin, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AtanOutofplaceTest,       \
+                                              atan_of, atan, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, CoshOutofplaceTest,       \
+                                              cosh_of, cosh, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, SinhOutofplaceTest,       \
+                                              sinh_of, sinh, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, TanhOutofplaceTest,       \
+                                              tanh_of, tanh, vtype, fvtype)    \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AcoshOutofplaceTest,      \
+                                              acosh_of, acosh, vtype, fvtype)  \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AsinhOutofplaceTest,      \
+                                              asinh_of, asinh, vtype, fvtype)  \
+  VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TEST(Suite, AtanhOutofplaceTest,      \
                                               atanh_of, atanh, vtype, fvtype)
 
 VECTOR_UNARY_TRIG_FN_OUTOFPLACE_SCALAR_TESTS(IVectorTrigTest, IVector, FVector)
@@ -730,46 +729,46 @@ testing::Values(VectorParamsTypeTrig<DVector, DVector, double, double>(
     Quadruplet<DVector, double, double>(1, 1, 1, 1))));
 */
 
-#define VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TEST(Suite, TestName, fn, expected) \
-  TEST_P(Suite, TestName) {                                                   \
-    int i = 0;                                                                \
-    for (int d = 2; d <= 4; d++) {                                            \
-      auto& v = vals_.v[i];                                                   \
-      auto& a = v.fn();                                                       \
-      auto e = vals_.u.expected.vec(d);                                       \
-      EXPECT_EQ(a.dimension(), e.dimension());                                \
-      EXPECT_THAT(&v, testing::Eq(&a));                                       \
-      EXPECT_THAT(a, VectorEq(e));                                            \
-      i++;                                                                    \
-    }                                                                         \
+#define VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TEST(Suite, TestName, fn, expected)  \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto &v = vals_.v[i];                                                    \
+      auto &a = v.fn();                                                        \
+      auto e = vals_.u.expected.vec(d);                                        \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Eq(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TESTS(Suite)                   \
-  VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TEST(Suite, FloorInplaceTest, floor, \
-                                         floor_i)                        \
+#define VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TESTS(Suite)                         \
+  VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TEST(Suite, FloorInplaceTest, floor,       \
+                                         floor_i)                              \
   VECTOR_UNARY_FC_FN_INPLACE_SCALAR_TEST(Suite, CeilInplaceTest, ceil, ceil_i)
 
-#define VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TEST(Suite, TestName, fn, expected) \
-  TEST_P(Suite, TestName) {                                                   \
-    int i = 0;                                                                \
-    for (int d = 2; d <= 4; d++) {                                            \
-      auto v = vals_.v[i];                                                    \
-      auto a = v.fn();                                                        \
-      auto e = vals_.u.expected.vec(d);                                       \
-      EXPECT_EQ(v.dimension(), e.dimension());                                \
-      EXPECT_EQ(a.dimension(), e.dimension());                                \
-      EXPECT_THAT(&v, testing::Ne(&a));                                       \
-      EXPECT_THAT(a, VectorEq(e));                                            \
-      i++;                                                                    \
-    }                                                                         \
+#define VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TEST(Suite, TestName, fn, expected)  \
+  TEST_P(Suite, TestName) {                                                    \
+    int i = 0;                                                                 \
+    for (int d = 2; d <= 4; d++) {                                             \
+      auto v = vals_.v[i];                                                     \
+      auto a = v.fn();                                                         \
+      auto e = vals_.u.expected.vec(d);                                        \
+      EXPECT_EQ(v.dimension(), e.dimension());                                 \
+      EXPECT_EQ(a.dimension(), e.dimension());                                 \
+      EXPECT_THAT(&v, testing::Ne(&a));                                        \
+      EXPECT_THAT(a, VectorEq(e));                                             \
+      i++;                                                                     \
+    }                                                                          \
   }
 
-#define VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TESTS(Suite)                      \
-  VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TEST(Suite, FloorOutofplaceTest, floor, \
-                                         floor)                             \
+#define VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TESTS(Suite)                         \
+  VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TEST(Suite, FloorOutofplaceTest, floor,    \
+                                         floor)                                \
   VECTOR_UNARY_FN_OUTOFPLACE_SCALAR_TEST(Suite, CeilOutofplaceTest, ceil, ceil)
 
-}  // namespace
+} // namespace
 
-}  // namespace vector
-}  // namespace math
+} // namespace vector
+} // namespace math
