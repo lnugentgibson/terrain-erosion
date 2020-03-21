@@ -20,7 +20,7 @@ git_repository(
 )
 
 git_repository(
-    name = "protobuf",
+    name = "com_google_protobuf",
     remote = "https://github.com/protocolbuffers/protobuf.git",
     commit = "fe1790ca0df67173702f70d5646b82f48f412b99",
 )
