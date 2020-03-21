@@ -175,6 +175,17 @@ private:
   }
 };
 
+template <typename T>
+const Status& StatusOr<T>::status() const & {
+  return this->status_;
+}
+template <typename T>
+Status StatusOr<T>::status() && {
+  // Note that we copy instead of moving the status here so that
+  // ~StatusOrData() can call ok() without invoking UB.
+  return ok() ? Status::OK() : this->status_;
+}
+
 template <typename T> const T &StatusOr<T>::ValueOrDie() const & {
   this->EnsureOk();
   return this->data_;
