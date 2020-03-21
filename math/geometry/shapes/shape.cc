@@ -27,7 +27,7 @@ bool Rectangle::Inside(Vector p) { return InsideRectangle(p, corner, size); }
 float Rectangle::Intersect(Vector c, Vector s) {
   Vector c2 = c + s;
   Vector corner2 = corner + size;
-  Vector d = corner2.min(c2) - corner.max(c);
+  Vector d = corner2.min(c2).ValueOrDie() - corner.max(c).ValueOrDie();
   return std::max(0.0f, d[0]) * std::max(0.0f, d[1]);
 }
 

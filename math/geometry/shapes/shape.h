@@ -52,7 +52,8 @@ class Polygon : public Shape {
   std::vector<Vector> points;
 
 public:
-  bool Inside(Vector p);
+  bool Inside(Vector p) override;
+  float Intersect(Vector c, Vector s) override;
 };
 
 } // namespace shapes
