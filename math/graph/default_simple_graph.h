@@ -4,8 +4,8 @@
 #include <map>
 #include <set>
 
-#include "experimental/users/nugentgibson/graph/graph.h"
-#include "third_party/absl/status/status.h"
+#include "math/graph/graph.h"
+#include "util/status.h"
 
 class DefaultSimpleGraph : public SimpleGraph {
 public:
@@ -27,7 +27,7 @@ public:
     return it == free_node_indices_.end();
   }
 
-  absl::Status RemoveNode(Node id) override;
+  util::Status RemoveNode(Node id) override;
 
   util::StatusOr<Edge> AddEdge(Node a, Node b) override;
 
@@ -39,7 +39,7 @@ public:
     return it == free_edge_indices_.end();
   }
 
-  absl::Status RemoveEdge(Edge id) override;
+  util::Status RemoveEdge(Edge id) override;
 
   // Whether nodes a and b are connect by an edge.
   // Returns kNotFound if either of the nodes do not exist.
@@ -55,52 +55,54 @@ public:
   util::StatusOr<Edge> GetEdge(Node a, Node b) override;
 
   // The edges and nodes connected to this node.
-  absl::Status
+  util::Status
   GetNeighbors(Node id, std::vector<std::pair<Edge, Node>> *neighbors) override;
 
   util::StatusOr<std::pair<Node, Node>> GetEndpoints(Edge id) override;
 
+  /*
   // The length of the shortest path between the specified nodes.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Distance(Node a, Node b) override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
 
   // The greatest distance between the specified node and any other node.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Eccentricity(Node node) override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
 
   // The minimum eccentricity of any node.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Radius() override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
 
   // The maximum eccentricity of any node.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Diameter() override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
 
   // The length of the shortest cycle.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Girth() override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
 
   // The length of the longest cycle.
   //
-  // Not required. Will return kUnimplemented if not implemented.
+  // Not required. Will return UNIMPLEMENTED if not implemented.
   util::StatusOr<int> Circumference() override {
-    return absl::Status(absl::StatusCode::kUnimplemented, "");
+    return util::Status(util::StatusCode::UNIMPLEMENTED, "");
   }
+  //*/
 
 private:
   std::vector<std::pair<Node, std::map<Edge, Node>>> nodes_;

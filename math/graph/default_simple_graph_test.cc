@@ -1,9 +1,9 @@
-#include "experimental/users/nugentgibson/graph/default_simple_graph.h"
+#include "math/graph/default_simple_graph.h"
 
 #include <memory>
 
-#include "testing/base/public/gmock.h"
-#include "testing/base/public/gunit.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace {
 
@@ -52,7 +52,7 @@ TEST_F(DefaultSimpleGraphTest, RemoveSingleNode) {
   EXPECT_EQ(graph_->AddNode(), 0);
   EXPECT_EQ(graph_->AddNode(), 1);
   EXPECT_EQ(graph_->AddNode(), 2);
-  EXPECT_OK(graph_->RemoveNode(Node(1)));
+  EXPECT_TRUE(graph_->RemoveNode(Node(1)).ok());
   EXPECT_TRUE(graph_->HasNode(Node(0)));
   EXPECT_FALSE(graph_->HasNode(Node(1)));
   EXPECT_TRUE(graph_->HasNode(Node(2)));
@@ -65,7 +65,7 @@ TEST_F(DefaultSimpleGraphTest, ReusesNodeIndices) {
   EXPECT_EQ(graph_->AddNode(), 0);
   EXPECT_EQ(graph_->AddNode(), 1);
   EXPECT_EQ(graph_->AddNode(), 2);
-  EXPECT_OK(graph_->RemoveNode(Node(1)));
+  EXPECT_TRUE(graph_->RemoveNode(Node(1)).ok());
   EXPECT_EQ(graph_->AddNode(), 1);
   EXPECT_TRUE(graph_->HasNode(Node(0)));
   EXPECT_TRUE(graph_->HasNode(Node(1)));

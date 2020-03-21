@@ -1,11 +1,13 @@
-package(default_visibility = ["//visibility:public"])
+# TODO(nugentgibson): describe this package.
 
 cc_library(
     name = "graph",
     hdrs = ["graph.h"],
     deps = [
-        "//third_party/absl/status",
-        "//util/task:statusor",
+        # "@com_google_protobuf//net/proto2/public:proto2",
+        "//util:status",
+        "@com_google_absl//absl/strings",
+        "//util:statusor",
     ],
 )
 
@@ -15,7 +17,17 @@ cc_library(
     hdrs = ["default_simple_graph.h"],
     deps = [
         ":graph",
-        "//third_party/absl/status",
+        "//util:status",
+    ],
+)
+
+cc_library(
+    name = "force_diagram",
+    srcs = ["force_diagram.cc"],
+    hdrs = ["force_diagram.h"],
+    deps = [
+        ":graph",
+        "//util:status",
     ],
 )
 
@@ -24,6 +36,16 @@ cc_test(
     srcs = ["default_simple_graph_test.cc"],
     deps = [
         ":default_simple_graph",
-        "//testing/base/public:gunit_main",
+        "@googletest//:gtest_main",
+        "//util:status",
+    ],
+)
+
+cc_test(
+    name = "force_diagram_test",
+    srcs = ["force_diagram_test.cc"],
+    deps = [
+        ":force_diagram",
+        "@googletest//:gtest_main",
     ],
 )
