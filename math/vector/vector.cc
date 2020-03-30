@@ -42,7 +42,7 @@ namespace vector {
   util::StatusOr<BVector> VectorType::lessThan(const ParamVectorType &v)       \
       const {                                                                  \
     if (v.d_ != d_) {                                                          \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions are not equal");                         \
     }                                                                          \
     BVector o(d_);                                                             \
@@ -64,7 +64,7 @@ namespace vector {
   util::StatusOr<BVector> VectorType::lessThanOrEqual(                         \
       const ParamVectorType &v) const {                                        \
     if (v.d_ != d_) {                                                          \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions are not equal");                         \
     }                                                                          \
     BVector o(d_);                                                             \
@@ -87,7 +87,7 @@ namespace vector {
   util::StatusOr<BVector> VectorType::eachEquals(const ParamVectorType &v,     \
                                                  FloatType tolerance) const {  \
     if (v.d_ != d_) {                                                          \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions are not equal");                         \
     }                                                                          \
     BVector o(d_);                                                             \
@@ -109,7 +109,7 @@ namespace vector {
   util::StatusOr<BVector> VectorType::greaterThanOrEqual(                      \
       const ParamVectorType &v) const {                                        \
     if (v.d_ != d_) {                                                          \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions are not equal");                         \
     }                                                                          \
     BVector o(d_);                                                             \
@@ -131,7 +131,7 @@ namespace vector {
   util::StatusOr<BVector> VectorType::greaterThan(const ParamVectorType &v)    \
       const {                                                                  \
     if (v.d_ != d_) {                                                          \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions are not equal");                         \
     }                                                                          \
     BVector o(d_);                                                             \
@@ -262,7 +262,7 @@ namespace vector {
                                      function, op)                             \
   util::StatusOr<VectorType> VectorType::function(const ParamVectorType &v) {  \
     if (v.d_ != d_)                                                            \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions must be equal");                         \
     return transform(                                                          \
         [v](DataType e, int i, DataType *A) { return e op v[i]; });            \
@@ -295,7 +295,7 @@ namespace vector {
   util::StatusOr<ReturnVectorType> VectorType::function(                       \
       const ParamVectorType &v) const {                                        \
     if (v.d_ != d_)                                                            \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions must be equal");                         \
     return ReturnVectorType(                                                   \
         map([v](DataType e, int i, DataType *A) { return e op v[i]; }));       \
@@ -409,7 +409,7 @@ namespace vector {
                                      delegate)                                 \
   util::StatusOr<VectorType> VectorType::f(const ParamVectorType &v) {         \
     if (v.d_ != d_)                                                            \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions must be equal");                         \
     return transform(                                                          \
         [v](DataType e, int i, DataType *A) { return delegate(e, v[i]); });    \
@@ -445,7 +445,7 @@ namespace vector {
   util::StatusOr<ReturnVectorType> VectorType::f(const ParamVectorType &v)     \
       const {                                                                  \
     if (v.d_ != d_)                                                            \
-      return util::Status(util::StatusCode::INVALID_ARGUMENT,                  \
+      return absl::Status(absl::StatusCode::kInvalidArgument,                  \
                           "dimensions must be equal");                         \
     return ReturnVectorType(map(                                               \
         [v](DataType e, int i, DataType *A) { return delegate(e, v[i]); }));   \

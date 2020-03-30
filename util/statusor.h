@@ -3,15 +3,15 @@
 
 #include <optional>
 
-#include "util/status.h"
+#include "absl/status/status.h"
 
 namespace util {
 
 class Helper {
 public:
   // Move type-agnostic error handling to the .cc.
-  static void HandleInvalidStatusCtorArg(Status *);
-  static void Crash(const Status &status);
+  static void HandleInvalidStatusCtorArg(absl::Status *);
+  static void Crash(const absl::Status &status);
 };
 
 // Construct an instance of T in `p` through placement new, passing Args... to
@@ -29,7 +29,7 @@ void PlacementNew(void *p, Args &&... args) {
 
 template <typename T> class StatusOr {
 public:
-  explicit StatusOr() : StatusOr(Status(StatusCode::UNKNOWN, "")) {}
+  explicit StatusOr() : StatusOr(absl::Status(absl::StatusCode::kUnknown, "")) {}
   StatusOr(const StatusOr &other) {
     if (other.ok()) {
       MakeValue(other.data_);
@@ -83,11 +83,11 @@ public:
   template <typename U> StatusOr &operator=(const StatusOr<U> &other);
   template <typename U> StatusOr &operator=(StatusOr<U> &&other);
   StatusOr(const T &value) : data_(value) { MakeStatus(); }
-  StatusOr(const Status &status) : status_(status) { EnsureNotOk(); }
-  StatusOr &operator=(const Status &status);
+  StatusOr(const absl::Status &status) : status_(status) { EnsureNotOk(); }
+  StatusOr &operator=(const absl::Status &status);
   StatusOr(T &&value) : data_(std::move(value)) { MakeStatus(); }
-  StatusOr(Status &&status) : status_(std::move(status)) { EnsureNotOk(); }
-  StatusOr &operator=(Status &&status);
+  StatusOr(absl::Status &&status) : status_(std::move(status)) { EnsureNotOk(); }
+  StatusOr &operator=(absl::Status &&status);
 
   ~StatusOr() {
     if (ok()) {
@@ -100,8 +100,8 @@ public:
 
   bool ok() const { return this->status_.ok(); }
 
-  const Status &status() const &;
-  Status status() &&;
+  const absl::Status &status() const &;
+  absl::Status status() &&;
 
   const T &ValueOrDie() const &;
   T &ValueOrDie() &;
@@ -116,7 +116,7 @@ public:
       MakeValue(value);
     } else {
       MakeValue(value);
-      status_ = Status::OK();
+      status_ = absl::OkStatus();
     }
   }
 
@@ -126,24 +126,24 @@ public:
       MakeValue(std::move(value));
     } else {
       MakeValue(std::move(value));
-      status_ = Status::OK();
+      status_ = absl::OkStatus();
     }
   }
 
-  void Assign(const Status &status) {
+  void Assign(const absl::Status &status) {
     Clear();
     status_ = status;
     EnsureNotOk();
   }
 
-  void Assign(Status &&status) {
+  void Assign(absl::Status &&status) {
     Clear();
     status_ = status;
     EnsureNotOk();
   }
 
 private:
-  Status status_;
+  absl::Status status_;
 
   struct Dummy {};
   union {
@@ -171,19 +171,17 @@ private:
   }
 
   template <typename... Args> void MakeStatus(Args &&... args) {
-    PlacementNew<Status>(&status_, std::forward<Args>(args)...);
+    PlacementNew<absl::Status>(&status_, std::forward<Args>(args)...);
   }
 };
 
-template <typename T>
-const Status& StatusOr<T>::status() const & {
+template <typename T> const absl::Status &StatusOr<T>::status() const & {
   return this->status_;
 }
-template <typename T>
-Status StatusOr<T>::status() && {
+template <typename T> absl::Status StatusOr<T>::status() && {
   // Note that we copy instead of moving the status here so that
   // ~StatusOrData() can call ok() without invoking UB.
-  return ok() ? Status::OK() : this->status_;
+  return ok() ? absl::OkStatus() : this->status_;
 }
 
 template <typename T> const T &StatusOr<T>::ValueOrDie() const & {

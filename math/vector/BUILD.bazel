@@ -26,8 +26,8 @@ cc_library(
     srcs = ["vector.cc"],
     deps = [
         "//math:common",
-        "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status:status",
     ],
 )
 

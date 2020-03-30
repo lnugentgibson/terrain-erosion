@@ -5,19 +5,11 @@
 #include <sstream>
 #include <string>
 
-#include "util/status.h"
+#include "absl/status/status.h"
 #include "util/statusor.h"
 
 namespace math {
 namespace vector {
-
-class Matrix;
-class BVector;
-class IVector;
-class FVector;
-class DVector;
-
-using Vector = FVector;
 
 #define VECTOR_CONSTRUCTORS(VectorType, DataType)                              \
   explicit VectorType(int d) : d_(d), c_(new DataType[d]) { fill(0); }         \
@@ -397,6 +389,17 @@ using Vector = FVector;
   DataType min() const;                                                        \
   DataType max() const;
 
+class Matrix;
+
+class BVector;
+class IVector;
+class FVector;
+class DVector;
+
+class FRange;
+
+using Vector = FVector;
+
 struct invalid_vector_t {};
 
 class BVector {
@@ -524,6 +527,8 @@ public:
   friend BVector;
   friend IVector;
   friend DVector;
+  
+  friend FRange;
 
 private:
   const size_t d_;
@@ -583,6 +588,16 @@ void floor(FVector *v);
 FVector floor(const FVector &v);
 FVector &&floor(FVector &&v);
 FVector &floor(const FVector &v, FVector *w);
+
+class FRange {
+public:
+  inline size_t dimension() const { return start_.d_; }
+
+private:
+  FVector start_, end_;
+  
+  FRange(const FVector &s, const FVector &e) : start_(s), end_(e) {}
+};
 
 } // namespace vector
 } // namespace math
