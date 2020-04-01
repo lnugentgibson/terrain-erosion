@@ -7,9 +7,9 @@
 #include <vector>
 
 // #include "net/proto2/public/message.h"
-#include "util/status.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/substitute.h"
+#include "util/status.h"
 #include "util/statusor.h"
 
 class Node {
@@ -159,7 +159,7 @@ public:
     if (type_ == STRING) {
       string_value_ = "";
     }
-    //if (type_ == PROTO) {
+    // if (type_ == PROTO) {
     //  proto_value_ = nullptr;
     //}
     if (type_ == POINTER) {
@@ -172,7 +172,7 @@ public:
   explicit Property(float f) { ForceFloatValue(f); }
   explicit Property(double d) { ForceDoubleValue(d); }
   explicit Property(std::string s) { ForceStringValue(s); }
-  //explicit Property(proto2::Message *m) { ForceProtoValue(m); }
+  // explicit Property(proto2::Message *m) { ForceProtoValue(m); }
 
   DataType Type() { return type_; }
 
@@ -272,13 +272,13 @@ public:
       return absl::StrCat("", numeric_.double_value);
     case STRING:
       return *string_value_;
-    //case PROTO:
+    // case PROTO:
     //  return (*proto_value_)->DebugString();
     default:
       return "";
     }
   }
-  //proto2::Message *ProtoValue() {
+  // proto2::Message *ProtoValue() {
   //  switch (type_) {
   //  case PROTO:
   //    return *proto_value_;
@@ -419,7 +419,7 @@ public:
     }
     return util::Status::OK();
   }
-  //util::Status ProtoValue(proto2::Message *value) {
+  // util::Status ProtoValue(proto2::Message *value) {
   //  switch (type_) {
   //  case STRING:
   //    string_value_ = value->DebugString();
@@ -455,7 +455,7 @@ public:
     type_ = STRING;
     string_value_ = value;
   }
-  //void ForceProtoValue(proto2::Message *value) {
+  // void ForceProtoValue(proto2::Message *value) {
   //  type_ = PROTO;
   //  proto_value_ = value;
   //}

@@ -4,10 +4,10 @@
 #include <map>
 #include <vector>
 
-#include "experimental/users/nugentgibson/math/geometry/shapes/shape.h"
-#include "experimental/users/nugentgibson/math/vector/vector.h"
-#include "third_party/absl/status/status.h"
-#include "util/task/statusor.h"
+#include "absl/status/status.h"
+#include "math/geometry/shapes/shape.h"
+#include "math/vector/vector.h"
+#include "util/statusor.h"
 
 namespace container {
 namespace spatial {
@@ -22,8 +22,8 @@ public:
   virtual size_t Size() const = 0;
   // The allowed region for points to exist. If set, points cannot be added
   // outside this range.
-  virtual std::optional<math::geometry::shapes::Rectangle> Bounds() const = 0;
-  virtual util::StatusOr<math::geometry::shapes::Rectangle> Range() const = 0;
+  virtual std::optional<math::vector::FCube> Bounds() const = 0;
+  virtual util::StatusOr<math::vector::FCube> Range() const = 0;
   virtual util::StatusOr<math::geometry::shapes::Polygon> Hull() const = 0;
 
   virtual size_t Insert(math::vector::Vector p) = 0;
@@ -60,8 +60,8 @@ public:
   explicit SimpleSpatialContainer(int d) : SpatialContainer(d) {}
 
   size_t Size() const override;
-  std::optional<math::geometry::shapes::Rectangle> Bounds() const override;
-  util::StatusOr<math::geometry::shapes::Rectangle> Range() const override;
+  std::optional<math::vector::FCube> Bounds() const override;
+  util::StatusOr<math::vector::FCube> Range() const override;
   util::StatusOr<math::geometry::shapes::Polygon> Hull() const override;
 
   size_t Insert(math::vector::Vector p) override;

@@ -29,6 +29,13 @@ namespace vector {
   }
 
 #define VECTOR_COMP(VectorType, ParamVectorType, DataType, FloatType)          \
+  BVector VectorType::operator<(FloatType v) const {                           \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] < v;                                                        \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
   BVector VectorType::operator<(const ParamVectorType &v) const {              \
     if (v.d_ != d_) {                                                          \
       return BVector(invalid_vector_t());                                      \
@@ -36,6 +43,13 @@ namespace vector {
     BVector o(d_);                                                             \
     for (int i = 0; i < (int)d_; i++) {                                        \
       o[i] = c_[i] < v.c_[i];                                                  \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
+  BVector VectorType::lessThan(FloatType v) const {                            \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] < v;                                                        \
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
@@ -51,6 +65,13 @@ namespace vector {
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
+  BVector VectorType::operator<=(FloatType v) const {                          \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] <= v;                                                       \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
   BVector VectorType::operator<=(const ParamVectorType &v) const {             \
     if (v.d_ != d_) {                                                          \
       return BVector(invalid_vector_t());                                      \
@@ -58,6 +79,13 @@ namespace vector {
     BVector o(d_);                                                             \
     for (int i = 0; i < (int)d_; i++) {                                        \
       o[i] = c_[i] <= v.c_[i];                                                 \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
+  BVector VectorType::lessThanOrEqual(FloatType v) const {                     \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] <= v;                                                       \
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
@@ -73,8 +101,16 @@ namespace vector {
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
+  bool VectorType::operator==(FloatType v) const { return equals(v); }         \
   bool VectorType::operator==(const ParamVectorType &v) const {                \
     return equals(v);                                                          \
+  }                                                                            \
+  bool VectorType::equals(FloatType v, FloatType tolerance) const {            \
+    return reduce(                                                             \
+        [v, tolerance](bool a, DataType e, int i, DataType *A) {               \
+          return a && floatEquals<FloatType>(e, v, tolerance);                 \
+        },                                                                     \
+        true);                                                                 \
   }                                                                            \
   bool VectorType::equals(const ParamVectorType &v, FloatType tolerance)       \
       const {                                                                  \
@@ -83,6 +119,13 @@ namespace vector {
           return a && floatEquals<FloatType>(e, v[i], tolerance);              \
         },                                                                     \
         true);                                                                 \
+  }                                                                            \
+  BVector VectorType::eachEquals(FloatType v, FloatType tolerance) const {     \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = floatEquals<FloatType>(c_[i], v, tolerance);                      \
+    }                                                                          \
+    return o;                                                                  \
   }                                                                            \
   util::StatusOr<BVector> VectorType::eachEquals(const ParamVectorType &v,     \
                                                  FloatType tolerance) const {  \
@@ -96,6 +139,13 @@ namespace vector {
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
+  BVector VectorType::operator>=(FloatType v) const {                          \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] >= v;                                                       \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
   BVector VectorType::operator>=(const ParamVectorType &v) const {             \
     if (v.d_ != d_) {                                                          \
       return BVector(invalid_vector_t());                                      \
@@ -103,6 +153,13 @@ namespace vector {
     BVector o(d_);                                                             \
     for (int i = 0; i < (int)d_; i++) {                                        \
       o[i] = c_[i] >= v.c_[i];                                                 \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
+  BVector VectorType::greaterThanOrEqual(FloatType v) const {                  \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] >= v;                                                       \
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
@@ -118,6 +175,13 @@ namespace vector {
     }                                                                          \
     return o;                                                                  \
   }                                                                            \
+  BVector VectorType::operator>(FloatType v) const {                           \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] > v;                                                        \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
   BVector VectorType::operator>(const ParamVectorType &v) const {              \
     if (v.d_ != d_) {                                                          \
       return BVector(invalid_vector_t());                                      \
@@ -125,6 +189,13 @@ namespace vector {
     BVector o(d_);                                                             \
     for (int i = 0; i < (int)d_; i++) {                                        \
       o[i] = c_[i] > v.c_[i];                                                  \
+    }                                                                          \
+    return o;                                                                  \
+  }                                                                            \
+  BVector VectorType::greaterThan(FloatType v) const {                         \
+    BVector o(d_);                                                             \
+    for (int i = 0; i < (int)d_; i++) {                                        \
+      o[i] = c_[i] > v;                                                        \
     }                                                                          \
     return o;                                                                  \
   }                                                                            \

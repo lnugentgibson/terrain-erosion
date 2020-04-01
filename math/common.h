@@ -15,6 +15,22 @@ template <typename T> bool floatEquals(T a, T b, T tolerance = .0001) {
   return fabs(a - b) < tolerance;
 }
 
+template <typename O = int, typename I = int> O fact(I n) {
+  O f = 1;
+  for (I i = 2; i < n; i++) {
+    f *= i;
+  }
+  return f;
+}
+
+template <typename O = int, typename I = int> O fact2(I n) {
+  O f = 1;
+  for (I i = 3; i < n; i += 2) {
+    f *= i;
+  }
+  return f;
+}
+
 } // namespace math
 
 #endif // MATH_COMMON_H

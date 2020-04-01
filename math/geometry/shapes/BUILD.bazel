@@ -8,3 +8,13 @@ cc_library(
         "//math/vector:vector",
     ],
 )
+
+cc_library(
+    name = "polygon",
+    hdrs = ["polygon.h"],
+    srcs = ["polygon.cc"],
+    deps = [
+        ":shape",
+        "//math/vector:vector",
+    ],
+)

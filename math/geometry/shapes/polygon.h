@@ -12,13 +12,17 @@ namespace math {
 namespace geometry {
 namespace shapes {
 
-class Polygon : public Shape {
+class FPolygon : public Shape {
 public:
-  bool Inside(Vector p) override;
-  float Intersect(Vector c, Vector s) override;
+  bool Inside(vector::IVector point) override;
+  bool Inside(vector::FVector point) override;
+  bool Inside(vector::DVector point) override;
+  float Intersect(vector::ICube cube) override;
+  float Intersect(vector::FCube cube) override;
+  double Intersect(vector::DCube cube) override;
 
 private:
-  std::vector<Vector> points;
+  std::vector<Vector> points_;
 };
 
 } // namespace shapes

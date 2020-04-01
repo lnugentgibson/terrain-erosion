@@ -29,7 +29,8 @@ void PlacementNew(void *p, Args &&... args) {
 
 template <typename T> class StatusOr {
 public:
-  explicit StatusOr() : StatusOr(absl::Status(absl::StatusCode::kUnknown, "")) {}
+  explicit StatusOr()
+      : StatusOr(absl::Status(absl::StatusCode::kUnknown, "")) {}
   StatusOr(const StatusOr &other) {
     if (other.ok()) {
       MakeValue(other.data_);
@@ -86,7 +87,9 @@ public:
   StatusOr(const absl::Status &status) : status_(status) { EnsureNotOk(); }
   StatusOr &operator=(const absl::Status &status);
   StatusOr(T &&value) : data_(std::move(value)) { MakeStatus(); }
-  StatusOr(absl::Status &&status) : status_(std::move(status)) { EnsureNotOk(); }
+  StatusOr(absl::Status &&status) : status_(std::move(status)) {
+    EnsureNotOk();
+  }
   StatusOr &operator=(absl::Status &&status);
 
   ~StatusOr() {

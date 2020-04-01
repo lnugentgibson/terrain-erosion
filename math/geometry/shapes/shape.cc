@@ -6,55 +6,56 @@ namespace math {
 namespace geometry {
 namespace shapes {
 
-bool InsideRectangle(Vector p, Vector corner, Vector size) {
-  if (p[0] < corner[0] || p[1] < corner[1])
+bool InsideFRectangle(vector::FVector point, vector::FVector corner,
+                      vector::FVector size) {
+  if (point[0] < corner[0] || point[1] < corner[1])
     return false;
-  if (p[0] > corner[0] + size[0] || p[1] > corner[1] + size[1])
+  if (point[0] > corner[0] + size[0] || point[1] > corner[1] + size[1])
     return false;
   return true;
 }
 
-Rectangle::Rectangle(Vector c, Vector s) : corner(2), size(2) {
-  auto c2 = c + s;
-  corner[0] = std::min(c[0], c2[0]);
-  corner[1] = std::min(c[1], c2[1]);
-  size[0] = std::max(c[0], c2[0]) - corner[0];
-  size[1] = std::max(c[1], c2[1]) - corner[1];
+FRectangle::FRectangle(vector::FVector c, vector::FVector s)
+    : vector::FCube(c, s) {
+  normalize();
 }
 
-bool Rectangle::Inside(Vector p) { return InsideRectangle(p, corner, size); }
+bool FRectangle::Inside(vector::FVector point) {
+  return InsideFRectangle(point, start_, difference());
+}
 
-float Rectangle::Intersect(Vector c, Vector s) {
-  Vector c2 = c + s;
-  Vector corner2 = corner + size;
-  Vector d = corner2.min(c2).ValueOrDie() - corner.max(c).ValueOrDie();
+float FRectangle::Intersect(vector::FCube cube) {
+  vector::FVector d =
+      end_.min(cube.end()).ValueOrDie() - start_.max(cube.start()).ValueOrDie();
   return std::max(0.0f, d[0]) * std::max(0.0f, d[1]);
 }
 
-bool InsideCircle(Vector p, Vector center, float radius) {
-  auto d = p - center;
+bool InsideCircle(vector::FVector point, vector::FVector center, float radius) {
+  auto d = point - center;
   return d.length() <= radius;
 }
 
-bool Circle::Inside(Vector p) { return InsideCircle(p, center, radius); }
-
-float Circle::Intersect(Vector c, Vector s) {
-  return InsideCircle(c, center, radius) ? 1.0 : 0.0;
+bool FCircle::Inside(vector::FVector point) {
+  return InsideCircle(point, center_, radius_);
 }
 
-void CircleField::Push(Vector center) { centers.push_back(center); }
+float FCircle::Intersect(vector::FCube cube) {
+  return InsideCircle(cube.start(), center_, radius_) ? 1.0 : 0.0;
+}
 
-bool CircleField::Inside(Vector p) {
-  for (auto &center : centers) {
-    if (InsideCircle(p, center, radius))
+void FCircleField::Push(vector::FVector center) { centers_.push_back(center); }
+
+bool FCircleField::Inside(vector::FVector point) {
+  for (auto &center : centers_) {
+    if (InsideCircle(point, center, radius_))
       return true;
   }
   return false;
 }
 
-float CircleField::Intersect(Vector c, Vector s) {
-  for (auto &center : centers) {
-    if (InsideCircle(c, center, radius))
+float FCircleField::Intersect(vector::FCube cube) {
+  for (auto &center : centers_) {
+    if (InsideCircle(cube.start(), center, radius_))
       return 1.0;
   }
   return 0.0;

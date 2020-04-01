@@ -5,55 +5,55 @@
 
 #include <vector>
 
-using math::vector::Vector;
-
 namespace math {
 namespace geometry {
 namespace shapes {
 
 class Shape {
 public:
-  virtual bool Inside(Vector p) = 0;
-  virtual float Intersect(Vector c, Vector s) = 0;
+  virtual bool Inside(vector::IVector point) = 0;
+  virtual bool Inside(vector::FVector point) = 0;
+  virtual bool Inside(vector::DVector point) = 0;
+  virtual float Intersect(vector::ICube cube) = 0;
+  virtual float Intersect(vector::FCube cube) = 0;
+  virtual double Intersect(vector::DCube cube) = 0;
 };
 
-class Rectangle : public Shape {
-  Vector corner;
-  Vector size;
-
+class FRectangle : public Shape, public vector::FCube {
 public:
-  Rectangle(Vector c, Vector s);
-  bool Inside(Vector p) override;
-  float Intersect(Vector c, Vector s) override;
+  FRectangle(vector::FVector corner, vector::FVector size);
+  bool Inside(vector::IVector point) override;
+  bool Inside(vector::FVector point) override;
+  bool Inside(vector::DVector point) override;
+  float Intersect(vector::ICube cube) override;
+  float Intersect(vector::FCube cube) override;
+  double Intersect(vector::DCube cube) override;
 };
 
-class Circle : public Shape {
-  Vector center;
-  float radius;
-
+class FCircle : public Shape, public vector::FCircle {
 public:
-  Circle(Vector c, float r) : center(c), radius(r) {}
-  bool Inside(Vector p) override;
-  float Intersect(Vector c, Vector s) override;
+  FCircle(vector::FVector c, float r) : vector::FCircle(c, r) {}
+  bool Inside(vector::IVector point) override;
+  bool Inside(vector::FVector point) override;
+  bool Inside(vector::DVector point) override;
+  float Intersect(vector::ICube cube) override;
+  float Intersect(vector::FCube cube) override;
+  double Intersect(vector::DCube cube) override;
 };
 
-class CircleField : public Shape {
-  std::vector<Vector> centers;
-  float radius;
+class FCircleField : public Shape {
+  std::vector<vector::FVector> centers_;
+  float radius_;
 
 public:
-  CircleField(float r) : radius(r) {}
-  void Push(Vector center);
-  bool Inside(Vector p) override;
-  float Intersect(Vector c, Vector s) override;
-};
-
-class Polygon : public Shape {
-  std::vector<Vector> points;
-
-public:
-  bool Inside(Vector p) override;
-  float Intersect(Vector c, Vector s) override;
+  FCircleField(float r) : radius_(r) {}
+  void Push(vector::FVector center);
+  bool Inside(vector::IVector point) override;
+  bool Inside(vector::FVector point) override;
+  bool Inside(vector::DVector point) override;
+  float Intersect(vector::ICube cube) override;
+  float Intersect(vector::FCube cube) override;
+  double Intersect(vector::DCube cube) override;
 };
 
 } // namespace shapes

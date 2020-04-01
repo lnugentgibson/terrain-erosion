@@ -6,6 +6,8 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "math/common.h"
+#include "math/constants.h"
 #include "util/statusor.h"
 
 namespace math {
@@ -158,17 +160,28 @@ namespace vector {
   }
 
 #define VECTOR_COMP_SIGS(ParamVectorType, DataType)                            \
+  BVector operator<(DataType v) const;                                         \
   BVector operator<(const ParamVectorType &v) const;                           \
+  BVector lessThan(DataType v) const;                                          \
   util::StatusOr<BVector> lessThan(const ParamVectorType &v) const;            \
+  BVector operator<=(DataType v) const;                                        \
   BVector operator<=(const ParamVectorType &v) const;                          \
+  BVector lessThanOrEqual(DataType v) const;                                   \
   util::StatusOr<BVector> lessThanOrEqual(const ParamVectorType &v) const;     \
+  bool operator==(DataType v) const;                                           \
   bool operator==(const ParamVectorType &v) const;                             \
+  bool equals(DataType v, DataType tolerance = .0001) const;                   \
   bool equals(const ParamVectorType &v, DataType tolerance = .0001) const;     \
+  BVector eachEquals(DataType v, DataType tolerance = .0001) const;            \
   util::StatusOr<BVector> eachEquals(const ParamVectorType &v,                 \
                                      DataType tolerance = .0001) const;        \
+  BVector operator>=(DataType v) const;                                        \
   BVector operator>=(const ParamVectorType &v) const;                          \
+  BVector greaterThanOrEqual(DataType v) const;                                \
   util::StatusOr<BVector> greaterThanOrEqual(const ParamVectorType &v) const;  \
+  BVector operator>(DataType v) const;                                         \
   BVector operator>(const ParamVectorType &v) const;                           \
+  BVector greaterThan(DataType v) const;                                       \
   util::StatusOr<BVector> greaterThan(const ParamVectorType &v) const;
 
 #define VECTOR_UNARY_OP_INPLACE_SIG(VectorType, function)                      \
@@ -396,7 +409,12 @@ class IVector;
 class FVector;
 class DVector;
 
-class FRange;
+class ICube;
+class FCube;
+class DCube;
+class ICircle;
+class FCircle;
+class DCircle;
 
 using Vector = FVector;
 
@@ -417,7 +435,7 @@ public:
 
   VECTOR_BINARY_OP_LOGIC_SIGS(BVector, bool)
 
-  bool every() {
+  bool every() const {
     for (int i = 0; i < (int)d_; i++) {
       if (!c_[i]) {
         return false;
@@ -426,7 +444,7 @@ public:
     return true;
   }
 
-  bool some() {
+  bool some() const {
     for (int i = 0; i < (int)d_; i++) {
       if (c_[i]) {
         return true;
@@ -445,6 +463,9 @@ private:
 
   VECTOR_INVALID_CONSTRUCTOR(BVector)
 };
+
+bool every(const BVector &v) { return v.every(); }
+bool some(const BVector &v) { return v.every(); }
 
 class IVector {
 public:
@@ -480,6 +501,9 @@ public:
   friend BVector;
   friend FVector;
   friend DVector;
+
+  friend ICube;
+  friend ICircle;
 
 private:
   const size_t d_;
@@ -527,8 +551,9 @@ public:
   friend BVector;
   friend IVector;
   friend DVector;
-  
-  friend FRange;
+
+  friend FCube;
+  friend FCircle;
 
 private:
   const size_t d_;
@@ -577,6 +602,9 @@ public:
   friend IVector;
   friend FVector;
 
+  friend DCube;
+  friend DCircle;
+
 private:
   const size_t d_;
   double *c_;
@@ -589,15 +617,109 @@ FVector floor(const FVector &v);
 FVector &&floor(FVector &&v);
 FVector &floor(const FVector &v, FVector *w);
 
-class FRange {
-public:
-  inline size_t dimension() const { return start_.d_; }
+int sum(const IVector &v) {
+  return v.reduce([](int a, int e, int i, int *A) { return a + e; }, 0);
+}
+int product(const IVector &v) {
+  return v.reduce([](int a, int e, int i, int *A) { return a * e; }, 1);
+}
+float length(const IVector &v) { return v.length(); }
 
-private:
-  FVector start_, end_;
-  
-  FRange(const FVector &s, const FVector &e) : start_(s), end_(e) {}
-};
+float sum(const FVector &v) {
+  return v.reduce([](float a, float e, int i, float *A) { return a + e; }, 0);
+}
+float product(const FVector &v) {
+  return v.reduce([](float a, float e, int i, float *A) { return a * e; }, 1);
+}
+float length(const FVector &v) { return v.length(); }
+
+double sum(const DVector &v) {
+  return v.reduce([](double a, double e, int i, double *A) { return a + e; },
+                  0);
+}
+double product(const DVector &v) {
+  return v.reduce([](double a, double e, int i, double *A) { return a * e; },
+                  1);
+}
+double length(const DVector &v) { return v.length(); }
+
+#define CUBE_CLASS(ClassName, VectorType, DataType, FloatType)                 \
+  class ClassName {                                                            \
+  public:                                                                      \
+    inline size_t dimension() const { return start_.d_; }                      \
+    inline const VectorType &start() const { return start_; }                  \
+    inline const VectorType &end() const { return end_; }                      \
+    ClassName &normalize() {                                                   \
+      auto s = start_, e = end_;                                               \
+      start_ = s.min(e).ValueOrDie();                                          \
+      end_ = s.max(e).ValueOrDie();                                            \
+      return *this;                                                            \
+    }                                                                          \
+    ClassName normalized() {                                                   \
+      return ClassName(start_.min(end_).ValueOrDie(),                          \
+                       start_.max(end_).ValueOrDie());                         \
+    }                                                                          \
+    VectorType difference() const { return end_ - start_; }                    \
+    FloatType diagonal() const { return length(end_ - start_); }               \
+    DataType volume() const { return product(end_ - start_); }                 \
+    bool inside(const VectorType &v) const {                                   \
+      const auto diff = v - start_;                                            \
+      return every((diff >= 0) * (diff < difference()));                       \
+    }                                                                          \
+    static util::StatusOr<ClassName> Create(const VectorType &start,           \
+                                            const VectorType &end) {           \
+      if (start.dimension() < 2) {                                             \
+        return absl::Status(absl::StatusCode::kInvalidArgument,                \
+                            "dimension must be at least 2");                   \
+      }                                                                        \
+      if (end.dimension() != start.dimension()) {                              \
+        return absl::Status(absl::StatusCode::kInvalidArgument,                \
+                            "start and end must have the same dimension");     \
+      }                                                                        \
+      return ClassName(start, end);                                            \
+    }                                                                          \
+                                                                               \
+  protected:                                                                   \
+    VectorType start_, end_;                                                   \
+    ClassName(const VectorType &start, const VectorType &end)                  \
+        : start_(start), end_(end) {}                                          \
+  };
+
+CUBE_CLASS(ICube, IVector, int, float)
+CUBE_CLASS(FCube, FVector, float, float)
+CUBE_CLASS(DCube, DVector, double, double)
+
+#define CIRCLE_CLASS(ClassName, VectorType, DataType, FloatType)               \
+  class ClassName {                                                            \
+  public:                                                                      \
+    ClassName(const VectorType &center, DataType radius)                       \
+        : center_(center), radius_(radius) {}                                  \
+    inline size_t dimension() const { return center_.d_; }                     \
+    inline const VectorType &center() const { return center_; }                \
+    inline DataType radius() const { return radius_; }                         \
+    DataType volume() const {                                                  \
+      int d = center_.d_;                                                      \
+      int k = d / 2;                                                           \
+      if (d % 2 == 0) {                                                        \
+        return ::pow(PI, k) * ::pow(radius_, d) / fact<DataType>(k);           \
+      } else {                                                                 \
+        return ::pow(2, k + 1) * ::pow(PI, k) * ::pow(radius_, d) /            \
+               fact2<DataType>(k);                                             \
+      }                                                                        \
+    }                                                                          \
+    bool inside(const VectorType &v) const {                                   \
+      const auto diff = v - center_;                                           \
+      return diff.length() <= radius_;                                         \
+    }                                                                          \
+                                                                               \
+  protected:                                                                   \
+    VectorType center_;                                                        \
+    DataType radius_;                                                          \
+  };
+
+CIRCLE_CLASS(ICircle, IVector, int, float)
+CIRCLE_CLASS(FCircle, FVector, float, float)
+CIRCLE_CLASS(DCircle, DVector, double, double)
 
 } // namespace vector
 } // namespace math
