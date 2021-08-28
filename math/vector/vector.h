@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "absl/status/status.h"
 #include "math/common.h"
@@ -409,12 +411,12 @@ class IVector;
 class FVector;
 class DVector;
 
-class ICube;
-class FCube;
-class DCube;
-class ICircle;
-class FCircle;
-class DCircle;
+class IBox;
+class FBox;
+class DBox;
+class IBall;
+class FBall;
+class DBall;
 
 using Vector = FVector;
 
@@ -502,8 +504,8 @@ public:
   friend FVector;
   friend DVector;
 
-  friend ICube;
-  friend ICircle;
+  friend IBox;
+  friend IBall;
 
 private:
   const size_t d_;
@@ -552,8 +554,8 @@ public:
   friend IVector;
   friend DVector;
 
-  friend FCube;
-  friend FCircle;
+  friend FBox;
+  friend FBall;
 
 private:
   const size_t d_;
@@ -602,8 +604,8 @@ public:
   friend IVector;
   friend FVector;
 
-  friend DCube;
-  friend DCircle;
+  friend DBox;
+  friend DBall;
 
 private:
   const size_t d_;
@@ -643,7 +645,7 @@ double product(const DVector &v) {
 }
 double length(const DVector &v) { return v.length(); }
 
-#define CUBE_CLASS(ClassName, VectorType, DataType, FloatType)                 \
+#define BOX_CLASS(ClassName, VectorType, DataType, FloatType)                  \
   class ClassName {                                                            \
   public:                                                                      \
     inline size_t dimension() const { return start_.d_; }                      \
@@ -685,11 +687,11 @@ double length(const DVector &v) { return v.length(); }
         : start_(start), end_(end) {}                                          \
   };
 
-CUBE_CLASS(ICube, IVector, int, float)
-CUBE_CLASS(FCube, FVector, float, float)
-CUBE_CLASS(DCube, DVector, double, double)
+BOX_CLASS(IBox, IVector, int, float)
+BOX_CLASS(FBox, FVector, float, float)
+BOX_CLASS(DBox, DVector, double, double)
 
-#define CIRCLE_CLASS(ClassName, VectorType, DataType, FloatType)               \
+#define BALL_CLASS(ClassName, VectorType, DataType, FloatType)                 \
   class ClassName {                                                            \
   public:                                                                      \
     ClassName(const VectorType &center, DataType radius)                       \
@@ -717,9 +719,41 @@ CUBE_CLASS(DCube, DVector, double, double)
     DataType radius_;                                                          \
   };
 
-CIRCLE_CLASS(ICircle, IVector, int, float)
-CIRCLE_CLASS(FCircle, FVector, float, float)
-CIRCLE_CLASS(DCircle, DVector, double, double)
+BALL_CLASS(IBall, IVector, int, float)
+BALL_CLASS(FBall, FVector, float, float)
+BALL_CLASS(DBall, DVector, double, double)
+
+#define HULL_CLASS(ClassName, VectorType, DataType, FloatType)                 \
+  class ClassName {                                                            \
+  public:                                                                      \
+    ClassName(const VectorType &center, DataType radius)                       \
+        : center_(center), radius_(radius) {}                                  \
+    inline size_t dimension() const { return center_.d_; }                     \
+    inline const VectorType &center() const { return center_; }                \
+    inline DataType radius() const { return radius_; }                         \
+    DataType volume() const {                                                  \
+      int d = center_.d_;                                                      \
+      int k = d / 2;                                                           \
+      if (d % 2 == 0) {                                                        \
+        return ::pow(PI, k) * ::pow(radius_, d) / fact<DataType>(k);           \
+      } else {                                                                 \
+        return ::pow(2, k + 1) * ::pow(PI, k) * ::pow(radius_, d) /            \
+               fact2<DataType>(k);                                             \
+      }                                                                        \
+    }                                                                          \
+    bool inside(const VectorType &v) const {                                   \
+      const auto diff = v - center_;                                           \
+      return diff.length() <= radius_;                                         \
+    }                                                                          \
+                                                                               \
+  protected:                                                                   \
+    std::vector<VectorType> vertices_;                                         \
+    std::unordered_set<std::pair<size_t, size_t>> edges_;                      \
+  };
+
+HULL_CLASS(IHull, IVector, int, float)
+HULL_CLASS(FHull, FVector, float, float)
+HULL_CLASS(DHull, DVector, double, double)
 
 } // namespace vector
 } // namespace math
